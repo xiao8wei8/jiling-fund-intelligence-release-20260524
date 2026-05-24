@@ -4793,15 +4793,101 @@
           
           <!-- AI修改面板 -->
           <div id="aiModifyPanel" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
-            <div class="slbl" style="margin-bottom:8px;font-size:12px;color:var(--text-muted);">🎯 选择优化方式</div>
-            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-              <button class="modify-option" data-action="shorten" onclick="applyModifyOption('shorten')">📝 缩短文案</button>
-              <button class="modify-option" data-action="lengthen" onclick="applyModifyOption('lengthen')">📄 加长文案</button>
-              <button class="modify-option" data-action="formal" onclick="applyModifyOption('formal')">💼 更正式</button>
-              <button class="modify-option" data-action="casual" onclick="applyModifyOption('casual')">😊 更口语化</button>
-              <button class="modify-option" data-action="add_emoji" onclick="applyModifyOption('add_emoji')">🎉 添加表情</button>
-              <button class="modify-option" data-action="more_attractive" onclick="applyModifyOption('more_attractive')">✨ 更吸引人</button>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+              <div class="slbl" style="margin-bottom:0;font-size:12px;color:var(--text-muted);">🎯 选择优化方式</div>
+              <div class="skills-settings-dropdown" style="position:relative;">
+                <button class="btn btn-sm" onclick="toggleSkillsSettings()" style="display:flex;align-items:center;gap:8px;background:var(--bg-subtle);border:1px solid var(--border);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                  Skills 设置
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="skillsSettingsArrow" style="transition:transform 0.2s;"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div id="skillsSettingsPanel" style="display:none;position:absolute;top:calc(100% + 8px);left:0;min-width:260px;background:white;border-radius:12px;box-shadow:0 10px 40px rgba(31,76,130,0.15);border:1px solid var(--border);z-index:100;overflow:hidden;">
+                  <div style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg-subtle);">
+                    <div style="font-size:13px;font-weight:600;color:var(--text-primary);">选择要启用的 Skill</div>
+                  </div>
+                  <div style="padding:12px;">
+                    <div style="margin-bottom:12px;">
+                      <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">文案优化</div>
+                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" id="skillShorten" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+                        <div style="flex:1;">
+                          <div style="font-size:14px;color:#1a202c;font-weight:500;">📝 缩短文案</div>
+                        </div>
+                      </label>
+                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" id="skillLengthen" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+                        <div style="flex:1;">
+                          <div style="font-size:14px;color:#1a202c;font-weight:500;">📄 加长文案</div>
+                        </div>
+                      </label>
+                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" id="skillFormal" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+                        <div style="flex:1;">
+                          <div style="font-size:14px;color:#1a202c;font-weight:500;">💼 更正式</div>
+                        </div>
+                      </label>
+                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" id="skillCasual" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+                        <div style="flex:1;">
+                          <div style="font-size:14px;color:#1a202c;font-weight:500;">😊 更口语化</div>
+                        </div>
+                      </label>
+                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" id="skillAddEmoji" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+                        <div style="flex:1;">
+                          <div style="font-size:14px;color:#1a202c;font-weight:500;">🎉 添加表情</div>
+                        </div>
+                      </label>
+                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" id="skillMoreAttractive" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+                        <div style="flex:1;">
+                          <div style="font-size:14px;color:#1a202c;font-weight:500;">✨ 更吸引人</div>
+                        </div>
+                      </label>
+                    </div>
+                    <div>
+                      <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">投资者类型</div>
+                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" id="skillConservative" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+                        <div style="flex:1;">
+                          <div style="font-size:14px;color:#1a202c;font-weight:500;">🛡️ 保守型</div>
+                          <div style="font-size:11px;color:var(--text-muted);">强调安全和稳定</div>
+                        </div>
+                      </label>
+                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" id="skillSteady" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+                        <div style="flex:1;">
+                          <div style="font-size:14px;color:#1a202c;font-weight:500;">🎯 稳健型</div>
+                          <div style="font-size:11px;color:var(--text-muted);">追求稳健增值</div>
+                        </div>
+                      </label>
+                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" id="skillBalanced" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+                        <div style="flex:1;">
+                          <div style="font-size:14px;color:#1a202c;font-weight:500;">⚖️ 平衡型</div>
+                          <div style="font-size:11px;color:var(--text-muted);">均衡风险收益</div>
+                        </div>
+                      </label>
+                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" id="skillProgressive" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+                        <div style="flex:1;">
+                          <div style="font-size:14px;color:#1a202c;font-weight:500;">📈 进取型</div>
+                          <div style="font-size:11px;color:var(--text-muted);">追求较高收益</div>
+                        </div>
+                      </label>
+                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+                        <input type="checkbox" id="skillAggressive" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+                        <div style="flex:1;">
+                          <div style="font-size:14px;color:#1a202c;font-weight:500;">🔥 激进型</div>
+                          <div style="font-size:11px;color:var(--text-muted);">追求最大化收益</div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+            <div id="skillsButtonsContainer" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
             <div style="margin-bottom:12px;">
               <input type="text" id="customModifyInput" class="search-input" placeholder="或输入自定义修改指令..." style="width:100%;">
             </div>
@@ -4879,6 +4965,19 @@
 
   // ---- AI Modification ----
   let currentModifyAction = '';
+  const skillsConfig = [
+    { id: 'shorten', label: '📝 缩短文案', action: 'shorten', instruction: '将文案缩短，保留核心信息', category: 'optimize' },
+    { id: 'lengthen', label: '📄 加长文案', action: 'lengthen', instruction: '将文案加长，增加更多细节', category: 'optimize' },
+    { id: 'formal', label: '💼 更正式', action: 'formal', instruction: '让文案更正式、专业', category: 'optimize' },
+    { id: 'casual', label: '😊 更口语化', action: 'casual', instruction: '让文案更口语化、亲切', category: 'optimize' },
+    { id: 'add_emoji', label: '🎉 添加表情', action: 'add_emoji', instruction: '添加适当的表情符号', category: 'optimize' },
+    { id: 'more_attractive', label: '✨ 更吸引人', action: 'more_attractive', instruction: '让文案更吸引人，增加感染力', category: 'optimize' },
+    { id: 'conservative', label: '🛡️ 保守型', action: 'conservative', instruction: '将文案修改为适合保守型投资者，强调安全、稳定、本金保障', category: 'investor' },
+    { id: 'steady', label: '🎯 稳健型', action: 'steady', instruction: '将文案修改为适合稳健型投资者，追求稳健增值、风险可控', category: 'investor' },
+    { id: 'balanced', label: '⚖️ 平衡型', action: 'balanced', instruction: '将文案修改为适合平衡型投资者，均衡风险与收益', category: 'investor' },
+    { id: 'progressive', label: '📈 进取型', action: 'progressive', instruction: '将文案修改为适合进取型投资者，追求较高收益', category: 'investor' },
+    { id: 'aggressive', label: '🔥 激进型', action: 'aggressive', instruction: '将文案修改为适合激进型投资者，追求最大化收益', category: 'investor' }
+  ];
 
   function openAIModify() {
     const panel = document.getElementById('aiModifyPanel');
@@ -4886,9 +4985,57 @@
     if (panel.style.display === 'none') {
       panel.style.display = 'block';
       btn.classList.add('active');
+      updateSkillsButtons();
     } else {
       panel.style.display = 'none';
       btn.classList.remove('active');
+    }
+  }
+
+  function updateSkillsButtons() {
+    const container = document.getElementById('skillsButtonsContainer');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    skillsConfig.forEach(skill => {
+      const checkbox = document.getElementById(`skill${skill.id.charAt(0).toUpperCase() + skill.id.slice(1)}`);
+      if (checkbox && checkbox.checked) {
+        const btn = document.createElement('button');
+        btn.className = 'modify-option';
+        btn.setAttribute('data-action', skill.action);
+        btn.textContent = skill.label;
+        btn.onclick = () => applyModifyOption(skill.action);
+        container.appendChild(btn);
+      }
+    });
+  }
+
+  function toggleSkillsSettings() {
+    const panel = document.getElementById('skillsSettingsPanel');
+    const arrow = document.getElementById('skillsSettingsArrow');
+    if (panel.style.display === 'none' || panel.style.display === '') {
+      panel.style.display = 'block';
+      arrow.style.transform = 'rotate(180deg)';
+      setTimeout(() => {
+        document.addEventListener('click', closeSkillsSettingsOutside);
+      }, 0);
+    } else {
+      panel.style.display = 'none';
+      arrow.style.transform = 'rotate(0deg)';
+      document.removeEventListener('click', closeSkillsSettingsOutside);
+    }
+  }
+
+  function closeSkillsSettingsOutside(event) {
+    const dropdown = document.querySelector('.skills-settings-dropdown');
+    if (!dropdown.contains(event.target)) {
+      const panel = document.getElementById('skillsSettingsPanel');
+      const arrow = document.getElementById('skillsSettingsArrow');
+      panel.style.display = 'none';
+      arrow.style.transform = 'rotate(0deg)';
+      document.removeEventListener('click', closeSkillsSettingsOutside);
+      updateSkillsButtons();
     }
   }
 
@@ -4923,15 +5070,8 @@
     if (customInput && customInput.value.trim()) {
       instruction = customInput.value.trim();
     } else if (currentModifyAction) {
-      const actionLabels = {
-        'shorten': '将文案缩短，保留核心信息',
-        'lengthen': '将文案加长，增加更多细节',
-        'formal': '让文案更正式、专业',
-        'casual': '让文案更口语化、亲切',
-        'add_emoji': '添加适当的表情符号',
-        'more_attractive': '让文案更吸引人，增加感染力'
-      };
-      instruction = actionLabels[currentModifyAction] || '请优化这篇文案';
+      const skill = skillsConfig.find(s => s.action === currentModifyAction);
+      instruction = skill ? skill.instruction : '请优化这篇文案';
     } else {
       showToast('请选择优化方式或输入自定义指令', 'err');
       return;
