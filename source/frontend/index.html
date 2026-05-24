@@ -1681,6 +1681,26 @@
       font-size: 14px;
       pointer-events: none;
     }
+    .search-clear {
+      position: absolute; right: 10px; top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      border: none;
+      background: rgba(0,0,0,0.1);
+      border-radius: 50%;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .search-clear:hover {
+      background: rgba(0,0,0,0.2);
+      color: var(--text-primary);
+    }
     .search-suggest {
       position: absolute;
       top: calc(100% + 6px);
@@ -2134,6 +2154,66 @@
     }
 
     /* ============================================================
+       GLOBAL LOADING
+    ============================================================ */
+    .global-loading {
+      position: fixed; inset: 0;
+      background: rgba(10,20,40,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--brand);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-text {
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* ============================================================
+       AI MODIFY
+    ============================================================ */
+    .modify-option {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .modify-option:hover {
+      border-color: var(--brand);
+      background: rgba(20, 92, 255, 0.05);
+    }
+    .modify-option.active {
+      border-color: var(--brand);
+      background: rgba(20, 92, 255, 0.1);
+      color: var(--brand);
+      font-weight: 600;
+    }
+    /* AI优化按钮激活状态 */
+    #aiOptBtn.active {
+      border-color: var(--brand);
+      background: rgba(20, 92, 255, 0.1);
+      color: var(--brand);
+      font-weight: 600;
+    }
+
+    /* ============================================================
        TOAST
     ============================================================ */
     .toast {
@@ -2396,6 +2476,12 @@
   </style>
 </head>
 <body>
+
+<!-- GLOBAL LOADING OVERLAY -->
+<div id="globalLoading" class="global-loading" style="display:none;">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">加载中...</div>
+</div>
 
 <!-- TOAST -->
 <div id="toast" class="toast">
@@ -2750,7 +2836,8 @@
             <div class="card-body">
               <div class="search-wrap">
                 <span class="search-icon">🔎</span>
-                <input class="search-input" placeholder="搜索基金名称或代码..." id="mainSearch">
+                <input class="search-input" placeholder="搜索基金名称或代码..." id="mainSearch" autocomplete="off">
+                <button class="search-clear" id="mainSearchClear" style="display:none;" onclick="clearMainSearch()">✕</button>
                 <div class="search-suggest" id="mainSearchSuggest"></div>
               </div>
 
@@ -2778,15 +2865,15 @@
                   <div class="data-item-val up" id="dY3">+42.17%</div>
                 </div>
                 <div class="data-item">
-                  <div class="data-item-label">同类排名</div>
+                  <div class="data-item-label">近1年同类排名</div>
                   <div class="data-item-val" id="dRank">前 5%</div>
                 </div>
                 <div class="data-item">
-                  <div class="data-item-label">夏普比率</div>
+                  <div class="data-item-label">近1年夏普比率</div>
                   <div class="data-item-val" id="dSharpe">1.82</div>
                 </div>
                 <div class="data-item">
-                  <div class="data-item-label">最大回撤</div>
+                  <div class="data-item-label">近1年最大回撤</div>
                   <div class="data-item-val down" id="dDD">-15.3%</div>
                 </div>
                 <div class="data-item">
@@ -2796,7 +2883,7 @@
               </div>
               <div class="data-source">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                数据来源：天天基金（天天基金网） · 更新于 2026-04-10
+                数据来源：天天基金（天天基金网） · 更新于 <span id="dUpdateDate">—</span>
               </div>
 
               <!-- Fund Performance Chart -->
@@ -3509,6 +3596,13 @@
   function selFmt(el) {
     el.closest('.format-grid').querySelectorAll('.format-card').forEach(e => e.classList.remove('sel'));
     el.classList.add('sel');
+    
+    const fundName = document.getElementById('sFundName').textContent.trim();
+    const formatName = el.querySelector('.format-name').textContent.trim();
+    const taskLabel = document.getElementById('aiTaskLabel');
+    if (taskLabel && fundName && fundName !== '—') {
+      taskLabel.textContent = `当前任务：${fundName.replace(/（.*?）/g, '')} · ${formatName}`;
+    }
   }
 
   // ---- Style ----
@@ -3594,7 +3688,7 @@
     `;
     
     try {
-      const resp = await fetch(`${API_BASE}/fund/copywriting`, {
+      const resp = await fetch(`${API_BASE}/copy/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -3618,10 +3712,30 @@
         box.innerHTML = `
           <div class="copy-toolbar">
             <button class="copy-act" onclick="genCopy()">🔄 重写</button>
+            <button id="aiOptBtn" class="copy-act" onclick="openAIModify()">🤖 AI优化</button>
             <button class="copy-act" onclick="doEdit()">✏️ 编辑</button>
             <button class="copy-act pri" onclick="doCopy()">📋 复制</button>
           </div>
           <div class="copy-text">${formattedContent}</div>
+          
+          <!-- AI修改面板 -->
+          <div id="aiModifyPanel" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+            <div class="slbl" style="margin-bottom:8px;font-size:12px;color:var(--text-muted);">🎯 选择优化方式</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+              <button class="modify-option" data-action="shorten" onclick="applyModifyOption('shorten')">📝 缩短文案</button>
+              <button class="modify-option" data-action="lengthen" onclick="applyModifyOption('lengthen')">📄 加长文案</button>
+              <button class="modify-option" data-action="formal" onclick="applyModifyOption('formal')">💼 更正式</button>
+              <button class="modify-option" data-action="casual" onclick="applyModifyOption('casual')">😊 更口语化</button>
+              <button class="modify-option" data-action="add_emoji" onclick="applyModifyOption('add_emoji')">🎉 添加表情</button>
+              <button class="modify-option" data-action="more_attractive" onclick="applyModifyOption('more_attractive')">✨ 更吸引人</button>
+            </div>
+            <div style="margin-bottom:12px;">
+              <input type="text" id="customModifyInput" class="search-input" placeholder="或输入自定义修改指令..." style="width:100%;">
+            </div>
+            <div style="text-align:right;">
+              <button class="btn btn-primary btn-sm" onclick="doAIModify()">🚀 AI智能修改</button>
+            </div>
+          </div>
         `;
         copyReady = true;
         showToast('文案生成成功！', 'ok');
@@ -3670,6 +3784,112 @@
     const text = document.getElementById('copyBox').innerText;
     navigator.clipboard.writeText(text).then(() => showToast('文案已复制到剪贴板！', 'ok'))
       .catch(() => showToast('复制失败，请手动复制', 'err'));
+  }
+
+  // ---- AI Modification ----
+  let currentModifyAction = '';
+
+  function openAIModify() {
+    const panel = document.getElementById('aiModifyPanel');
+    const btn = document.getElementById('aiOptBtn');
+    if (panel.style.display === 'none') {
+      panel.style.display = 'block';
+      btn.classList.add('active');
+    } else {
+      panel.style.display = 'none';
+      btn.classList.remove('active');
+    }
+  }
+
+  function applyModifyOption(action) {
+    currentModifyAction = action;
+    document.querySelectorAll('.modify-option').forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.getAttribute('data-action') === action) {
+        btn.classList.add('active');
+      }
+    });
+    document.getElementById('customModifyInput').value = '';
+  }
+
+  async function doAIModify() {
+    const box = document.getElementById('copyBox');
+    const textEl = box.querySelector('.copy-text');
+    if (!textEl) {
+      showToast('请先生成文案', 'err');
+      return;
+    }
+
+    // 获取原文案
+    const originalText = textEl.innerHTML
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<[^>]+>/g, '')
+      .trim();
+
+    // 获取修改指令
+    const customInput = document.getElementById('customModifyInput');
+    let instruction = '';
+    if (customInput && customInput.value.trim()) {
+      instruction = customInput.value.trim();
+    } else if (currentModifyAction) {
+      const actionLabels = {
+        'shorten': '将文案缩短，保留核心信息',
+        'lengthen': '将文案加长，增加更多细节',
+        'formal': '让文案更正式、专业',
+        'casual': '让文案更口语化、亲切',
+        'add_emoji': '添加适当的表情符号',
+        'more_attractive': '让文案更吸引人，增加感染力'
+      };
+      instruction = actionLabels[currentModifyAction] || '请优化这篇文案';
+    } else {
+      showToast('请选择优化方式或输入自定义指令', 'err');
+      return;
+    }
+
+    // 获取当前选中的内容（素材格式、文案风格、卖点）
+    const formatType = getSelectedFormat();
+    const style = getSelectedStyle();
+    const fundInfo = getCurrentFundInfo();
+
+    // 显示加载状态
+    textEl.innerHTML = `
+      <div style="text-align:center;padding:30px;">
+        <div class="spnr" style="width:24px;height:24px;border-width:2px;margin:0 auto;"></div>
+        <div style="margin-top:12px;color:var(--text-muted);font-size:13px;">AI正在优化文案...</div>
+      </div>
+    `;
+
+    try {
+      const resp = await fetch(`${API_BASE}/copy/modify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          original_content: originalText,
+          instruction: instruction,
+          format_type: formatType,
+          style: style,
+          fund_info: fundInfo
+        })
+      });
+
+      const data = await resp.json();
+
+      if (data.success && data.data) {
+        // 格式化新内容
+        const formattedContent = data.data.content
+          .replace(/\n/g, '<br>')
+          .replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+        textEl.innerHTML = formattedContent;
+        showToast('文案优化成功！', 'ok');
+      } else {
+        textEl.innerHTML = originalText.replace(/\n/g, '<br>');
+        showToast('优化失败: ' + (data.error || '未知错误'), 'err');
+      }
+    } catch (e) {
+      textEl.innerHTML = originalText.replace(/\n/g, '<br>');
+      console.error('doAIModify error:', e);
+      showToast('优化失败，请重试', 'err');
+    }
   }
 
   // ---- Modal ----
@@ -3804,12 +4024,35 @@
     if (productAppBooted) return;
     productAppBooted = true;
     updateSPCount();
-    initFundChart('163406');
+    initFundChart('004512');
     setupMainSearch();
     loadEastmoneyFundList().catch(() => {});
     const inviteBtn = document.getElementById('inviteBtn');
     if (inviteBtn) inviteBtn.addEventListener('click', showTeamInviteModal);
     switchPage('generator');
+    
+    // 自动加载004512的数据
+    loadFundDataByCode('004512');
+  }
+
+  // 新增：通过基金代码加载真实数据
+  async function loadFundDataByCode(code) {
+    try {
+      // 显示全局加载遮罩
+      showGlobalLoading();
+      
+      const fund = await loadFundFromBackend(code);
+      if (fund) {
+        applyFundToUI(fund);
+        generateSellingPoints(fund);
+      }
+    } catch (e) {
+      console.error('加载基金数据失败:', e);
+      showToast('加载基金数据失败，请稍后重试', '');
+    } finally {
+      // 隐藏全局加载遮罩
+      hideGlobalLoading();
+    }
   }
 
   function setAuthenticatedView(user) {
@@ -3971,6 +4214,7 @@
       manager: f.manager || f.mgr || '—',
       sharpe: f.sharpe || '—',
       dd: f.dd || f.drawdown || '—',
+      nav_date: f.nav_date || '—',
       category: f.category || 'hold'
     };
   }
@@ -4046,7 +4290,8 @@
       sharpe: document.getElementById('dSharpe').textContent.trim(),
       dd: document.getElementById('dDD').textContent.trim(),
       mgr: document.getElementById('dMgr').textContent.trim(),
-      manager: document.getElementById('dMgr').textContent.trim()
+      manager: document.getElementById('dMgr').textContent.trim(),
+      nav_date: document.getElementById('dUpdateDate').textContent.trim()
     };
   }
 
@@ -4074,6 +4319,8 @@
     dDD.textContent = f.dd || f.drawdown || '—';
     dDD.className = 'data-item-val ' + ((f.dd || f.drawdown) && parseFloat(f.dd || f.drawdown) < -30 ? 'down' : '');
     document.getElementById('dMgr').textContent = f.manager || f.mgr || '—';
+    // 更新日期显示
+    document.getElementById('dUpdateDate').textContent = f.nav_date || '—';
     showToast(`已切换至 ${f.name}`, 'ok');
     updateFundChart(f.code);
 
@@ -4136,9 +4383,10 @@
       const categoryTag = f.category === 'focus' ? '重点推荐' : '自选基金';
       const co = f.co || f.company || '—';
       const mgr = f.mgr || f.manager || '—';
+      const navDate = f.nav_date || '—';
       return `
         <div class="card" style="cursor:pointer;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-          <div class="card-body" style="display:flex;gap:16px;align-items:center;" onclick="switchPage('generator');loadDemo('${f.code}','${f.name}','${co}','${f.y1 || '—'}','${f.y3 || '—'}','${f.rank || '—'}','${mgr}','${f.sharpe || '—'}','${f.dd || '—'}')">
+          <div class="card-body" style="display:flex;gap:16px;align-items:center;" onclick="switchPage('generator');loadDemo('${f.code}','${f.name}','${co}','${f.y1 || '—'}','${f.y3 || '—'}','${f.rank || '—'}','${mgr}','${f.sharpe || '—'}','${f.dd || '—'}','${navDate}')">
             <div style="width:48px;height:48px;background:${bgColors[typeKey] || bgColors['混合']};border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:12px;">${typeLabel}</div>
             <div style="flex:1;">
               <div style="font-weight:700;font-size:14px;margin-bottom:2px;">${f.name} <span style="font-size:11px;color:var(--text-muted);font-weight:400;">${f.code}</span></div>
@@ -4151,7 +4399,7 @@
             </div>
             <button class="fund-fav-btn followed" data-code="${f.code}" onclick="toggleFavoriteFromSearch(event,'${f.code}')">✓ 已自选</button>
             <button class="btn btn-outline btn-sm" onclick="removeFavoriteFund(event,'${f.code}','${f.name}')">删除自选</button>
-            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();switchPage('generator');loadDemo('${f.code}','${f.name}','${co}','${f.y1 || '—'}','${f.y3 || '—'}','${f.rank || '—'}','${mgr}','${f.sharpe || '—'}','${f.dd || '—'}')">生成素材</button>
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();switchPage('generator');loadDemo('${f.code}','${f.name}','${co}','${f.y1 || '—'}','${f.y3 || '—'}','${f.rank || '—'}','${mgr}','${f.sharpe || '—'}','${f.dd || '—'}','${navDate}')">生成素材</button>
           </div>
         </div>`;
     }).join('');
@@ -4344,7 +4592,7 @@
   }
 
   // ---- Load Demo ----
-  function loadDemo(code, name, co, y1, y3, rank, mgr, sharpe, dd) {
+  function loadDemo(code, name, co, y1, y3, rank, mgr, sharpe, dd, navDate) {
     // Update fund info
     document.getElementById('sFundName').textContent = name;
     document.getElementById('sFundCode').textContent = code;
@@ -4366,6 +4614,7 @@
     dDD.textContent = dd;
     dDD.className = 'data-item-val ' + (parseFloat(dd) < -30 ? 'down' : '');
     document.getElementById('dMgr').textContent = mgr;
+    document.getElementById('dUpdateDate').textContent = navDate || '—';
 
     // Update chart
     updateFundChart(code);
@@ -4993,7 +5242,7 @@
       searchResultCache[String(f.code)] = normalizeFavoriteFund(f);
       const followed = isFavoriteFund(f.code);
       html += `
-        <div class="flist-item" data-code="${f.code}" data-name="${f.name}">
+        <div class="flist-item" data-code="${f.code}" data-name="${f.name}" onclick="handleFundSelect('${f.code}')">
           <div class="flist-main">
             <div class="flist-name">${f.name}</div>
             <div class="flist-meta">${f.code} · ${f.type || '基金'}</div>
@@ -5008,6 +5257,76 @@
     updateFavoriteButtons();
   }
 
+  async function handleFundSelect(code) {
+    const input = document.getElementById('mainSearch');
+    hideMainSuggest();
+    input.value = '';
+    updateClearButtonVisibility();
+    
+    showGlobalLoading();
+    
+    const nonce = ++lastSelectNonce;
+    try {
+      let f = await loadFundFromBackend(code);
+      if (!f || nonce !== lastSelectNonce) {
+        f = await buildFundDataFromEastmoney(code);
+      }
+      if (nonce !== lastSelectNonce) return;
+      input.value = `${f.name}（${f.code}）`;
+      updateClearButtonVisibility();
+      applyFundToUI(f);
+      generateSellingPoints(f);
+    } catch (e2) {
+      const demo = demoFunds.find(x => x.code === code);
+      if (demo) {
+        const fundData = {
+          name: demo.name,
+          code: demo.code,
+          type: demo.type,
+          risk: typeToRisk(demo.type),
+          company: demo.company,
+          y1: demo.y1,
+          y3: demo.y3,
+          rank: '—',
+          sharpe: '—',
+          dd: '—',
+          manager: '—'
+        };
+        applyFundToUI(fundData);
+        generateSellingPoints(fundData);
+      } else {
+        showToast('加载失败，请稍后重试', '');
+      }
+    } finally {
+      hideGlobalLoading();
+    }
+  }
+
+  function showGlobalLoading() {
+    const loading = document.getElementById('globalLoading');
+    if (loading) loading.style.display = 'flex';
+  }
+
+  function hideGlobalLoading() {
+    const loading = document.getElementById('globalLoading');
+    if (loading) loading.style.display = 'none';
+  }
+
+  function clearMainSearch() {
+    const input = document.getElementById('mainSearch');
+    const clearBtn = document.getElementById('mainSearchClear');
+    if (input) input.value = '';
+    if (clearBtn) clearBtn.style.display = 'none';
+    hideMainSuggest();
+  }
+
+  function updateClearButtonVisibility() {
+    const input = document.getElementById('mainSearch');
+    const clearBtn = document.getElementById('mainSearchClear');
+    if (!input || !clearBtn) return;
+    clearBtn.style.display = input.value.trim() ? 'flex' : 'none';
+  }
+
   function setupMainSearch() {
     const input = document.getElementById('mainSearch');
     const box = document.getElementById('mainSearchSuggest');
@@ -5019,6 +5338,10 @@
       const code = item.getAttribute('data-code');
       hideMainSuggest();
       input.value = '';
+      updateClearButtonVisibility();
+      
+      showGlobalLoading();
+      
       const nonce = ++lastSelectNonce;
       try {
         let f = await loadFundFromBackend(code);
@@ -5027,6 +5350,7 @@
         }
         if (nonce !== lastSelectNonce) return;
         input.value = `${f.name}（${f.code}）`;
+        updateClearButtonVisibility();
         applyFundToUI(f);
         generateSellingPoints(f);
       } catch (e2) {
@@ -5050,11 +5374,14 @@
         } else {
           showToast('加载失败，请稍后重试', '');
         }
+      } finally {
+        hideGlobalLoading();
       }
     });
 
     input.addEventListener('input', () => {
       clearTimeout(mainSearchTimer);
+      updateClearButtonVisibility();
       const raw = input.value.trim();
       const q = normalizeKeyword(raw);
       if (!q) return hideMainSuggest();
@@ -5077,6 +5404,13 @@
           renderMainSuggest(filtered);
         }
       }, 120);
+    });
+
+    input.addEventListener('click', () => {
+      const raw = input.value.trim();
+      if (!raw) {
+        return;
+      }
     });
 
     input.addEventListener('keydown', e => {

@@ -77,10 +77,18 @@ class MiniMaxService:
         else:
             points = "长期表现稳健"
         
-        # 语气调整
-        if style == "专业正式":
+        # 根据风格调整语气
+        if style == "专业稳健":
             template = template.replace("各位朋友好", "尊敬的投资者")
             template = template.replace("感兴趣的朋友", "有投资意向的客户")
+            template = template.replace("给大家推荐", "向您推荐")
+            template = template.replace("很看好", "值得关注")
+        elif style == "紧迫促成":
+            template = template.replace("感兴趣的朋友可以私信", "抓住机会，立即咨询")
+            template = template.replace("有意向的朋友欢迎咨询", "限时机会，马上行动")
+        elif style == "权威背书":
+            template = template.replace("各位朋友好", "")
+            template = template.replace("感兴趣的朋友", "专业投资者")
         
         content = template.format(
             name=fund_info.get('name', '优质基金'),
@@ -117,7 +125,10 @@ class MiniMaxService:
                 user_prompt += f"- {sp}\n"
         
         user_prompt += """
-要求：专业但不生硬，突出业绩，提醒风险，字数适中。直接输出文案，不要markdown格式。"""
+要求：
+1. 专业但不生硬，突出业绩，提醒风险，字数适中
+2. 必须完全使用中文输出，不要使用英文或其他语言
+3. 直接输出文案，不要markdown格式"""
         
         try:
             # 使用Anthropic兼容的API格式
@@ -178,3 +189,100 @@ class MiniMaxService:
         # 降级策略：使用模板生成
         print("使用模板生成文案作为降级方案")
         return cls.generate_copy(fund_info, selling_points, format_type, style)
+    
+    @classmethod
+    def modify_content(cls, original_content, instruction, format_type="朋友圈文案", style="亲切易懂", fund_info=None):
+        """根据指令修改文案"""
+        fund_info = fund_info or {}
+        
+        format_desc = {
+            '朋友圈文案': '适合微信朋友圈发布的文案，100-200字',
+            '一句话推荐': '简短有力的推荐语，15-30字，适合海报或轮播图',
+            '微信群推广': '适合微信群群发的文案，200-300字'
+        }
+        
+        style_desc = {
+            '专业稳健': '正式、专业的语气，适合面向机构客户',
+            '亲切易懂': '口语化、亲切的语气，适合普通投资者',
+            '紧迫促成': '带有紧迫感的促销语气',
+            '权威背书': '简洁专业，强调权威性'
+        }
+        
+        user_prompt = f"""请根据以下要求修改这篇基金营销文案：
+
+【原文案】
+{original_content}
+
+【修改要求】
+{instruction}
+
+【素材格式】
+{format_desc.get(format_type, format_type)}
+
+【文案风格】
+{style_desc.get(style, style)}
+
+【基金信息】
+- 基金名称：{fund_info.get('name', '未知基金')}
+- 基金代码：{fund_info.get('code', '')}
+- 基金类型：{fund_info.get('type', '')}
+- 基金公司：{fund_info.get('company', '')}
+- 基金经理：{fund_info.get('manager', '')}
+
+【注意事项】
+1. 保持文案的核心信息和卖点不变
+2. 遵守金融合规要求，必须保留风险提示
+3. 符合指定的素材格式和文案风格
+4. 必须完全使用中文输出，不要使用英文或其他语言
+5. 直接输出修改后的文案，不需要其他说明"""
+
+        try:
+            api_url = f"{ANTHROPIC_BASE_URL}/v1/messages"
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {ANTHROPIC_AUTH_TOKEN}",
+                "x-api-key": ANTHROPIC_AUTH_TOKEN
+            }
+
+            data = {
+                "model": ANTHROPIC_MODEL,
+                "messages": [
+                    {"role": "user", "content": user_prompt}
+                ],
+                "max_tokens": 800,
+                "temperature": 0.7
+            }
+
+            print(f"调用修改API: {api_url}")
+            resp = requests.post(api_url, headers=headers, json=data, timeout=API_TIMEOUT)
+            resp.raise_for_status()
+
+            result = resp.json()
+            print(f"修改API响应: {result}")
+
+            # 解析MiniMax的Anthropic兼容API格式
+            content_blocks = result.get("content", [])
+            for block in content_blocks:
+                if block.get("type") == "text" and block.get("text"):
+                    reply = block.get("text", "")
+                    if reply:
+                        return reply.strip()
+
+            if "error" in result:
+                error_msg = result["error"].get("message", "未知错误")
+                print(f"API错误: {error_msg}")
+
+        except requests.exceptions.Timeout:
+            print(f"API超时: {api_url}")
+        except requests.exceptions.ConnectionError as e:
+            print(f"API连接失败: {e}")
+        except requests.exceptions.HTTPError as e:
+            print(f"API HTTP错误: {e}")
+        except Exception as e:
+            print(f"API未知错误: {e}")
+            import traceback
+            traceback.print_exc()
+
+        # 降级策略：返回原文并添加简单的修改标记
+        print("返回原文案作为降级方案")
+        return original_content
