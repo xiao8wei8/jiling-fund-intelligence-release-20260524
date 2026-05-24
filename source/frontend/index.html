@@ -4577,7 +4577,7 @@
   
   // 页面初始化
   document.addEventListener('DOMContentLoaded', function() {
-    // 绑定Checkbox变化事件
+    // 绑定Agent Checkbox变化事件
     const agentResultCheck = document.getElementById('agentResultCheck');
     const agentComplianceCheck = document.getElementById('agentComplianceCheck');
     const agentWindCheck = document.getElementById('agentWindCheck');
@@ -4600,6 +4600,23 @@
     if (agentWindCheck) {
       agentWindCheck.addEventListener('change', updateCardVisibility);
     }
+    
+    // 绑定Skills Checkbox变化事件
+    const skillCheckboxes = [
+      'skillShorten', 'skillLengthen', 'skillFormal', 'skillCasual',
+      'skillAddEmoji', 'skillMoreAttractive',
+      'skillConservative', 'skillSteady', 'skillBalanced',
+      'skillProgressive', 'skillAggressive'
+    ];
+    
+    skillCheckboxes.forEach(id => {
+      const checkbox = document.getElementById(id);
+      if (checkbox) {
+        checkbox.addEventListener('change', function() {
+          updateSkillsButtons();
+        });
+      }
+    });
     
     // 初始执行一次
     updateCardVisibility();
@@ -4801,7 +4818,7 @@
                   Skills 设置
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="skillsSettingsArrow" style="transition:transform 0.2s;"><path d="M6 9l6 6 6-6"/></svg>
                 </button>
-                <div id="skillsSettingsPanel" style="display:none;position:absolute;top:calc(100% + 8px);left:0;min-width:260px;background:white;border-radius:12px;box-shadow:0 10px 40px rgba(31,76,130,0.15);border:1px solid var(--border);z-index:100;overflow:hidden;">
+                <div id="skillsSettingsPanel" style="display:none;position:absolute;top:calc(100% + 8px);left:0;min-width:260px;max-height:400px;background:white;border-radius:12px;box-shadow:0 10px 40px rgba(31,76,130,0.15);border:1px solid var(--border);z-index:9999;overflow-y:auto;">
                   <div style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg-subtle);">
                     <div style="font-size:13px;font-weight:600;color:var(--text-primary);">选择要启用的 Skill</div>
                   </div>
@@ -5035,7 +5052,6 @@
       panel.style.display = 'none';
       arrow.style.transform = 'rotate(0deg)';
       document.removeEventListener('click', closeSkillsSettingsOutside);
-      updateSkillsButtons();
     }
   }
 
