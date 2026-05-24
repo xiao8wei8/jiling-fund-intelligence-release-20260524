@@ -3111,6 +3111,12 @@
         </div>
         品牌配置
       </a>
+      <a class="sidebar-link" href="#" onclick="switchPage('skills-agents', this)">
+        <div class="sidebar-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        Skills & Agents配置
+      </a>
       <a class="sidebar-link" href="#" onclick="switchPage('compliance', this)">
         <div class="sidebar-icon">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -4216,7 +4222,7 @@
     document.querySelector('.main').style.display = 'none';
 
     // Hide all other pages and remove page-full class
-    ['library','dashboard','team','myfunds','audit','brand','compliance'].forEach(p => {
+    ['library','dashboard','team','myfunds','audit','brand','skills-agents','compliance'].forEach(p => {
       const el = document.getElementById('page-' + p);
       if (el) {
         el.style.display = 'none';
@@ -4247,7 +4253,130 @@
     if (page === 'dashboard') {
       loadFundMarketPage();
     }
+    if (page === 'skills-agents') {
+      loadSkillsAgentsConfig();
+    }
 
+  }
+
+  // ---- Skills & Agents Config ----
+  let skillsAgentsConfig = null;
+
+  function loadSkillsAgentsConfig() {
+    const saved = localStorage.getItem('skillsAgentsConfig');
+    if (saved) {
+      skillsAgentsConfig = JSON.parse(saved);
+    } else {
+      // 默认配置
+      skillsAgentsConfig = {
+        agents: {
+          result: true,
+          compliance: true,
+          wind: true
+        },
+        skills: {
+          shorten: true,
+          lengthen: true,
+          formal: true,
+          casual: true,
+          addEmoji: true,
+          moreAttractive: true,
+          conservative: true,
+          steady: true,
+          balanced: true,
+          progressive: true,
+          aggressive: true
+        }
+      };
+    }
+    
+    // 应用配置到表单
+    if (document.getElementById('config-agent-result')) {
+      document.getElementById('config-agent-result').checked = skillsAgentsConfig.agents.result;
+      document.getElementById('config-agent-compliance').checked = skillsAgentsConfig.agents.compliance;
+      document.getElementById('config-agent-wind').checked = skillsAgentsConfig.agents.wind;
+      
+      document.getElementById('config-skill-shorten').checked = skillsAgentsConfig.skills.shorten;
+      document.getElementById('config-skill-lengthen').checked = skillsAgentsConfig.skills.lengthen;
+      document.getElementById('config-skill-formal').checked = skillsAgentsConfig.skills.formal;
+      document.getElementById('config-skill-casual').checked = skillsAgentsConfig.skills.casual;
+      document.getElementById('config-skill-add-emoji').checked = skillsAgentsConfig.skills.addEmoji;
+      document.getElementById('config-skill-more-attractive').checked = skillsAgentsConfig.skills.moreAttractive;
+      document.getElementById('config-skill-conservative').checked = skillsAgentsConfig.skills.conservative;
+      document.getElementById('config-skill-steady').checked = skillsAgentsConfig.skills.steady;
+      document.getElementById('config-skill-balanced').checked = skillsAgentsConfig.skills.balanced;
+      document.getElementById('config-skill-progressive').checked = skillsAgentsConfig.skills.progressive;
+      document.getElementById('config-skill-aggressive').checked = skillsAgentsConfig.skills.aggressive;
+    }
+    
+    // 应用配置到主界面
+    applyConfigToMainUI();
+    
+    return skillsAgentsConfig;
+  }
+
+  function saveSkillsAgentsConfig() {
+    skillsAgentsConfig = {
+      agents: {
+        result: document.getElementById('config-agent-result').checked,
+        compliance: document.getElementById('config-agent-compliance').checked,
+        wind: document.getElementById('config-agent-wind').checked
+      },
+      skills: {
+        shorten: document.getElementById('config-skill-shorten').checked,
+        lengthen: document.getElementById('config-skill-lengthen').checked,
+        formal: document.getElementById('config-skill-formal').checked,
+        casual: document.getElementById('config-skill-casual').checked,
+        addEmoji: document.getElementById('config-skill-add-emoji').checked,
+        moreAttractive: document.getElementById('config-skill-more-attractive').checked,
+        conservative: document.getElementById('config-skill-conservative').checked,
+        steady: document.getElementById('config-skill-steady').checked,
+        balanced: document.getElementById('config-skill-balanced').checked,
+        progressive: document.getElementById('config-skill-progressive').checked,
+        aggressive: document.getElementById('config-skill-aggressive').checked
+      }
+    };
+    
+    localStorage.setItem('skillsAgentsConfig', JSON.stringify(skillsAgentsConfig));
+    
+    // 应用配置到主界面
+    applyConfigToMainUI();
+    
+    showToast('配置已保存', 'ok');
+  }
+
+  function applyConfigToMainUI() {
+    // 应用Agent配置
+    if (document.getElementById('agentResultCheck')) {
+      document.getElementById('agentResultCheck').checked = skillsAgentsConfig.agents.result;
+      document.getElementById('agentComplianceCheck').checked = skillsAgentsConfig.agents.compliance;
+      document.getElementById('agentWindCheck').checked = skillsAgentsConfig.agents.wind;
+      
+      // 更新卡片可见性
+      const resultCard = document.getElementById('agent-result');
+      const complianceCard = document.getElementById('agent-compliance');
+      const windCard = document.getElementById('agent-wind');
+      if (resultCard) resultCard.style.display = skillsAgentsConfig.agents.result ? 'block' : 'none';
+      if (complianceCard) complianceCard.style.display = skillsAgentsConfig.agents.compliance ? 'block' : 'none';
+      if (windCard) windCard.style.display = skillsAgentsConfig.agents.wind ? 'block' : 'none';
+    }
+    
+    // 应用Skills配置
+    if (document.getElementById('skillShorten')) {
+      document.getElementById('skillShorten').checked = skillsAgentsConfig.skills.shorten;
+      document.getElementById('skillLengthen').checked = skillsAgentsConfig.skills.lengthen;
+      document.getElementById('skillFormal').checked = skillsAgentsConfig.skills.formal;
+      document.getElementById('skillCasual').checked = skillsAgentsConfig.skills.casual;
+      document.getElementById('skillAddEmoji').checked = skillsAgentsConfig.skills.addEmoji;
+      document.getElementById('skillMoreAttractive').checked = skillsAgentsConfig.skills.moreAttractive;
+      document.getElementById('skillConservative').checked = skillsAgentsConfig.skills.conservative;
+      document.getElementById('skillSteady').checked = skillsAgentsConfig.skills.steady;
+      document.getElementById('skillBalanced').checked = skillsAgentsConfig.skills.balanced;
+      document.getElementById('skillProgressive').checked = skillsAgentsConfig.skills.progressive;
+      document.getElementById('skillAggressive').checked = skillsAgentsConfig.skills.aggressive;
+      
+      updateSkillsButtons();
+    }
   }
 
   // ---- Panel ----
@@ -4579,6 +4708,9 @@
   
   // 页面初始化
   document.addEventListener('DOMContentLoaded', function() {
+    // 加载Skills & Agents配置
+    loadSkillsAgentsConfig();
+    
     // 绑定Agent Checkbox变化事件
     const agentResultCheck = document.getElementById('agentResultCheck');
     const agentComplianceCheck = document.getElementById('agentComplianceCheck');
@@ -7603,6 +7735,179 @@
           <div style="width:64px;height:64px;background:var(--brand-gold);border-radius:8px;margin-bottom:8px;"></div>
           <div style="font-size:12px;font-weight:600;">AI 青</div>
           <div style="font-size:11px;color:var(--text-muted);">#B8892A</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE: SKILLS & AGENTS (Skills & Agents配置)
+============================================================ -->
+<div id="page-skills-agents" style="display:none;">
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <div class="page-title">Skills & Agents配置</div>
+      <div class="page-breadcrumb">
+        Fund Intelligence &nbsp;/&nbsp; <span>系统设置</span>
+      </div>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-primary btn-sm" onclick="saveSkillsAgentsConfig()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg>
+        保存配置
+      </button>
+    </div>
+  </div>
+
+  <!-- Agents配置 -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-head"><div class="card-title"><div class="card-title-icon" style="background:#E8F1FB;color:var(--brand);">🤖</div>Agents 配置</div></div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(20,92,255,0.03);">
+            <input type="checkbox" id="config-agent-result" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+            <div style="flex:1;">
+              <div style="font-size:14px;color:#1a202c;font-weight:600;">📝 文案审核 Agent</div>
+              <div style="font-size:11px;color:var(--text-muted);">检查文案的完整性、吸引力和上下文相关性</div>
+            </div>
+          </label>
+        </div>
+        <div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(20,92,255,0.03);">
+            <input type="checkbox" id="config-agent-compliance" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+            <div style="flex:1;">
+              <div style="font-size:14px;color:#1a202c;font-weight:600;">⚖️ 合规检查 Agent</div>
+              <div style="font-size:11px;color:var(--text-muted);">检查禁用词汇和宣传合规性</div>
+            </div>
+          </label>
+        </div>
+        <div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(20,92,255,0.03);">
+            <input type="checkbox" id="config-agent-wind" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+            <div style="flex:1;">
+              <div style="font-size:14px;color:#1a202c;font-weight:600;">📊 Wind数据验证 Agent</div>
+              <div style="font-size:11px;color:var(--text-muted);">通过Wind API验证基金数据准确性</div>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skills配置 - 文案优化 -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-head"><div class="card-title"><div class="card-title-icon" style="background:#F5E9C8;color:var(--brand-gold);">🎨</div>Skills 配置 - 文案优化</div></div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+        <div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(184,137,42,0.05);">
+            <input type="checkbox" id="config-skill-shorten" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+            <div style="flex:1;">
+              <div style="font-size:14px;color:#1a202c;font-weight:600;">📝 缩短文案</div>
+              <div style="font-size:11px;color:var(--text-muted);">精简文案，保留核心信息</div>
+            </div>
+          </label>
+        </div>
+        <div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(184,137,42,0.05);">
+            <input type="checkbox" id="config-skill-lengthen" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+            <div style="flex:1;">
+              <div style="font-size:14px;color:#1a202c;font-weight:600;">📄 加长文案</div>
+              <div style="font-size:11px;color:var(--text-muted);">增加细节，丰富文案内容</div>
+            </div>
+          </label>
+        </div>
+        <div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(184,137,42,0.05);">
+            <input type="checkbox" id="config-skill-formal" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+            <div style="flex:1;">
+              <div style="font-size:14px;color:#1a202c;font-weight:600;">💼 更正式</div>
+              <div style="font-size:11px;color:var(--text-muted);">调整语气为专业正式</div>
+            </div>
+          </label>
+        </div>
+        <div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(184,137,42,0.05);">
+            <input type="checkbox" id="config-skill-casual" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+            <div style="flex:1;">
+              <div style="font-size:14px;color:#1a202c;font-weight:600;">😊 更口语化</div>
+              <div style="font-size:11px;color:var(--text-muted);">调整语气为亲切自然</div>
+            </div>
+          </label>
+        </div>
+        <div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(184,137,42,0.05);">
+            <input type="checkbox" id="config-skill-add-emoji" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+            <div style="flex:1;">
+              <div style="font-size:14px;color:#1a202c;font-weight:600;">🎉 添加表情</div>
+              <div style="font-size:11px;color:var(--text-muted);">插入适当的emoji增加活力</div>
+            </div>
+          </label>
+        </div>
+        <div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(184,137,42,0.05);">
+            <input type="checkbox" id="config-skill-more-attractive" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+            <div style="flex:1;">
+              <div style="font-size:14px;color:#1a202c;font-weight:600;">✨ 更吸引人</div>
+              <div style="font-size:11px;color:var(--text-muted);">优化表达，增强感染力</div>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skills配置 - 投资者类型 -->
+  <div class="card">
+    <div class="card-head"><div class="card-title"><div class="card-title-icon" style="background:#EBF7EE;color:var(--success);">🎯</div>Skills 配置 - 投资者类型</div></div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+        <div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(63,185,80,0.05);">
+            <input type="checkbox" id="config-skill-conservative" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+            <div style="flex:1;">
+              <div style="font-size:14px;color:#1a202c;font-weight:600;">🛡️ 保守型</div>
+              <div style="font-size:11px;color:var(--text-muted);">强调安全、稳定、本金保障</div>
+            </div>
+          </label>
+        </div>
+        <div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(63,185,80,0.05);">
+            <input type="checkbox" id="config-skill-steady" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+            <div style="flex:1;">
+              <div style="font-size:14px;color:#1a202c;font-weight:600;">🎯 稳健型</div>
+              <div style="font-size:11px;color:var(--text-muted);">追求稳健增值、风险可控</div>
+            </div>
+          </label>
+        </div>
+        <div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(63,185,80,0.05);">
+            <input type="checkbox" id="config-skill-balanced" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+            <div style="flex:1;">
+              <div style="font-size:14px;color:#1a202c;font-weight:600;">⚖️ 平衡型</div>
+              <div style="font-size:11px;color:var(--text-muted);">均衡风险与收益</div>
+            </div>
+          </label>
+        </div>
+        <div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(63,185,80,0.05);">
+            <input type="checkbox" id="config-skill-progressive" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+            <div style="flex:1;">
+              <div style="font-size:14px;color:#1a202c;font-weight:600;">📈 进取型</div>
+              <div style="font-size:11px;color:var(--text-muted);">追求较高收益</div>
+            </div>
+          </label>
+        </div>
+        <div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(63,185,80,0.05);">
+            <input type="checkbox" id="config-skill-aggressive" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+            <div style="flex:1;">
+              <div style="font-size:14px;color:#1a202c;font-weight:600;">🔥 激进型</div>
+              <div style="font-size:11px;color:var(--text-muted);">追求最大化收益</div>
+            </div>
+          </label>
         </div>
       </div>
     </div>
