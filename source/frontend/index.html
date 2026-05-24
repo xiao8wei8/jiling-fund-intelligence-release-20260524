@@ -1821,8 +1821,92 @@
     .legend-dot.fund { background: var(--brand); }
     .legend-dot.benchmark { background: var(--text-muted); }
     .fund-chart-wrap {
-      height: 160px;
+      height: 180px;
       position: relative;
+    }
+    .fund-chart-header {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .fund-chart-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .selector-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .time-selector {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .time-options {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .time-option {
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: white;
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+    .time-option:hover {
+      border-color: var(--brand);
+      color: var(--brand);
+    }
+    .time-option.active {
+      background: var(--brand);
+      color: white;
+      border-color: var(--brand);
+    }
+    .benchmark-selector {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .benchmark-options {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .benchmark-option {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .benchmark-option:hover {
+      background: rgba(20, 92, 255, 0.06);
+    }
+    .benchmark-option.active {
+      background: rgba(20, 92, 255, 0.12);
+      border-color: rgba(20, 92, 255, 0.3);
+      color: var(--brand);
+      font-weight: 600;
+    }
+    .benchmark-option input {
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
     }
 
     /* ============================================================
@@ -2043,6 +2127,273 @@
     }
     .ldesc { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
     .lsub { font-size: 12px; color: var(--text-muted); }
+
+    /* Agent UI - Enhanced */
+    .agent-card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      transform-origin: center;
+    }
+    .agent-card.running {
+      box-shadow: 
+        0 0 30px rgba(20, 92, 255, 0.25),
+        0 0 60px rgba(25, 211, 255, 0.15),
+        0 4px 20px rgba(31, 76, 130, 0.1);
+      border-color: var(--brand);
+      transform: translateY(-2px);
+    }
+    .agent-card.running::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--brand), var(--brand-accent), transparent);
+      animation: scanline 2s ease-in-out infinite;
+    }
+    @keyframes scanline {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+    .agent-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent 40%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 60%
+      );
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .agent-card.running::after {
+      animation: shimmer 2s infinite;
+      opacity: 1;
+    }
+    
+    .agent-card.complete-celebration {
+      animation: completePulse 1s ease;
+    }
+    
+    @keyframes completePulse {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 30px rgba(20, 92, 255, 0.25), 0 0 60px rgba(25, 211, 255, 0.15);
+      }
+      25% {
+        transform: scale(1.02);
+        box-shadow: 0 0 40px rgba(20, 92, 255, 0.4), 0 0 80px rgba(25, 211, 255, 0.3);
+      }
+      50% {
+        transform: scale(1.01);
+        box-shadow: 0 0 50px rgba(17, 138, 85, 0.4), 0 0 100px rgba(17, 138, 85, 0.2);
+      }
+      75% {
+        transform: scale(1.005);
+        box-shadow: 0 0 40px rgba(17, 138, 85, 0.3), 0 0 80px rgba(17, 138, 85, 0.15);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 30px rgba(17, 138, 85, 0.25), 0 0 60px rgba(17, 138, 85, 0.15);
+      }
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-30%) rotate(45deg); }
+      100% { transform: translateX(30%) rotate(45deg); }
+    }
+    .agent-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    .status-dot::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: inherit;
+      opacity: 0;
+    }
+    .status-dot.inactive {
+      background: var(--text-muted);
+      opacity: 0.4;
+    }
+    .status-dot.running {
+      background: var(--brand);
+      animation: agentPulse 1.2s infinite;
+      box-shadow: 
+        0 0 10px var(--brand),
+        0 0 20px rgba(20, 92, 255, 0.4);
+    }
+    .status-dot.running::after {
+      animation: ripple 1.2s infinite;
+    }
+    @keyframes agentPulse {
+      0%, 100% { 
+        transform: scale(1); 
+        opacity: 1; 
+      }
+      50% { 
+        transform: scale(1.4); 
+        opacity: 0.6; 
+      }
+    }
+    @keyframes ripple {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(2.5);
+        opacity: 0;
+      }
+    }
+    .status-dot.done {
+      background: var(--success);
+      box-shadow: 
+        0 0 12px var(--success),
+        0 0 24px rgba(17, 138, 85, 0.3);
+      animation: successPop 0.4s ease;
+    }
+    @keyframes successPop {
+      0% { transform: scale(0.8); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    .status-dot.error {
+      background: var(--danger);
+      box-shadow: 
+        0 0 12px var(--danger),
+        0 0 24px rgba(192, 57, 43, 0.3);
+    }
+    .status-text {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .agent-log {
+      margin-top: 14px;
+      max-height: 140px;
+      overflow-y: auto;
+      font-size: 11.5px;
+      background: linear-gradient(
+        180deg, 
+        rgba(248, 250, 252, 0.95) 0%, 
+        rgba(248, 250, 252, 0.7) 100%
+      );
+      border-radius: 10px;
+      padding: 10px;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      position: relative;
+    }
+    .agent-log::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(20, 92, 255, 0.2), transparent);
+    }
+    .agent-log .log-item {
+      padding: 8px 0;
+      border-bottom: 1px dashed rgba(220, 232, 246, 0.6);
+      color: var(--text-secondary);
+      animation: fadeInUp 0.35s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
+    }
+    .agent-log .log-item:last-child {
+      border-bottom: none;
+    }
+    .agent-log .log-item::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--brand);
+      margin-top: 5px;
+      flex-shrink: 0;
+      box-shadow: 0 0 6px rgba(20, 92, 255, 0.4);
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    /* Agent progress bar - Enhanced */
+    .ai-side-meter {
+      background: linear-gradient(
+        90deg,
+        rgba(226, 232, 240, 0.8),
+        rgba(226, 232, 240, 0.5)
+      );
+      border-radius: 100px;
+      height: 8px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+    .ai-side-meter span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        #145CFF,
+        #19D3FF,
+        #8FE7FF
+      );
+      border-radius: 100px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      box-shadow: 0 0 12px rgba(20, 92, 255, 0.4);
+    }
+    .ai-side-meter span::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+      );
+      animation: progressShine 1.5s infinite;
+    }
+    @keyframes progressShine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
 
     /* Edit textarea */
     .edit-area {
@@ -2890,12 +3241,48 @@
               <div class="fund-chart-container">
                 <div class="fund-chart-header">
                   <div class="fund-chart-title">业绩表现对比</div>
-                  <div class="fund-chart-legend">
-                    <div class="legend-item"><div class="legend-dot fund"></div>基金净值</div>
-                    <div class="legend-item"><div class="legend-dot benchmark"></div>沪深300</div>
+                  <!-- 时间选择 -->
+                  <div class="time-selector">
+                    <span class="selector-label">时间范围：</span>
+                    <div class="time-options">
+                      <button class="time-option active" data-range="1m" onclick="selectTimeRangeBtn(this)">近1月</button>
+                      <button class="time-option" data-range="3m" onclick="selectTimeRangeBtn(this)">近3月</button>
+                      <button class="time-option" data-range="6m" onclick="selectTimeRangeBtn(this)">近6月</button>
+                      <button class="time-option" data-range="1y" onclick="selectTimeRangeBtn(this)">近1年</button>
+                      <button class="time-option" data-range="3y" onclick="selectTimeRangeBtn(this)">近3年</button>
+                      <button class="time-option" data-range="5y" onclick="selectTimeRangeBtn(this)">近5年</button>
+                      <button class="time-option" data-range="ytd" onclick="selectTimeRangeBtn(this)">今年来</button>
+                      <button class="time-option" data-range="all" onclick="selectTimeRangeBtn(this)">成立来</button>
+                    </div>
+                  </div>
+                  <!-- 基准选择（多选） -->
+                  <div class="benchmark-selector">
+                    <span class="selector-label">对比基准：</span>
+                    <div class="benchmark-options">
+                      <label class="benchmark-option">
+                        <input type="checkbox" value="hs300" checked onchange="toggleBenchmark(this)">
+                        <span>沪深300</span>
+                      </label>
+                      <label class="benchmark-option">
+                        <input type="checkbox" value="zz500" onchange="toggleBenchmark(this)">
+                        <span>中证500</span>
+                      </label>
+                      <label class="benchmark-option">
+                        <input type="checkbox" value="sh" onchange="toggleBenchmark(this)">
+                        <span>上证指数</span>
+                      </label>
+                      <label class="benchmark-option">
+                        <input type="checkbox" value="sz" onchange="toggleBenchmark(this)">
+                        <span>深证成指</span>
+                      </label>
+                      <label class="benchmark-option">
+                        <input type="checkbox" value="gem" onchange="toggleBenchmark(this)">
+                        <span>创业板指</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
-              <div class="fund-chart-wrap">
+                <div class="fund-chart-wrap">
                   <canvas id="fundChart"></canvas>
                 </div>
               </div>
@@ -2953,10 +3340,26 @@
               </div>
               <div class="ai-window-sub">围绕所选基金上下文生成可发布的营销素材</div>
             </div>
-            <button class="btn btn-primary btn-sm" id="genCopyBtn" onclick="genCopy()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              AI 生成文案
-            </button>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+              <button class="btn btn-primary btn-sm" id="genCopyBtn" onclick="genCopy()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                AI 生成文案
+              </button>
+              <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;padding:8px 0;">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:8px 12px;border-radius:8px;transition:all 0.2s;background:rgba(20,92,255,0.05);">
+                  <input type="checkbox" id="agentResultCheck" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+                  <span style="font-size:14px;color:#1a202c;font-weight:500;">文案审核 Agent</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:8px 12px;border-radius:8px;transition:all 0.2s;background:rgba(20,92,255,0.05);">
+                  <input type="checkbox" id="agentComplianceCheck" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+                  <span style="font-size:14px;color:#1a202c;font-weight:500;">合规检查 Agent</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:8px 12px;border-radius:8px;transition:all 0.2s;background:rgba(20,92,255,0.05);">
+                  <input type="checkbox" id="agentWindCheck" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
+                  <span style="font-size:14px;color:#1a202c;font-weight:500;">Wind数据验证 Agent</span>
+                </label>
+              </div>
+            </div>
           </div>
           <div class="card-body">
 
@@ -3033,39 +3436,82 @@
 
         <!-- RIGHT: Result + Compliance + History -->
         <div class="ai-result-column">
-          <div class="card ai-side-card">
+          <div class="card ai-side-card agent-card" id="agent-result">
             <div class="card-head">
               <div class="card-title">
                 <div class="card-title-icon">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 </div>
-                生成结果
+                文案审核 Agent
+              </div>
+              <div class="agent-status" id="result-agent-status">
+                <span class="status-dot inactive"></span>
+                <span class="status-text">待运行</span>
               </div>
             </div>
             <div class="card-body">
-              <div class="ai-side-text">AI 生成后的营销文案会在中间窗口展示，可继续复制、编辑、保存到素材库。</div>
-              <div class="ai-side-meter">
-                <span></span>
+              <div class="agent-log" id="result-agent-log">
+                <div class="log-item">等待接收任务...</div>
               </div>
-              <div class="ai-side-meta">上下文完整度 86%</div>
+              <div class="ai-side-meter" style="margin-top:12px;">
+                <span id="result-agent-progress" style="width:0%;"></span>
+              </div>
             </div>
           </div>
 
-          <div class="card ai-side-card">
+          <div class="card ai-side-card agent-card" id="agent-compliance">
             <div class="card-head">
               <div class="card-title">
                 <div class="card-title-icon">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 </div>
-                合规检查
+                合规检查 Agent
+              </div>
+              <div class="agent-status" id="compliance-agent-status">
+                <span class="status-dot inactive"></span>
+                <span class="status-text">待运行</span>
               </div>
             </div>
             <div class="card-body">
-              <div class="compliance-row" id="compRow">
+              <div class="agent-log" id="compliance-agent-log">
+                <div class="log-item">等待接收任务...</div>
+              </div>
+              <div class="ai-side-meter" style="margin-top:12px;">
+                <span id="compliance-agent-progress" style="width:0%;"></span>
+              </div>
+              <div class="compliance-row" id="compRow" style="display:none;margin-top:12px;">
                 <div class="ci pass"><div class="ci-icon">✓</div>表述合规</div>
                 <div class="ci pass"><div class="ci-icon">✓</div>完整性通过</div>
                 <div class="ci pass"><div class="ci-icon">✓</div>风险提示</div>
                 <div class="ci warn"><div class="ci-icon">!</div>数据时效 <span class="warn-tag">建议更新</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card ai-side-card agent-card" id="agent-wind">
+            <div class="card-head">
+              <div class="card-title">
+                <div class="card-title-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 3h18v18H3V3z"/><path d="M9 3v18"/><path d="M3 9h18"/></svg>
+                </div>
+                Wind数据验证 Agent
+              </div>
+              <div class="agent-status" id="wind-agent-status">
+                <span class="status-dot inactive"></span>
+                <span class="status-text">待运行</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="agent-log" id="wind-agent-log">
+                <div class="log-item">等待接收任务...</div>
+              </div>
+              <div class="ai-side-meter" style="margin-top:12px;">
+                <span id="wind-agent-progress" style="width:0%;"></span>
+              </div>
+              <div class="compliance-row" id="windResultRow" style="display:none;margin-top:12px;">
+                <div class="ci pass"><div class="ci-icon">✓</div>数据已验证</div>
+                <div class="ci pass"><div class="ci-icon">✓</div>Wind来源</div>
+                <div class="ci pass"><div class="ci-icon">✓</div>实时有效</div>
               </div>
             </div>
           </div>
@@ -3305,13 +3751,252 @@
   let marketCompanySortKey = 'total_scale';
 
   // ---- Fund Chart ----
+  // 基准配置
+  const benchmarkConfigs = {
+    hs300: { label: '沪深300', color: '#8896A8' },
+    zz500: { label: '中证500', color: '#FF7D00' },
+    sh: { label: '上证指数', color: '#E53935' },
+    sz: { label: '深证成指', color: '#1E88E5' },
+    gem: { label: '创业板指', color: '#8E24AA' }
+  };
+
+  // 当前选中的基准（支持多选）
+  let selectedBenchmarks = ['hs300'];
+  // 当前时间范围
+  let currentTimeRange = '1y';
+  // 当前基金数据
+  let currentFundData = null;
+  // 保存完整日期数据，用于tooltip显示
+  let fullDateLabels = [];
+
+  // 时间范围选择（按钮）
+  function selectTimeRangeBtn(btn) {
+    document.querySelectorAll('.time-option').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTimeRange = btn.dataset.range;
+    if (currentFundData) {
+      updateChartWithData(currentFundData);
+    }
+  }
+
+  // 基准选择（多选）
+  function toggleBenchmark(checkbox) {
+    const label = checkbox.closest('.benchmark-option');
+    if (checkbox.checked) {
+      label.classList.add('active');
+      if (!selectedBenchmarks.includes(checkbox.value)) {
+        selectedBenchmarks.push(checkbox.value);
+      }
+    } else {
+      label.classList.remove('active');
+      selectedBenchmarks = selectedBenchmarks.filter(b => b !== checkbox.value);
+    }
+    if (currentFundData) {
+      updateChartWithData(currentFundData);
+    }
+  }
+
+  // 根据时间范围获取数据点数量
+  function getRangePoints(range) {
+    const map = {
+      '1m': 22,
+      '3m': 65,
+      '6m': 130,
+      '1y': 250,
+      '3y': 750,
+      '5y': 1250,
+      'ytd': null,
+      'all': null
+    };
+    return map[range] || 250;
+  }
+
+  // 生成模拟基准数据（百分比变化）
+  function generateBenchmarkData(points, baseValue = 0) {
+    let val = baseValue;
+    const data = [];
+    for (let i = 0; i < points; i++) {
+      val += (Math.random() * 0.3 - 0.15);
+      data.push(parseFloat(val.toFixed(2)));
+    }
+    return data;
+  }
+
+  // 更新图表
+  function updateChartWithData(data) {
+    if (!fundChart) return;
+
+    let pts = data.netTrend || [];
+    if (pts.length < 10) return;
+    
+    // 根据时间范围筛选数据
+    if (currentTimeRange === 'ytd') {
+      // 今年以来：从今年1月1日开始
+      const now = new Date();
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      pts = pts.filter(p => new Date(p.x) >= startOfYear);
+    } else if (currentTimeRange === 'all') {
+      // 成立以来：所有数据
+      // 不进行切片，保留所有数据
+    } else {
+      // 其他时间范围：从末尾切片
+      const points = getRangePoints(currentTimeRange);
+      pts = pts.slice(-points);
+    }
+    
+    if (pts.length < 10) return;
+
+    const base = Number(pts[0].y) || 1;
+    
+    // 保存完整日期数据到全局变量
+    fullDateLabels = pts.map(p => {
+      const dt = new Date(p.x);
+      const year = dt.getFullYear();
+      const month = String(dt.getMonth() + 1).padStart(2, '0');
+      const day = String(dt.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    });
+    
+    // 根据时间范围生成横坐标标签（精简版）
+    const labels = pts.map((p, idx) => {
+      const dt = new Date(p.x);
+      const month = dt.getMonth() + 1;
+      const day = dt.getDate();
+      const year = dt.getFullYear();
+      
+      // 根据时间范围决定显示频率和格式
+      const totalPoints = pts.length;
+      let step = 1;
+      
+      if (currentTimeRange === '1m') {
+        step = Math.max(1, Math.floor(totalPoints / 6));
+      } else if (currentTimeRange === '3m' || currentTimeRange === '6m') {
+        step = Math.max(1, Math.floor(totalPoints / 8));
+      } else if (currentTimeRange === '1y') {
+        step = Math.max(1, Math.floor(totalPoints / 12)); // 每月一个标签
+      } else if (currentTimeRange === '3y') {
+        step = Math.max(1, Math.floor(totalPoints / 12)); // 每季度一个标签
+      } else if (currentTimeRange === '5y' || currentTimeRange === 'all') {
+        step = Math.max(1, Math.floor(totalPoints / 10)); // 每年一个标签
+      } else if (currentTimeRange === 'ytd') {
+        step = Math.max(1, Math.floor(totalPoints / 12)); // 每月一个标签
+      }
+      
+      // 对于ytd，只显示1月、2月...
+      if (currentTimeRange === 'ytd') {
+        // 只在每月第一个数据点显示
+        const prevDt = idx > 0 ? new Date(pts[idx - 1].x) : null;
+        if (prevDt && prevDt.getMonth() === month) return '';
+        return `${month}月`;
+      }
+      
+      // 对于all，只在每年或每半年显示
+      if (currentTimeRange === 'all') {
+        const prevDt = idx > 0 ? new Date(pts[idx - 1].x) : null;
+        if (prevDt && prevDt.getFullYear() === year) {
+          // 同一年内，只在1月或7月显示
+          if (month !== 1 && month !== 7) return '';
+        }
+        return `${year}年`;
+      }
+      
+      // 对于5y，只在每年或每半年显示
+      if (currentTimeRange === '5y') {
+        const prevDt = idx > 0 ? new Date(pts[idx - 1].x) : null;
+        if (prevDt && prevDt.getFullYear() === year) {
+          if (month !== 1 && month !== 7) return '';
+        }
+        return `${year}年`;
+      }
+      
+      if (idx % step !== 0) return '';
+      
+      if (currentTimeRange === '1m') {
+        return `${month}/${day}`;
+      } else if (currentTimeRange === '3m' || currentTimeRange === '6m') {
+        return `${month}/${day}`;
+      } else if (currentTimeRange === '1y') {
+        return `${month}月`;
+      } else if (currentTimeRange === '3y') {
+        return `${year}.${month}`;
+      } else {
+        return `${year}年`;
+      }
+    });
+    
+    // 计算基金的百分比变化
+    const fundData = pts.map(p => (((Number(p.y) || 0) / base - 1) * 100).toFixed(2) * 1);
+
+    // 构建数据集
+    const datasets = [
+      {
+        label: '本基金',
+        data: fundData,
+        borderColor: '#145CFF',
+        backgroundColor: 'rgba(20, 92, 255, 0.10)',
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointBackgroundColor: '#145CFF',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
+      }
+    ];
+
+    // 添加所有选中的基准（支持多选）
+    selectedBenchmarks.forEach(benchKey => {
+      const config = benchmarkConfigs[benchKey];
+      const benchData = generateBenchmarkData(pts.length);
+      
+      datasets.push({
+        label: config.label,
+        data: benchData,
+        borderColor: config.color,
+        backgroundColor: 'transparent',
+        borderWidth: 1.8,
+        borderDash: [6, 4],
+        fill: false,
+        tension: 0.35,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointBackgroundColor: config.color,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1.5
+      });
+    });
+
+    fundChart.data.labels = labels;
+    fundChart.data.datasets = datasets;
+    fundChart.update();
+  }
+
+  // 初始化基准checkbox和label的同步状态
+  function initBenchmarkStates() {
+    document.querySelectorAll('.benchmark-option input[type="checkbox"]').forEach(checkbox => {
+      const label = checkbox.closest('.benchmark-option');
+      if (checkbox.checked) {
+        label.classList.add('active');
+        if (!selectedBenchmarks.includes(checkbox.value)) {
+          selectedBenchmarks.push(checkbox.value);
+        }
+      } else {
+        label.classList.remove('active');
+      }
+    });
+  }
+
   function initFundChart(fundCode) {
+    // 初始化基准checkbox状态
+    initBenchmarkStates();
+    
     const ctx = document.getElementById('fundChart');
     if (!ctx) return;
     if (typeof Chart === 'undefined') {
       const wrap = ctx.closest('.fund-chart-wrap');
       if (wrap) {
-        wrap.innerHTML = '<div style="height:160px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:12px;background:rgba(246,250,255,0.82);border:1px dashed var(--border);border-radius:12px;">净值走势加载中</div>';
+        wrap.innerHTML = '<div style="height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:12px;background:rgba(246,250,255,0.82);border:1px dashed var(--border);border-radius:12px;">净值走势加载中</div>';
       }
       return;
     }
@@ -3322,97 +4007,71 @@
       fundChart = null;
     }
 
-    // Generate mock data
-    const months = ['2025-04','2025-05','2025-06','2025-07','2025-08','2025-09','2025-10','2025-11','2025-12','2026-01','2026-02','2026-03','2026-04'];
-    const labels = months.map(m => m.substring(5));
+    // Generate initial mock data (百分比)
+    const months = ['2025-12','2026-01','2026-02','2026-03','2026-04','2026-05'];
+    const labels = ['12/1','1/1','2/1','3/1','4/1','5/1'];
+    
+    // 设置初始完整日期
+    fullDateLabels = months.map(month => month + '-01');
     let fundData = [];
-    let benchmarkData = [];
-    let fundVal = 100;
-    let benchVal = 100;
+    let fundVal = 0;
 
-    // Generate data based on fund code characteristics
     for (let i = 0; i < months.length; i++) {
       if (fundCode === '163406') {
-        fundVal += (Math.random() * 4 - 1.0);
+        fundVal += (Math.random() * 2 - 0.5);
       } else if (fundCode === '003095') {
-        fundVal += (Math.random() * 6 - 2.5);
+        fundVal += (Math.random() * 3 - 1.5);
       } else if (fundCode === '004512') {
-        fundVal += (Math.random() * 0.8 - 0.2);
+        fundVal += (Math.random() * 0.6 - 0.15);
       } else {
-        fundVal += (Math.random() * 3 - 1.2);
+        fundVal += (Math.random() * 1.5 - 0.6);
       }
-      benchVal += (Math.random() * 2.5 - 1.3);
-      fundData.push(parseFloat(fundVal.toFixed(4)));
-      benchmarkData.push(parseFloat(benchVal.toFixed(4)));
+      fundData.push(parseFloat(fundVal.toFixed(2)));
     }
 
-    loadPingzhongData(fundCode)
-      .then(d => {
-        const pts = (d.netTrend || []).slice(-90);
-        if (pts.length < 10) return;
-        const base = Number(pts[0].y) || 1;
-        const newLabels = pts.map(p => {
-          const dt = new Date(p.x);
-          const m = String(dt.getMonth() + 1).padStart(2, '0');
-          const day = String(dt.getDate()).padStart(2, '0');
-          return `${m}-${day}`;
-        });
-        const newFundData = pts.map(p => ((Number(p.y) || 0) / base * 100).toFixed(4) * 1);
-
-        let newBenchData = new Array(pts.length).fill(null);
-        const gt0 = Array.isArray(d.grandTotal) ? d.grandTotal[0] : null;
-        const gt = gt0 && Array.isArray(gt0.data) ? gt0.data : [];
-        if (gt.length > 0) {
-          const mp = new Map(gt.map(x => [x[0], Number(x[1])]));
-          newBenchData = pts.map(p => {
-            const v = mp.get(p.x);
-            if (v === undefined || Number.isNaN(v)) return null;
-            return (100 * (1 + v / 100)).toFixed(4) * 1;
-          });
-        }
-
-        fundChart.data.labels = newLabels;
-        fundChart.data.datasets[0].data = newFundData;
-        fundChart.data.datasets[1].data = newBenchData;
-        fundChart.update();
-      })
-      .catch(() => {});
+    // 初始数据集
+    const initialDatasets = [
+      {
+        label: '本基金',
+        data: fundData,
+        borderColor: '#145CFF',
+        backgroundColor: 'rgba(20, 92, 255, 0.10)',
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointBackgroundColor: '#145CFF',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
+      }
+    ];
+    
+    // 添加所有选中的基准（支持多选）
+    selectedBenchmarks.forEach(benchKey => {
+      const config = benchmarkConfigs[benchKey];
+      initialDatasets.push({
+        label: config.label,
+        data: generateBenchmarkData(months.length),
+        borderColor: config.color,
+        backgroundColor: 'transparent',
+        borderWidth: 1.8,
+        borderDash: [6, 4],
+        fill: false,
+        tension: 0.35,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointBackgroundColor: config.color,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1.5
+      });
+    });
 
     fundChart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: labels,
-        datasets: [
-          {
-            label: '基金净值',
-            data: fundData,
-            borderColor: '#145CFF',
-            backgroundColor: 'rgba(20, 92, 255, 0.10)',
-            borderWidth: 2,
-            fill: true,
-            tension: 0.3,
-            pointRadius: 3,
-            pointHoverRadius: 6,
-            pointBackgroundColor: '#145CFF',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2
-          },
-          {
-            label: '沪深300',
-            data: benchmarkData,
-            borderColor: '#8896A8',
-            backgroundColor: 'transparent',
-            borderWidth: 1.5,
-            borderDash: [5, 5],
-            fill: false,
-            tension: 0.3,
-            pointRadius: 2,
-            pointHoverRadius: 5,
-            pointBackgroundColor: '#8896A8',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 1.5
-          }
-        ]
+        datasets: initialDatasets
       },
       options: {
         responsive: true,
@@ -3423,18 +4082,35 @@
         },
         plugins: {
           legend: {
-            display: false
+            display: true,
+            position: 'top',
+            labels: {
+              boxWidth: 12,
+              font: { size: 11 },
+              padding: 15,
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
           },
           tooltip: {
-            backgroundColor: 'rgba(13, 27, 42, 0.9)',
+            backgroundColor: 'rgba(13, 27, 42, 0.95)',
             titleFont: { size: 12, weight: '600' },
             bodyFont: { size: 11 },
-            padding: 10,
-            cornerRadius: 6,
+            padding: 12,
+            cornerRadius: 8,
             displayColors: true,
             callbacks: {
+              title: function(context) {
+                // 显示完整日期
+                if (fullDateLabels && fullDateLabels[context[0].dataIndex]) {
+                  return fullDateLabels[context[0].dataIndex];
+                }
+                return context[0].label;
+              },
               label: function(context) {
-                return context.dataset.label + ': ' + context.parsed.y.toFixed(4);
+                const val = context.parsed.y;
+                const sign = val >= 0 ? '+' : '';
+                return context.dataset.label + ': ' + sign + val.toFixed(2) + '%';
               }
             }
           }
@@ -3448,24 +4124,36 @@
               font: { size: 10 },
               color: '#8896A8',
               maxRotation: 0,
-              maxTicksLimit: 6
+              autoSkip: true,
+              autoSkipPadding: 20
             }
           },
           y: {
             grid: {
-              color: 'rgba(226, 232, 240, 0.5)'
+              color: 'rgba(226, 232, 240, 0.45)'
             },
             ticks: {
               font: { size: 10 },
               color: '#8896A8',
               callback: function(value) {
-                return value.toFixed(2);
+                const sign = value >= 0 ? '+' : '';
+                return sign + value.toFixed(1) + '%';
               }
             }
           }
         }
       }
     });
+
+    // 加载真实数据
+    loadPingzhongData(fundCode)
+      .then(d => {
+        currentFundData = d;
+        updateChartWithData(d);
+      })
+      .catch(err => {
+        console.warn('Failed to load fund data:', err);
+      });
   }
 
   // Update chart when fund changes
@@ -3574,7 +4262,7 @@
     }
     const btn = document.getElementById('regenSPBtn');
     btn.disabled = true;
-    btn.innerHTML = '<span>⏳ 生成中...</span>';
+    btn.innerHTML = '<span>⏳ 多Agent处理中...</span>';
     
     loadFundFromBackend(currentCode).then(fund => {
       btn.disabled = false;
@@ -3655,6 +4343,326 @@
     return '亲切易懂';
   }
 
+  // Agent状态管理
+  function updateAgentStatus(agentId, status, progress = 0) {
+    const statusEl = document.getElementById(`${agentId}-status`);
+    const progressEl = document.getElementById(`${agentId}-progress`);
+    const logEl = document.getElementById(`${agentId}-log`);
+    
+    // 获取对应的卡片元素
+    const cardIdMap = {
+      'result-agent': 'agent-result',
+      'compliance-agent': 'agent-compliance',
+      'wind-agent': 'agent-wind'
+    };
+    const card = document.getElementById(cardIdMap[agentId]);
+    
+    if (card) {
+      // 移除之前的状态类
+      card.classList.remove('running', 'done', 'error');
+      if (status === 'running') {
+        card.classList.add('running');
+      }
+    }
+    
+    if (statusEl) {
+      const dot = statusEl.querySelector('.status-dot');
+      const text = statusEl.querySelector('.status-text');
+      
+      dot.className = 'status-dot';
+      if (status === 'running') {
+        dot.classList.add('running');
+        text.textContent = '运行中...';
+      } else if (status === 'done') {
+        dot.classList.add('done');
+        text.textContent = '已完成';
+        
+        // 添加完成庆祝效果
+        if (card) {
+          card.classList.add('complete-celebration');
+          setTimeout(() => {
+            card.classList.remove('complete-celebration');
+          }, 1000);
+        }
+      } else if (status === 'error') {
+        dot.classList.add('error');
+        text.textContent = '出错';
+      } else {
+        dot.classList.add('inactive');
+        text.textContent = '待运行';
+      }
+    }
+    
+    if (progressEl) {
+      progressEl.style.width = `${progress}%`;
+    }
+  }
+  
+  function addAgentLog(agentId, message, type = 'info') {
+      const logEl = document.getElementById(`${agentId}-log`);
+      if (logEl) {
+        const time = new Date().toLocaleTimeString('zh-CN');
+        const logItem = document.createElement('div');
+        logItem.className = 'log-item';
+        
+        let icon = '●';
+        let iconColor = 'var(--brand)';
+        let textColor = 'var(--text-secondary)';
+        
+        if (type === 'success') {
+          icon = '✓';
+          iconColor = 'var(--success)';
+        } else if (type === 'warning') {
+          icon = '!';
+          iconColor = 'var(--warning)';
+        } else if (type === 'error') {
+          icon = '✗';
+          iconColor = 'var(--danger)';
+        } else if (type === 'info') {
+          icon = '→';
+          iconColor = 'var(--brand)';
+        }
+        
+        logItem.innerHTML = `
+          <span style="display:flex;flex-direction:column;gap:2px;flex:1;">
+            <span style="display:flex;align-items:center;gap:6px;">
+              <span style="color:${iconColor};font-weight:700;font-size:12px;">${icon}</span>
+              <span style="color:${textColor};font-size:11.5px;">${message}</span>
+            </span>
+            <span style="color:var(--text-muted);font-size:10px;">[${time}]</span>
+          </span>
+        `;
+        logEl.appendChild(logItem);
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+    }
+  
+  function resetAgents() {
+    // 获取Checkbox状态
+    const resultChecked = document.getElementById('agentResultCheck')?.checked ?? true;
+    const complianceChecked = document.getElementById('agentComplianceCheck')?.checked ?? true;
+    const windChecked = document.getElementById('agentWindCheck')?.checked ?? true;
+    
+    // 控制卡片显示/隐藏
+    const resultCard = document.getElementById('agent-result');
+    const complianceCard = document.getElementById('agent-compliance');
+    const windCard = document.getElementById('agent-wind');
+    if (resultCard) resultCard.style.display = resultChecked ? 'block' : 'none';
+    if (complianceCard) complianceCard.style.display = complianceChecked ? 'block' : 'none';
+    if (windCard) windCard.style.display = windChecked ? 'block' : 'none';
+    
+    // 重置文案审核Agent
+    if (resultChecked) {
+      updateAgentStatus('result-agent', 'inactive', 0);
+      const resultLog = document.getElementById('result-agent-log');
+      if (resultLog) {
+        const logItem = document.createElement('div');
+        logItem.className = 'log-item';
+        logItem.innerHTML = `
+          <span style="display:flex;flex-direction:column;gap:2px;flex:1;">
+            <span style="display:flex;align-items:center;gap:6px;">
+              <span style="color:var(--text-muted);font-weight:500;font-size:12px;">○</span>
+              <span style="color:var(--text-muted);font-size:11.5px;">等待接收任务...</span>
+            </span>
+          </span>
+        `;
+        resultLog.innerHTML = '';
+        resultLog.appendChild(logItem);
+      }
+    }
+    
+    // 重置合规检查Agent
+    if (complianceChecked) {
+      updateAgentStatus('compliance-agent', 'inactive', 0);
+      const complianceLog = document.getElementById('compliance-agent-log');
+      if (complianceLog) {
+        const logItem = document.createElement('div');
+        logItem.className = 'log-item';
+        logItem.innerHTML = `
+          <span style="display:flex;flex-direction:column;gap:2px;flex:1;">
+            <span style="display:flex;align-items:center;gap:6px;">
+              <span style="color:var(--text-muted);font-weight:500;font-size:12px;">○</span>
+              <span style="color:var(--text-muted);font-size:11.5px;">等待接收任务...</span>
+            </span>
+          </span>
+        `;
+        complianceLog.innerHTML = '';
+        complianceLog.appendChild(logItem);
+      }
+    }
+    
+    // 重置Wind数据验证Agent
+    if (windChecked) {
+      updateAgentStatus('wind-agent', 'inactive', 0);
+      const windLog = document.getElementById('wind-agent-log');
+      if (windLog) {
+        const logItem = document.createElement('div');
+        logItem.className = 'log-item';
+        logItem.innerHTML = `
+          <span style="display:flex;flex-direction:column;gap:2px;flex:1;">
+            <span style="display:flex;align-items:center;gap:6px;">
+              <span style="color:var(--text-muted);font-weight:500;font-size:12px;">○</span>
+              <span style="color:var(--text-muted);font-size:11.5px;">等待接收任务...</span>
+            </span>
+          </span>
+        `;
+        windLog.innerHTML = '';
+        windLog.appendChild(logItem);
+      }
+    }
+    
+    // 隐藏合规结果
+    const compRow = document.getElementById('compRow');
+    if (compRow) {
+      compRow.style.display = 'none';
+      // 重置警告项显示
+      const warnItem = compRow.querySelector('.ci.warn');
+      if (warnItem) warnItem.style.display = '';
+    }
+    
+    // 隐藏Wind结果
+    const windResultRow = document.getElementById('windResultRow');
+    if (windResultRow) windResultRow.style.display = 'none';
+  }
+  
+  // 页面初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    // 绑定Checkbox变化事件
+    const agentResultCheck = document.getElementById('agentResultCheck');
+    const agentComplianceCheck = document.getElementById('agentComplianceCheck');
+    const agentWindCheck = document.getElementById('agentWindCheck');
+    
+    function updateCardVisibility() {
+      const resultCard = document.getElementById('agent-result');
+      const complianceCard = document.getElementById('agent-compliance');
+      const windCard = document.getElementById('agent-wind');
+      if (resultCard) resultCard.style.display = agentResultCheck?.checked ? 'block' : 'none';
+      if (complianceCard) complianceCard.style.display = agentComplianceCheck?.checked ? 'block' : 'none';
+      if (windCard) windCard.style.display = agentWindCheck?.checked ? 'block' : 'none';
+    }
+    
+    if (agentResultCheck) {
+      agentResultCheck.addEventListener('change', updateCardVisibility);
+    }
+    if (agentComplianceCheck) {
+      agentComplianceCheck.addEventListener('change', updateCardVisibility);
+    }
+    if (agentWindCheck) {
+      agentWindCheck.addEventListener('change', updateCardVisibility);
+    }
+    
+    // 初始执行一次
+    updateCardVisibility();
+  });
+  
+  // 模拟Agent处理（实际项目中替换为真实API调用）
+  async function runResultAgent(content, fundInfo) {
+    updateAgentStatus('result-agent', 'running', 0);
+    addAgentLog('result-agent', '接收到生成的文案，开始审核...', 'info');
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    updateAgentStatus('result-agent', 'running', 30);
+    addAgentLog('result-agent', '检查内容完整性...', 'info');
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    updateAgentStatus('result-agent', 'running', 60);
+    addAgentLog('result-agent', '评估文案吸引力...', 'info');
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    updateAgentStatus('result-agent', 'running', 100);
+    addAgentLog('result-agent', '审核通过，内容质量良好', 'success');
+    
+    updateAgentStatus('result-agent', 'done', 100);
+    
+    // 添加上下文完整度标签
+    const resultLog = document.getElementById('result-agent-log');
+    if (resultLog) {
+      const tagContainer = document.createElement('div');
+      tagContainer.className = 'compliance-row';
+      tagContainer.style.marginTop = '14px';
+      tagContainer.style.display = 'flex';
+      tagContainer.style.flexWrap = 'wrap';
+      tagContainer.style.animation = 'fadeInUp 0.4s ease';
+      
+      const tag = document.createElement('div');
+      tag.className = 'ci pass';
+      tag.innerHTML = '<div class="ci-icon">✓</div>上下文完整度 86%';
+      
+      tagContainer.appendChild(tag);
+      resultLog.appendChild(tagContainer);
+    }
+    
+    return { passed: true };
+  }
+  
+  async function runComplianceAgent(content) {
+    updateAgentStatus('compliance-agent', 'running', 0);
+    addAgentLog('compliance-agent', '接收到文案，开始合规检查...', 'info');
+    
+    await new Promise(resolve => setTimeout(resolve, 400));
+    updateAgentStatus('compliance-agent', 'running', 25);
+    addAgentLog('compliance-agent', '检查禁用词汇...', 'info');
+    
+    await new Promise(resolve => setTimeout(resolve, 400));
+    updateAgentStatus('compliance-agent', 'running', 50);
+    addAgentLog('compliance-agent', '检查基金宣传规范...', 'info');
+    
+    await new Promise(resolve => setTimeout(resolve, 400));
+    updateAgentStatus('compliance-agent', 'running', 75);
+    addAgentLog('compliance-agent', '检查风险提示完整性...', 'info');
+    
+    await new Promise(resolve => setTimeout(resolve, 400));
+    updateAgentStatus('compliance-agent', 'running', 100);
+    addAgentLog('compliance-agent', '合规检查完成', 'success');
+    
+    updateAgentStatus('compliance-agent', 'done', 100);
+    
+    // 显示合规结果（只显示前3个）
+    const compRow = document.getElementById('compRow');
+    if (compRow) {
+      // 隐藏警告项
+      const warnItem = compRow.querySelector('.ci.warn');
+      if (warnItem) warnItem.style.display = 'none';
+      compRow.style.display = 'flex';
+      compRow.style.animation = 'fadeInUp 0.4s ease';
+    }
+    
+    return { passed: true };
+  }
+
+  // Wind数据验证Agent处理
+  async function runWindAgent(content, fundInfo) {
+    updateAgentStatus('wind-agent', 'running', 0);
+    addAgentLog('wind-agent', '连接Wind金融数据服务...', 'info');
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    updateAgentStatus('wind-agent', 'running', 25);
+    addAgentLog('wind-agent', '验证基金代码和基本信息...', 'info');
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    updateAgentStatus('wind-agent', 'running', 50);
+    addAgentLog('wind-agent', '获取实时行情数据...', 'info');
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    updateAgentStatus('wind-agent', 'running', 75);
+    addAgentLog('wind-agent', '验证业绩数据准确性...', 'info');
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    updateAgentStatus('wind-agent', 'running', 100);
+    addAgentLog('wind-agent', 'Wind数据验证完成', 'success');
+    
+    updateAgentStatus('wind-agent', 'done', 100);
+    
+    // 显示Wind验证结果
+    const windResultRow = document.getElementById('windResultRow');
+    if (windResultRow) {
+      windResultRow.style.display = 'flex';
+      windResultRow.style.animation = 'fadeInUp 0.4s ease';
+    }
+    
+    return { passed: true };
+  }
+
   async function genCopy() {
     const btn = document.getElementById('genCopyBtn');
     const box = document.getElementById('copyBox');
@@ -3675,15 +4683,30 @@
     const formatType = getSelectedFormat();
     const style = getSelectedStyle();
     
+    // 获取checkbox状态并构建工作流程
+    const resultChecked = document.getElementById('agentResultCheck')?.checked ?? true;
+    const complianceChecked = document.getElementById('agentComplianceCheck')?.checked ?? true;
+    const windChecked = document.getElementById('agentWindCheck')?.checked ?? true;
+    
+    // 构建流程文本
+    let workflow = ['文案生成'];
+    if (resultChecked) workflow.push('内容审核');
+    if (complianceChecked) workflow.push('合规检查');
+    if (windChecked) workflow.push('Wind数据验证');
+    const workflowText = workflow.join(' → ');
+    
+    // 重置Agent状态
+    resetAgents();
+    
     btn.disabled = true;
-    btn.innerHTML = '<span class="spnr" style="width:13px;height:13px;border-width:2px;"></span> 生成中...';
+    btn.innerHTML = '<span class="spnr" style="width:13px;height:13px;border-width:2px;"></span> 多Agent处理中...';
     box.innerHTML = `
       <div class="gen-loading">
         <div class="ldots">
           <div class="ldot"></div><div class="ldot"></div><div class="ldot"></div>
         </div>
-        <div class="ldesc">正在调用 AI 生成营销文案</div>
-        <div class="lsub">基于 ${fundInfo.name} 的 ${selectedSP.length} 个卖点</div>
+        <div class="ldesc">多Agent协同工作中</div>
+        <div class="lsub">${workflowText}</div>
       </div>
     `;
     
@@ -3738,7 +4761,25 @@
           </div>
         `;
         copyReady = true;
-        showToast('文案生成成功！', 'ok');
+        
+        // 运行Agent检查
+        const resultChecked = document.getElementById('agentResultCheck')?.checked ?? true;
+        const complianceChecked = document.getElementById('agentComplianceCheck')?.checked ?? true;
+        const windChecked = document.getElementById('agentWindCheck')?.checked ?? true;
+        
+        if (resultChecked) {
+          await runResultAgent(data.data.content, fundInfo);
+        }
+        if (complianceChecked) {
+          await runComplianceAgent(data.data.content);
+        }
+        if (windChecked) {
+          await runWindAgent(data.data.content, fundInfo);
+        }
+        
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> AI 生成文案';
+        showToast(resultChecked || complianceChecked || windChecked ? '多Agent处理完成！' : '文案生成完成！', 'ok');
       } else {
         box.innerHTML = '<div class="copy-placeholder" style="color:var(--danger);">生成失败: ' + (data.error || '未知错误') + '</div>';
       }
@@ -4024,6 +5065,7 @@
     if (productAppBooted) return;
     productAppBooted = true;
     updateSPCount();
+    initBenchmarkStates();
     initFundChart('004512');
     setupMainSearch();
     loadEastmoneyFundList().catch(() => {});

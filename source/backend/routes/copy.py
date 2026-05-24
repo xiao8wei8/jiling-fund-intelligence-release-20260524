@@ -5,6 +5,7 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from services.minimax import MiniMaxService
+from services.wind import WindService
 
 copy_bp = Blueprint('copy', __name__)
 
@@ -78,3 +79,26 @@ def formats():
             {'id': '微信图文', 'name': '微信图文'},
         ]
     })
+
+
+@copy_bp.route('/wind/verify', methods=['POST'])
+def wind_verify():
+    """Wind数据验证API"""
+    try:
+        data = request.get_json()
+        fund_code = data.get('fund_code')
+        fund_name = data.get('fund_name')
+        content = data.get('content')
+        
+        if not fund_code:
+            return jsonify({'success': False, 'error': '请提供基金代码'}), 400
+        
+        # 调用Wind服务验证
+        result = WindService.verify_fund_data(fund_code, fund_name, content)
+        
+        return jsonify(result)
+    except Exception as e:
+        print(f"Wind验证错误: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500

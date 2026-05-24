@@ -99,7 +99,9 @@ class MiniMaxService:
     @classmethod
     def generate_with_ai(cls, fund_info, selling_points, format_type, style):
         """调用MiniMax Anthropic兼容API生成文案"""
-        user_prompt = f"""请为基金"{fund_info.get('name', '')}"生成一段{format_type}风格的营销文案。
+        user_prompt = f"""【重要要求：必须完全使用中文输出！绝对不可以使用任何英文或其他语言！】
+
+请为基金"{fund_info.get('name', '')}"生成一段{format_type}风格的营销文案。
 
 基金信息：
 - 代码：{fund_info.get('code', '')}
@@ -117,7 +119,11 @@ class MiniMaxService:
                 user_prompt += f"- {sp}\n"
         
         user_prompt += """
-要求：专业但不生硬，突出业绩，提醒风险，字数适中。直接输出文案，不要markdown格式。"""
+
+【输出要求】
+1. 专业但不生硬，突出业绩，提醒风险，字数适中
+2. 【强制要求】100%使用中文，绝对不使用任何英文单词（包括但不限于OK、OKAY、YES、NO、GOOD、EXCELLENT等）
+3. 直接输出文案，不要markdown格式"""
         
         try:
             # 使用Anthropic兼容的API格式

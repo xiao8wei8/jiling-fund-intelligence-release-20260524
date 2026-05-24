@@ -23,6 +23,10 @@ class Config:
     # 缓存配置
     CACHE_DURATION = 3600  # 缓存时间（秒）
     
+    # Wind AIFin Market 配置
+    WIND_API_KEY = os.environ.get('WIND_API_KEY', 'ak_nMfUSCG4yb7Iv0ls2uz8KF-7XVdVP79j')
+    WIND_BASE_URL = os.environ.get('WIND_BASE_URL', 'https://aifinmarket.wind.com.cn/api')
+    
     # 服务配置
     PORT = int(os.environ.get('PORT', 5002))
     DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
