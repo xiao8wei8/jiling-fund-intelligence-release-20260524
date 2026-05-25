@@ -3813,7 +3813,7 @@
     return map[range] || 250;
   }
 
-  // 生成模拟基准数据（百分比变化）
+  // 加载真实基准数据
   let benchmarkDataCache = {};
 
   async function loadBenchmarkData(indexKeys, days) {
@@ -3836,16 +3836,6 @@
     }
     
     return null;
-  }
-
-  function generateBenchmarkData(points, baseValue = 0) {
-    let val = baseValue;
-    const data = [];
-    for (let i = 0; i < points; i++) {
-      val += (Math.random() * 0.3 - 0.15);
-      data.push(parseFloat(val.toFixed(2)));
-    }
-    return data;
   }
 
   // 更新图表
@@ -3987,48 +3977,48 @@
       }
     ];
 
-    // 获取真实基准数据
+    // 只获取真实基准数据
     const benchData = await loadBenchmarkData(selectedBenchmarks, days);
     
-    // 添加所有选中的基准（支持多选）
-    selectedBenchmarks.forEach(benchKey => {
-      const config = benchmarkConfigs[benchKey];
-      let benchValues = generateBenchmarkData(pts.length);
-      
-      // 如果有真实数据，使用真实数据
-      if (benchData && benchData[benchKey]) {
-        const indexData = benchData[benchKey];
-        benchValues = [];
-        const ptsLen = pts.length;
-        const dataLen = indexData.length;
+    // 只添加有真实数据的基准
+    if (benchData) {
+      selectedBenchmarks.forEach(benchKey => {
+        const config = benchmarkConfigs[benchKey];
         
-        // 对齐数据点
-        for (let i = 0; i < ptsLen; i++) {
-          const idx = Math.floor((i / ptsLen) * dataLen);
-          if (idx < dataLen && indexData[idx]) {
-            benchValues.push(parseFloat(indexData[idx].return.toFixed(2)));
-          } else {
-            benchValues.push(0);
+        if (benchData[benchKey]) {
+          const indexData = benchData[benchKey];
+          const benchValues = [];
+          const ptsLen = pts.length;
+          const dataLen = indexData.length;
+          
+          // 对齐数据点
+          for (let i = 0; i < ptsLen; i++) {
+            const idx = Math.floor((i / ptsLen) * dataLen);
+            if (idx < dataLen && indexData[idx]) {
+              benchValues.push(parseFloat(indexData[idx].return.toFixed(2)));
+            } else {
+              benchValues.push(0);
+            }
           }
+          
+          datasets.push({
+            label: config.label,
+            data: benchValues,
+            borderColor: config.color,
+            backgroundColor: 'transparent',
+            borderWidth: 1.8,
+            borderDash: [6, 4],
+            fill: false,
+            tension: 0.35,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointBackgroundColor: config.color,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 1.5
+          });
         }
-      }
-      
-      datasets.push({
-        label: config.label,
-        data: benchValues,
-        borderColor: config.color,
-        backgroundColor: 'transparent',
-        borderWidth: 1.8,
-        borderDash: [6, 4],
-        fill: false,
-        tension: 0.35,
-        pointRadius: 0,
-        pointHoverRadius: 5,
-        pointBackgroundColor: config.color,
-        pointBorderColor: '#fff',
-        pointBorderWidth: 1.5
       });
-    });
+    }
 
     fundChart.data.labels = labels;
     fundChart.data.datasets = datasets;
@@ -4092,7 +4082,7 @@
       fundData.push(parseFloat(fundVal.toFixed(2)));
     }
 
-    // 初始数据集
+    // 初始数据集（只包含本基金）
     const initialDatasets = [
       {
         label: '本基金',
@@ -4109,26 +4099,6 @@
         pointBorderWidth: 2
       }
     ];
-    
-    // 添加所有选中的基准（支持多选）
-    selectedBenchmarks.forEach(benchKey => {
-      const config = benchmarkConfigs[benchKey];
-      initialDatasets.push({
-        label: config.label,
-        data: generateBenchmarkData(months.length),
-        borderColor: config.color,
-        backgroundColor: 'transparent',
-        borderWidth: 1.8,
-        borderDash: [6, 4],
-        fill: false,
-        tension: 0.35,
-        pointRadius: 0,
-        pointHoverRadius: 5,
-        pointBackgroundColor: config.color,
-        pointBorderColor: '#fff',
-        pointBorderWidth: 1.5
-      });
-    });
 
     fundChart = new Chart(ctx, {
       type: 'line',

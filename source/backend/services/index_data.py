@@ -26,42 +26,8 @@ class IndexDataService:
     CACHE_DURATION = Config.CACHE_DURATION
     
     @classmethod
-    def _generate_simulation_data(cls, index_key, days):
-        """生成模拟指数数据（作为后备）"""
-        result = []
-        base_return = 0.0
-        
-        # 根据指数类型设置不同的收益率特征
-        trends = {
-            'hs300': [0.02, 0.015, -0.01, 0.025, -0.005, 0.018, -0.02, 0.03, 0.01, -0.015,
-                      0.022, -0.008, 0.015, -0.012, 0.028, -0.003, 0.01, -0.018, 0.025, 0.005],
-            'zz500': [0.015, 0.02, -0.015, 0.03, -0.01, 0.022, -0.025, 0.035, 0.015, -0.02,
-                      0.028, -0.012, 0.02, -0.018, 0.032, -0.005, 0.015, -0.022, 0.03, 0.01],
-            'sh': [0.01, 0.012, -0.008, 0.018, -0.006, 0.014, -0.015, 0.022, 0.008, -0.012,
-                   0.018, -0.006, 0.012, -0.01, 0.02, -0.003, 0.008, -0.014, 0.018, 0.003],
-            'sz': [0.018, 0.025, -0.012, 0.028, -0.008, 0.02, -0.022, 0.032, 0.012, -0.018,
-                   0.025, -0.01, 0.018, -0.015, 0.028, -0.005, 0.012, -0.02, 0.025, 0.008],
-            'gem': [0.025, 0.032, -0.018, 0.038, -0.012, 0.028, -0.028, 0.042, 0.018, -0.025,
-                    0.032, -0.015, 0.025, -0.02, 0.035, -0.008, 0.018, -0.025, 0.032, 0.012]
-        }
-        
-        trend = trends.get(index_key, trends['hs300'])
-        
-        today = datetime.now()
-        for i in range(days):
-            date = today - timedelta(days=days - i - 1)
-            trend_idx = i % len(trend)
-            base_return += trend[trend_idx] + (0.005 * (1 if i % 3 == 0 else -1))
-            result.append({
-                'date': date.strftime('%Y-%m-%d'),
-                'return': round(base_return, 2)
-            })
-        
-        return result
-    
-    @classmethod
     def get_index_history(cls, index_key, days=90):
-        """获取指数历史数据"""
+        """获取指数历史数据（只使用真实数据）"""
         cache_key = f'index_{index_key}_{days}'
         if cache_key in cls._cache:
             if datetime.now().timestamp() - cls._cache_time.get(cache_key, 0) < cls.CACHE_DURATION:
@@ -70,7 +36,7 @@ class IndexDataService:
         try:
             index_info = cls.INDEX_CODES.get(index_key)
             if not index_info:
-                return cls._generate_simulation_history(index_key, days)
+                return None
             
             code = index_info['code']
             market = index_info['market']
@@ -117,60 +83,7 @@ class IndexDataService:
         except Exception as e:
             print(f"获取指数数据失败 {index_key}: {e}")
         
-        return cls._generate_simulation_history(index_key, days)
-    
-    @classmethod
-    def _generate_simulation_history(cls, index_key, days):
-        """生成模拟历史数据 - 更贴近真实市场表现"""
-        # 基于真实数据设定的基础价格和目标收益率
-        config = {
-            'hs300': {'base': 4500, 'monthly_return': 3.19},   # 近1月约3.19%
-            'zz500': {'base': 7800, 'monthly_return': 4.2},
-            'sh': {'base': 3400, 'monthly_return': 2.8},
-            'sz': {'base': 11200, 'monthly_return': 5.1},
-            'gem': {'base': 2300, 'monthly_return': 6.8}
-        }
-        
-        cfg = config.get(index_key, config['hs300'])
-        base_price = cfg['base']
-        target_monthly_return = cfg['monthly_return']
-        
-        result = []
-        today = datetime.now()
-        
-        # 计算每日增长因子以达到目标月度收益率
-        daily_factor = (1 + target_monthly_return / 100) ** (1 / 22)  # 约22个交易日
-        
-        for i in range(days):
-            date = today - timedelta(days=days - i - 1)
-            
-            # 基础增长趋势
-            base_growth = daily_factor ** min(i, 22)
-            
-            # 添加随机波动
-            volatility = 0.008  # 每日波动约0.8%
-            random_factor = 1 + (2 * (i % 7) / 7 - 1) * volatility
-            
-            # 添加周末效应（周五略微上涨，周一略微下跌）
-            weekday = date.weekday()
-            if weekday == 4:  # 周五
-                random_factor *= 1.003
-            elif weekday == 0:  # 周一
-                random_factor *= 0.997
-            
-            close_price = base_price * base_growth * random_factor
-            open_price = close_price * (0.998 + (i % 3) * 0.001)
-            
-            result.append({
-                'date': date.strftime('%Y-%m-%d'),
-                'open': round(open_price, 2),
-                'close': round(close_price, 2),
-                'high': round(close_price * 1.005, 2),
-                'low': round(close_price * 0.995, 2),
-                'volume': 100000000
-            })
-        
-        return result
+        return None
     
     @classmethod
     def get_index_performance(cls, index_key, days=30):
