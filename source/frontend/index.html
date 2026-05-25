@@ -3359,34 +3359,7 @@
                   Agent 设置
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="agentSettingsArrow" style="transition:transform 0.2s;"><path d="M6 9l6 6 6-6"/></svg>
                 </button>
-                <div id="agentSettingsPanel" style="display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:240px;background:white;border-radius:12px;box-shadow:0 10px 40px rgba(31,76,130,0.15);border:1px solid var(--border);z-index:100;overflow:hidden;">
-                  <div style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg-subtle);">
-                    <div style="font-size:13px;font-weight:600;color:var(--text-primary);">选择要启用的 Agent</div>
-                  </div>
-                  <div style="padding:12px;">
-                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
-                      <input type="checkbox" id="agentResultCheck" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-                      <div style="flex:1;">
-                        <div style="font-size:14px;color:#1a202c;font-weight:500;">文案审核 Agent</div>
-                        <div style="font-size:11px;color:var(--text-muted);">检查内容完整性和吸引力</div>
-                      </div>
-                    </label>
-                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
-                      <input type="checkbox" id="agentComplianceCheck" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-                      <div style="flex:1;">
-                        <div style="font-size:14px;color:#1a202c;font-weight:500;">合规检查 Agent</div>
-                        <div style="font-size:11px;color:var(--text-muted);">检查禁用词汇和宣传规范</div>
-                      </div>
-                    </label>
-                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
-                      <input type="checkbox" id="agentWindCheck" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-                      <div style="flex:1;">
-                        <div style="font-size:14px;color:#1a202c;font-weight:500;">Wind数据验证 Agent</div>
-                        <div style="font-size:11px;color:var(--text-muted);">验证基金数据准确性</div>
-                      </div>
-                    </label>
-                  </div>
-                </div>
+                <div id="agentSettingsPanel" style="display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:240px;background:white;border-radius:12px;box-shadow:0 10px 40px rgba(31,76,130,0.15);border:1px solid var(--border);z-index:100;overflow:hidden;"></div>
               </div>
             </div>
           </div>
@@ -4261,119 +4234,394 @@
 
   // ---- Skills & Agents Config ----
   let skillsAgentsConfig = null;
+  let currentEditingItem = null;
+  let currentEditingType = null;
+  
+  // 默认配置数据
+  const defaultConfig = {
+    agents: {
+      result: {
+        id: 'result',
+        name: '文案审核 Agent',
+        icon: '📝',
+        enabled: true,
+        description: '检查文案的完整性、吸引力和上下文相关性',
+        prompt: '作为专业的文案审核员，请评估这段文案：\n1. 内容完整性（是否包含所有必要信息）\n2. 吸引力（是否能引起读者兴趣）\n3. 上下文相关性（是否与基金产品匹配）\n请给出评分（0-100分）和详细建议。'
+      },
+      compliance: {
+        id: 'compliance',
+        name: '合规检查 Agent',
+        icon: '⚖️',
+        enabled: true,
+        description: '检查禁用词汇和宣传合规性',
+        prompt: '作为合规审核员，请检查这段文案：\n1. 是否包含禁用词汇（保本、保证收益、零风险等）\n2. 宣传表述是否合规\n3. 风险提示是否充分\n请列出问题并给出修改建议。'
+      },
+      wind: {
+        id: 'wind',
+        name: 'Wind数据验证 Agent',
+        icon: '📊',
+        enabled: true,
+        description: '通过Wind API验证基金数据准确性',
+        prompt: '作为数据验证员，请验证文案中的基金数据：\n1. 净值数据准确性\n2. 收益率数据准确性\n3. 排名数据准确性\n请通过Wind API验证并给出验证报告。'
+      }
+    },
+    skills: {
+      text: {
+        shorten: {
+          id: 'shorten',
+          name: '缩短文案',
+          icon: '📝',
+          category: 'text',
+          enabled: true,
+          description: '精简文案，保留核心信息',
+          prompt: '请将这段文案精简，保留所有核心信息，使其更简洁有力。'
+        },
+        lengthen: {
+          id: 'lengthen',
+          name: '加长文案',
+          icon: '📄',
+          category: 'text',
+          enabled: true,
+          description: '增加细节，丰富文案内容',
+          prompt: '请扩展这段文案，增加更多有价值的细节和描述，使其更丰满。'
+        },
+        formal: {
+          id: 'formal',
+          name: '更正式',
+          icon: '💼',
+          category: 'text',
+          enabled: true,
+          description: '调整语气为专业正式',
+          prompt: '请将这段文案调整为更正式、专业的语气风格。'
+        },
+        casual: {
+          id: 'casual',
+          name: '更口语化',
+          icon: '😊',
+          category: 'text',
+          enabled: true,
+          description: '调整语气为亲切自然',
+          prompt: '请将这段文案调整为更口语化、亲切自然的语气风格。'
+        },
+        addEmoji: {
+          id: 'addEmoji',
+          name: '添加表情',
+          icon: '🎉',
+          category: 'text',
+          enabled: true,
+          description: '插入适当的emoji增加活力',
+          prompt: '请在这段文案中适当添加emoji，增加活力和吸引力。'
+        },
+        moreAttractive: {
+          id: 'moreAttractive',
+          name: '更吸引人',
+          icon: '✨',
+          category: 'text',
+          enabled: true,
+          description: '优化表达，增强感染力',
+          prompt: '请优化这段文案的表达，使其更有感染力和吸引力。'
+        }
+      },
+      investor: {
+        conservative: {
+          id: 'conservative',
+          name: '保守型',
+          icon: '🛡️',
+          category: 'investor',
+          enabled: true,
+          description: '强调安全、稳定、本金保障',
+          prompt: '请将这段文案改写为针对保守型投资者的版本，强调安全、稳定和本金保障。'
+        },
+        steady: {
+          id: 'steady',
+          name: '稳健型',
+          icon: '🎯',
+          category: 'investor',
+          enabled: true,
+          description: '追求稳健增值、风险可控',
+          prompt: '请将这段文案改写为针对稳健型投资者的版本，强调稳健增值和风险可控。'
+        },
+        balanced: {
+          id: 'balanced',
+          name: '平衡型',
+          icon: '⚖️',
+          category: 'investor',
+          enabled: true,
+          description: '均衡风险与收益',
+          prompt: '请将这段文案改写为针对平衡型投资者的版本，均衡体现风险与收益。'
+        },
+        progressive: {
+          id: 'progressive',
+          name: '进取型',
+          icon: '📈',
+          category: 'investor',
+          enabled: true,
+          description: '追求较高收益',
+          prompt: '请将这段文案改写为针对进取型投资者的版本，强调追求较高收益的机会。'
+        },
+        aggressive: {
+          id: 'aggressive',
+          name: '激进型',
+          icon: '🔥',
+          category: 'investor',
+          enabled: true,
+          description: '追求最大化收益',
+          prompt: '请将这段文案改写为针对激进型投资者的版本，强调追求最大化收益的潜力。'
+        }
+      }
+    }
+  };
 
   function loadSkillsAgentsConfig() {
     const saved = localStorage.getItem('skillsAgentsConfig');
     if (saved) {
       skillsAgentsConfig = JSON.parse(saved);
     } else {
-      // 默认配置
-      skillsAgentsConfig = {
-        agents: {
-          result: true,
-          compliance: true,
-          wind: true
-        },
-        skills: {
-          shorten: true,
-          lengthen: true,
-          formal: true,
-          casual: true,
-          addEmoji: true,
-          moreAttractive: true,
-          conservative: true,
-          steady: true,
-          balanced: true,
-          progressive: true,
-          aggressive: true
-        }
-      };
+      skillsAgentsConfig = JSON.parse(JSON.stringify(defaultConfig));
     }
     
-    // 应用配置到表单
-    if (document.getElementById('config-agent-result')) {
-      document.getElementById('config-agent-result').checked = skillsAgentsConfig.agents.result;
-      document.getElementById('config-agent-compliance').checked = skillsAgentsConfig.agents.compliance;
-      document.getElementById('config-agent-wind').checked = skillsAgentsConfig.agents.wind;
-      
-      document.getElementById('config-skill-shorten').checked = skillsAgentsConfig.skills.shorten;
-      document.getElementById('config-skill-lengthen').checked = skillsAgentsConfig.skills.lengthen;
-      document.getElementById('config-skill-formal').checked = skillsAgentsConfig.skills.formal;
-      document.getElementById('config-skill-casual').checked = skillsAgentsConfig.skills.casual;
-      document.getElementById('config-skill-add-emoji').checked = skillsAgentsConfig.skills.addEmoji;
-      document.getElementById('config-skill-more-attractive').checked = skillsAgentsConfig.skills.moreAttractive;
-      document.getElementById('config-skill-conservative').checked = skillsAgentsConfig.skills.conservative;
-      document.getElementById('config-skill-steady').checked = skillsAgentsConfig.skills.steady;
-      document.getElementById('config-skill-balanced').checked = skillsAgentsConfig.skills.balanced;
-      document.getElementById('config-skill-progressive').checked = skillsAgentsConfig.skills.progressive;
-      document.getElementById('config-skill-aggressive').checked = skillsAgentsConfig.skills.aggressive;
-    }
-    
-    // 应用配置到主界面
+    renderConfigPage();
     applyConfigToMainUI();
     
     return skillsAgentsConfig;
   }
 
-  function saveSkillsAgentsConfig() {
-    skillsAgentsConfig = {
-      agents: {
-        result: document.getElementById('config-agent-result').checked,
-        compliance: document.getElementById('config-agent-compliance').checked,
-        wind: document.getElementById('config-agent-wind').checked
-      },
-      skills: {
-        shorten: document.getElementById('config-skill-shorten').checked,
-        lengthen: document.getElementById('config-skill-lengthen').checked,
-        formal: document.getElementById('config-skill-formal').checked,
-        casual: document.getElementById('config-skill-casual').checked,
-        addEmoji: document.getElementById('config-skill-add-emoji').checked,
-        moreAttractive: document.getElementById('config-skill-more-attractive').checked,
-        conservative: document.getElementById('config-skill-conservative').checked,
-        steady: document.getElementById('config-skill-steady').checked,
-        balanced: document.getElementById('config-skill-balanced').checked,
-        progressive: document.getElementById('config-skill-progressive').checked,
-        aggressive: document.getElementById('config-skill-aggressive').checked
+  function renderConfigPage() {
+    // 渲染Agents列表
+    const agentsList = document.getElementById('agentsConfigList');
+    if (agentsList) {
+      agentsList.innerHTML = Object.values(skillsAgentsConfig.agents).map(agent => `
+        <div style="border:1px solid var(--border-light);border-radius:12px;padding:16px;background:var(--bg-subtle);">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <input type="checkbox" 
+                   id="agent-${agent.id}-enabled" 
+                   ${agent.enabled ? 'checked' : ''} 
+                   style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;"
+                   onchange="toggleAgentEnabled('${agent.id}')">
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <span style="font-size:20px;">${agent.icon}</span>
+                <span style="font-size:15px;font-weight:700;color:#1a202c;">${agent.name}</span>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);">${agent.description}</div>
+            </div>
+            <button class="btn btn-sm" onclick="openEditModal('agent', '${agent.id}')" style="background:white;border:1px solid var(--border);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              编辑
+            </button>
+          </div>
+          <div style="background:white;border-radius:8px;padding:12px;border:1px dashed var(--border);">
+            <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Prompt:</div>
+            <div style="font-size:12px;color:#374151;line-height:1.6;white-space:pre-wrap;max-height:80px;overflow-y:auto;">${agent.prompt}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // 渲染文案优化Skills
+    const skillsTextList = document.getElementById('skillsTextConfigList');
+    if (skillsTextList) {
+      skillsTextList.innerHTML = Object.values(skillsAgentsConfig.skills.text).map(skill => `
+        <div style="border:1px solid var(--border-light);border-radius:12px;padding:16px;background:rgba(184,137,42,0.05);">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <input type="checkbox" 
+                   id="skill-${skill.id}-enabled" 
+                   ${skill.enabled ? 'checked' : ''} 
+                   style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;"
+                   onchange="toggleSkillEnabled('${skill.category}', '${skill.id}')">
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <span style="font-size:20px;">${skill.icon}</span>
+                <span style="font-size:15px;font-weight:700;color:#1a202c;">${skill.name}</span>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);">${skill.description}</div>
+            </div>
+            <button class="btn btn-sm" onclick="openEditModal('skill', '${skill.id}')" style="background:white;border:1px solid var(--border);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              编辑
+            </button>
+          </div>
+          <div style="background:white;border-radius:8px;padding:12px;border:1px dashed var(--border);">
+            <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Prompt:</div>
+            <div style="font-size:12px;color:#374151;line-height:1.6;white-space:pre-wrap;max-height:80px;overflow-y:auto;">${skill.prompt}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // 渲染投资者类型Skills
+    const skillsInvestorList = document.getElementById('skillsInvestorConfigList');
+    if (skillsInvestorList) {
+      skillsInvestorList.innerHTML = Object.values(skillsAgentsConfig.skills.investor).map(skill => `
+        <div style="border:1px solid var(--border-light);border-radius:12px;padding:16px;background:rgba(63,185,80,0.05);">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <input type="checkbox" 
+                   id="skill-${skill.id}-enabled" 
+                   ${skill.enabled ? 'checked' : ''} 
+                   style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;"
+                   onchange="toggleSkillEnabled('${skill.category}', '${skill.id}')">
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <span style="font-size:20px;">${skill.icon}</span>
+                <span style="font-size:15px;font-weight:700;color:#1a202c;">${skill.name}</span>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);">${skill.description}</div>
+            </div>
+            <button class="btn btn-sm" onclick="openEditModal('skill', '${skill.id}')" style="background:white;border:1px solid var(--border);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              编辑
+            </button>
+          </div>
+          <div style="background:white;border-radius:8px;padding:12px;border:1px dashed var(--border);">
+            <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Prompt:</div>
+            <div style="font-size:12px;color:#374151;line-height:1.6;white-space:pre-wrap;max-height:80px;overflow-y:auto;">${skill.prompt}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  function toggleAgentEnabled(id) {
+    if (skillsAgentsConfig.agents[id]) {
+      skillsAgentsConfig.agents[id].enabled = !skillsAgentsConfig.agents[id].enabled;
+      applyConfigToMainUI();
+    }
+  }
+
+  function toggleSkillEnabled(category, id) {
+    if (skillsAgentsConfig.skills[category] && skillsAgentsConfig.skills[category][id]) {
+      skillsAgentsConfig.skills[category][id].enabled = !skillsAgentsConfig.skills[category][id].enabled;
+      applyConfigToMainUI();
+    }
+  }
+
+  function openEditModal(type, id) {
+    currentEditingType = type;
+    currentEditingItem = id;
+    
+    let item = null;
+    let title = '';
+    
+    if (type === 'agent') {
+      item = skillsAgentsConfig.agents[id];
+      title = `编辑 ${item.name}`;
+    } else {
+      // 查找skill
+      if (skillsAgentsConfig.skills.text[id]) {
+        item = skillsAgentsConfig.skills.text[id];
+      } else if (skillsAgentsConfig.skills.investor[id]) {
+        item = skillsAgentsConfig.skills.investor[id];
       }
-    };
+      title = `编辑 ${item.name}`;
+    }
     
-    localStorage.setItem('skillsAgentsConfig', JSON.stringify(skillsAgentsConfig));
+    document.getElementById('editModalTitle').textContent = title;
+    document.getElementById('editModalContent').innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div>
+          <label style="display:block;font-size:12px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">名称</label>
+          <input type="text" id="edit-name" value="${item.name}" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">图标</label>
+          <input type="text" id="edit-icon" value="${item.icon}" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">描述</label>
+          <input type="text" id="edit-description" value="${item.description}" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Prompt</label>
+          <textarea id="edit-prompt" rows="8" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;resize:vertical;line-height:1.6;">${item.prompt}</textarea>
+        </div>
+      </div>
+    `;
     
-    // 应用配置到主界面
+    const modal = document.getElementById('editItemModal');
+    modal.style.display = 'flex';
+  }
+
+  function closeEditModal() {
+    const modal = document.getElementById('editItemModal');
+    modal.style.display = 'none';
+    currentEditingItem = null;
+    currentEditingType = null;
+  }
+
+  function saveEditItem() {
+    if (!currentEditingItem || !currentEditingType) return;
+    
+    const name = document.getElementById('edit-name').value;
+    const icon = document.getElementById('edit-icon').value;
+    const description = document.getElementById('edit-description').value;
+    const prompt = document.getElementById('edit-prompt').value;
+    
+    if (currentEditingType === 'agent') {
+      skillsAgentsConfig.agents[currentEditingItem].name = name;
+      skillsAgentsConfig.agents[currentEditingItem].icon = icon;
+      skillsAgentsConfig.agents[currentEditingItem].description = description;
+      skillsAgentsConfig.agents[currentEditingItem].prompt = prompt;
+    } else {
+      if (skillsAgentsConfig.skills.text[currentEditingItem]) {
+        skillsAgentsConfig.skills.text[currentEditingItem].name = name;
+        skillsAgentsConfig.skills.text[currentEditingItem].icon = icon;
+        skillsAgentsConfig.skills.text[currentEditingItem].description = description;
+        skillsAgentsConfig.skills.text[currentEditingItem].prompt = prompt;
+      } else if (skillsAgentsConfig.skills.investor[currentEditingItem]) {
+        skillsAgentsConfig.skills.investor[currentEditingItem].name = name;
+        skillsAgentsConfig.skills.investor[currentEditingItem].icon = icon;
+        skillsAgentsConfig.skills.investor[currentEditingItem].description = description;
+        skillsAgentsConfig.skills.investor[currentEditingItem].prompt = prompt;
+      }
+    }
+    
+    closeEditModal();
+    renderConfigPage();
     applyConfigToMainUI();
-    
+    showToast('已保存修改', 'ok');
+  }
+
+  function saveSkillsAgentsConfig() {
+    localStorage.setItem('skillsAgentsConfig', JSON.stringify(skillsAgentsConfig));
     showToast('配置已保存', 'ok');
+  }
+
+  function resetSkillsAgentsConfig() {
+    if (confirm('确定要重置所有配置为默认值吗？')) {
+      skillsAgentsConfig = JSON.parse(JSON.stringify(defaultConfig));
+      localStorage.setItem('skillsAgentsConfig', JSON.stringify(skillsAgentsConfig));
+      renderConfigPage();
+      applyConfigToMainUI();
+      showToast('已重置为默认配置', 'ok');
+    }
   }
 
   function applyConfigToMainUI() {
     // 应用Agent配置
     if (document.getElementById('agentResultCheck')) {
-      document.getElementById('agentResultCheck').checked = skillsAgentsConfig.agents.result;
-      document.getElementById('agentComplianceCheck').checked = skillsAgentsConfig.agents.compliance;
-      document.getElementById('agentWindCheck').checked = skillsAgentsConfig.agents.wind;
+      document.getElementById('agentResultCheck').checked = skillsAgentsConfig.agents.result.enabled;
+      document.getElementById('agentComplianceCheck').checked = skillsAgentsConfig.agents.compliance.enabled;
+      document.getElementById('agentWindCheck').checked = skillsAgentsConfig.agents.wind.enabled;
       
       // 更新卡片可见性
       const resultCard = document.getElementById('agent-result');
       const complianceCard = document.getElementById('agent-compliance');
       const windCard = document.getElementById('agent-wind');
-      if (resultCard) resultCard.style.display = skillsAgentsConfig.agents.result ? 'block' : 'none';
-      if (complianceCard) complianceCard.style.display = skillsAgentsConfig.agents.compliance ? 'block' : 'none';
-      if (windCard) windCard.style.display = skillsAgentsConfig.agents.wind ? 'block' : 'none';
+      if (resultCard) resultCard.style.display = skillsAgentsConfig.agents.result.enabled ? 'block' : 'none';
+      if (complianceCard) complianceCard.style.display = skillsAgentsConfig.agents.compliance.enabled ? 'block' : 'none';
+      if (windCard) windCard.style.display = skillsAgentsConfig.agents.wind.enabled ? 'block' : 'none';
     }
     
     // 应用Skills配置
     if (document.getElementById('skillShorten')) {
-      document.getElementById('skillShorten').checked = skillsAgentsConfig.skills.shorten;
-      document.getElementById('skillLengthen').checked = skillsAgentsConfig.skills.lengthen;
-      document.getElementById('skillFormal').checked = skillsAgentsConfig.skills.formal;
-      document.getElementById('skillCasual').checked = skillsAgentsConfig.skills.casual;
-      document.getElementById('skillAddEmoji').checked = skillsAgentsConfig.skills.addEmoji;
-      document.getElementById('skillMoreAttractive').checked = skillsAgentsConfig.skills.moreAttractive;
-      document.getElementById('skillConservative').checked = skillsAgentsConfig.skills.conservative;
-      document.getElementById('skillSteady').checked = skillsAgentsConfig.skills.steady;
-      document.getElementById('skillBalanced').checked = skillsAgentsConfig.skills.balanced;
-      document.getElementById('skillProgressive').checked = skillsAgentsConfig.skills.progressive;
-      document.getElementById('skillAggressive').checked = skillsAgentsConfig.skills.aggressive;
+      const allSkills = { ...skillsAgentsConfig.skills.text, ...skillsAgentsConfig.skills.investor };
+      
+      Object.keys(allSkills).forEach(id => {
+        const checkbox = document.getElementById(`skill${id.charAt(0).toUpperCase() + id.slice(1)}`);
+        if (checkbox) {
+          checkbox.checked = allSkills[id].enabled;
+        }
+      });
       
       updateSkillsButtons();
     }
@@ -4682,6 +4930,37 @@
     const panel = document.getElementById('agentSettingsPanel');
     const arrow = document.getElementById('agentSettingsArrow');
     if (panel.style.display === 'none' || panel.style.display === '') {
+      // 动态生成面板内容
+      if (skillsAgentsConfig) {
+        let html = `
+          <div style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg-subtle);">
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);">选择要启用的 Agent</div>
+          </div>
+          <div style="padding:12px;">
+        `;
+        
+        // 遍历所有Agents
+        Object.values(skillsAgentsConfig.agents).forEach(agent => {
+          let checkboxId;
+          if (agent.id === 'result') checkboxId = 'agentResultCheck';
+          else if (agent.id === 'compliance') checkboxId = 'agentComplianceCheck';
+          else if (agent.id === 'wind') checkboxId = 'agentWindCheck';
+          
+          html += `
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+              <input type="checkbox" id="${checkboxId}" ${agent.enabled ? 'checked' : ''} style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="handleAgentCheckboxChange('${agent.id}')">
+              <div style="flex:1;">
+                <div style="font-size:14px;color:#1a202c;font-weight:500;">${agent.icon} ${agent.name}</div>
+                <div style="font-size:11px;color:var(--text-muted);">${agent.description}</div>
+              </div>
+            </label>
+          `;
+        });
+        
+        html += `</div>`;
+        panel.innerHTML = html;
+      }
+      
       panel.style.display = 'block';
       arrow.style.transform = 'rotate(180deg)';
       // 点击其他地方关闭
@@ -4692,6 +4971,21 @@
       panel.style.display = 'none';
       arrow.style.transform = 'rotate(0deg)';
       document.removeEventListener('click', closeAgentSettingsOutside);
+    }
+  }
+  
+  function handleAgentCheckboxChange(agentId) {
+    if (skillsAgentsConfig && skillsAgentsConfig.agents[agentId]) {
+      let checkboxId;
+      if (agentId === 'result') checkboxId = 'agentResultCheck';
+      else if (agentId === 'compliance') checkboxId = 'agentComplianceCheck';
+      else if (agentId === 'wind') checkboxId = 'agentWindCheck';
+      
+      const checkbox = document.getElementById(checkboxId);
+      if (checkbox) {
+        skillsAgentsConfig.agents[agentId].enabled = checkbox.checked;
+        applyConfigToMainUI();
+      }
     }
   }
   
@@ -4935,90 +5229,7 @@
                   Skills 设置
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="skillsSettingsArrow" style="transition:transform 0.2s;"><path d="M6 9l6 6 6-6"/></svg>
                 </button>
-                <div id="skillsSettingsPanel" style="display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:260px;max-height:400px;background:white;border-radius:12px;box-shadow:0 10px 40px rgba(31,76,130,0.15);border:1px solid var(--border);z-index:9999;overflow-y:auto;">
-                  <div style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg-subtle);">
-                    <div style="font-size:13px;font-weight:600;color:var(--text-primary);">选择要启用的 Skill</div>
-                  </div>
-                  <div style="padding:12px;">
-                    <div style="margin-bottom:12px;">
-                      <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">文案优化</div>
-                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
-                        <input type="checkbox" id="skillShorten" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="updateSkillsButtons()">
-                        <div style="flex:1;">
-                          <div style="font-size:14px;color:#1a202c;font-weight:500;">📝 缩短文案</div>
-                        </div>
-                      </label>
-                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
-                        <input type="checkbox" id="skillLengthen" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="updateSkillsButtons()">
-                        <div style="flex:1;">
-                          <div style="font-size:14px;color:#1a202c;font-weight:500;">📄 加长文案</div>
-                        </div>
-                      </label>
-                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
-                        <input type="checkbox" id="skillFormal" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="updateSkillsButtons()">
-                        <div style="flex:1;">
-                          <div style="font-size:14px;color:#1a202c;font-weight:500;">💼 更正式</div>
-                        </div>
-                      </label>
-                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
-                        <input type="checkbox" id="skillCasual" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="updateSkillsButtons()">
-                        <div style="flex:1;">
-                          <div style="font-size:14px;color:#1a202c;font-weight:500;">😊 更口语化</div>
-                        </div>
-                      </label>
-                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
-                        <input type="checkbox" id="skillAddEmoji" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="updateSkillsButtons()">
-                        <div style="flex:1;">
-                          <div style="font-size:14px;color:#1a202c;font-weight:500;">🎉 添加表情</div>
-                        </div>
-                      </label>
-                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
-                        <input type="checkbox" id="skillMoreAttractive" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="updateSkillsButtons()">
-                        <div style="flex:1;">
-                          <div style="font-size:14px;color:#1a202c;font-weight:500;">✨ 更吸引人</div>
-                        </div>
-                      </label>
-                    </div>
-                    <div>
-                      <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">投资者类型</div>
-                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
-                        <input type="checkbox" id="skillConservative" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="updateSkillsButtons()">
-                        <div style="flex:1;">
-                          <div style="font-size:14px;color:#1a202c;font-weight:500;">🛡️ 保守型</div>
-                          <div style="font-size:11px;color:var(--text-muted);">强调安全和稳定</div>
-                        </div>
-                      </label>
-                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
-                        <input type="checkbox" id="skillSteady" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="updateSkillsButtons()">
-                        <div style="flex:1;">
-                          <div style="font-size:14px;color:#1a202c;font-weight:500;">🎯 稳健型</div>
-                          <div style="font-size:11px;color:var(--text-muted);">追求稳健增值</div>
-                        </div>
-                      </label>
-                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
-                        <input type="checkbox" id="skillBalanced" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="updateSkillsButtons()">
-                        <div style="flex:1;">
-                          <div style="font-size:14px;color:#1a202c;font-weight:500;">⚖️ 平衡型</div>
-                          <div style="font-size:11px;color:var(--text-muted);">均衡风险收益</div>
-                        </div>
-                      </label>
-                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
-                        <input type="checkbox" id="skillProgressive" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="updateSkillsButtons()">
-                        <div style="flex:1;">
-                          <div style="font-size:14px;color:#1a202c;font-weight:500;">📈 进取型</div>
-                          <div style="font-size:11px;color:var(--text-muted);">追求较高收益</div>
-                        </div>
-                      </label>
-                      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
-                        <input type="checkbox" id="skillAggressive" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="updateSkillsButtons()">
-                        <div style="flex:1;">
-                          <div style="font-size:14px;color:#1a202c;font-weight:500;">🔥 激进型</div>
-                          <div style="font-size:11px;color:var(--text-muted);">追求最大化收益</div>
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-                </div>
+                <div id="skillsSettingsPanel" style="display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:260px;max-height:400px;background:white;border-radius:12px;box-shadow:0 10px 40px rgba(31,76,130,0.15);border:1px solid var(--border);z-index:9999;overflow-y:auto;"></div>
               </div>
             </div>
             <div id="skillsButtonsContainer" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
@@ -5099,19 +5310,6 @@
 
   // ---- AI Modification ----
   let currentModifyAction = '';
-  const skillsConfig = [
-    { id: 'shorten', label: '📝 缩短文案', action: 'shorten', instruction: '将文案缩短，保留核心信息', category: 'optimize' },
-    { id: 'lengthen', label: '📄 加长文案', action: 'lengthen', instruction: '将文案加长，增加更多细节', category: 'optimize' },
-    { id: 'formal', label: '💼 更正式', action: 'formal', instruction: '让文案更正式、专业', category: 'optimize' },
-    { id: 'casual', label: '😊 更口语化', action: 'casual', instruction: '让文案更口语化、亲切', category: 'optimize' },
-    { id: 'add_emoji', label: '🎉 添加表情', action: 'add_emoji', instruction: '添加适当的表情符号', category: 'optimize' },
-    { id: 'more_attractive', label: '✨ 更吸引人', action: 'more_attractive', instruction: '让文案更吸引人，增加感染力', category: 'optimize' },
-    { id: 'conservative', label: '🛡️ 保守型', action: 'conservative', instruction: '将文案修改为适合保守型投资者，强调安全、稳定、本金保障', category: 'investor' },
-    { id: 'steady', label: '🎯 稳健型', action: 'steady', instruction: '将文案修改为适合稳健型投资者，追求稳健增值、风险可控', category: 'investor' },
-    { id: 'balanced', label: '⚖️ 平衡型', action: 'balanced', instruction: '将文案修改为适合平衡型投资者，均衡风险与收益', category: 'investor' },
-    { id: 'progressive', label: '📈 进取型', action: 'progressive', instruction: '将文案修改为适合进取型投资者，追求较高收益', category: 'investor' },
-    { id: 'aggressive', label: '🔥 激进型', action: 'aggressive', instruction: '将文案修改为适合激进型投资者，追求最大化收益', category: 'investor' }
-  ];
 
   function openAIModify() {
     const panel = document.getElementById('aiModifyPanel');
@@ -5128,18 +5326,23 @@
 
   function updateSkillsButtons() {
     const container = document.getElementById('skillsButtonsContainer');
-    if (!container) return;
+    if (!container || !skillsAgentsConfig) return;
     
     container.innerHTML = '';
     
-    skillsConfig.forEach(skill => {
-      const checkbox = document.getElementById(`skill${skill.id.charAt(0).toUpperCase() + skill.id.slice(1)}`);
-      if (checkbox && checkbox.checked) {
+    // 合并所有skills
+    const allSkills = [
+      ...Object.values(skillsAgentsConfig.skills.text),
+      ...Object.values(skillsAgentsConfig.skills.investor)
+    ];
+    
+    allSkills.forEach(skill => {
+      if (skill.enabled) {
         const btn = document.createElement('button');
         btn.className = 'modify-option';
-        btn.setAttribute('data-action', skill.action);
-        btn.textContent = skill.label;
-        btn.onclick = () => applyModifyOption(skill.action);
+        btn.setAttribute('data-action', skill.id);
+        btn.textContent = `${skill.icon} ${skill.name}`;
+        btn.onclick = () => applyModifyOption(skill.id);
         container.appendChild(btn);
       }
     });
@@ -5149,6 +5352,57 @@
     const panel = document.getElementById('skillsSettingsPanel');
     const arrow = document.getElementById('skillsSettingsArrow');
     if (panel.style.display === 'none' || panel.style.display === '') {
+      // 动态生成面板内容
+      if (skillsAgentsConfig) {
+        let html = `
+          <div style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg-subtle);">
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);">选择要启用的 Skill</div>
+          </div>
+          <div style="padding:12px;">
+            <div style="margin-bottom:12px;">
+              <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">文案优化</div>
+        `;
+        
+        // 文案优化skills
+        Object.values(skillsAgentsConfig.skills.text).forEach(skill => {
+          const checkboxId = `skill${skill.id.charAt(0).toUpperCase() + skill.id.slice(1)}`;
+          html += `
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+              <input type="checkbox" id="${checkboxId}" ${skill.enabled ? 'checked' : ''} style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="handleSkillCheckboxChange('${skill.category}','${skill.id}')">
+              <div style="flex:1;">
+                <div style="font-size:14px;color:#1a202c;font-weight:500;">${skill.icon} ${skill.name}</div>
+              </div>
+            </label>
+          `;
+        });
+        
+        html += `
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">投资者类型</div>
+        `;
+        
+        // 投资者类型skills
+        Object.values(skillsAgentsConfig.skills.investor).forEach(skill => {
+          const checkboxId = `skill${skill.id.charAt(0).toUpperCase() + skill.id.slice(1)}`;
+          html += `
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+              <input type="checkbox" id="${checkboxId}" ${skill.enabled ? 'checked' : ''} style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="handleSkillCheckboxChange('${skill.category}','${skill.id}')">
+              <div style="flex:1;">
+                <div style="font-size:14px;color:#1a202c;font-weight:500;">${skill.icon} ${skill.name}</div>
+                <div style="font-size:11px;color:var(--text-muted);">${skill.description}</div>
+              </div>
+            </label>
+          `;
+        });
+        
+        html += `
+            </div>
+          </div>
+        `;
+        panel.innerHTML = html;
+      }
+      
       panel.style.display = 'block';
       arrow.style.transform = 'rotate(180deg)';
       setTimeout(() => {
@@ -5158,6 +5412,17 @@
       panel.style.display = 'none';
       arrow.style.transform = 'rotate(0deg)';
       document.removeEventListener('click', closeSkillsSettingsOutside);
+    }
+  }
+
+  function handleSkillCheckboxChange(category, id) {
+    if (skillsAgentsConfig && skillsAgentsConfig.skills[category] && skillsAgentsConfig.skills[category][id]) {
+      const checkboxId = `skill${id.charAt(0).toUpperCase() + id.slice(1)}`;
+      const checkbox = document.getElementById(checkboxId);
+      if (checkbox) {
+        skillsAgentsConfig.skills[category][id].enabled = checkbox.checked;
+        updateSkillsButtons();
+      }
     }
   }
 
@@ -5202,9 +5467,11 @@
     let instruction = '';
     if (customInput && customInput.value.trim()) {
       instruction = customInput.value.trim();
-    } else if (currentModifyAction) {
-      const skill = skillsConfig.find(s => s.action === currentModifyAction);
-      instruction = skill ? skill.instruction : '请优化这篇文案';
+    } else if (currentModifyAction && skillsAgentsConfig) {
+      // 查找skill
+      const allSkills = { ...skillsAgentsConfig.skills.text, ...skillsAgentsConfig.skills.investor };
+      const skill = allSkills[currentModifyAction];
+      instruction = skill ? skill.prompt : '请优化这篇文案';
     } else {
       showToast('请选择优化方式或输入自定义指令', 'err');
       return;
@@ -7757,6 +8024,10 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg>
         保存配置
       </button>
+      <button class="btn btn-outline btn-sm" onclick="resetSkillsAgentsConfig()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
+        重置默认
+      </button>
     </div>
   </div>
 
@@ -7764,35 +8035,7 @@
   <div class="card" style="margin-bottom:20px;">
     <div class="card-head"><div class="card-title"><div class="card-title-icon" style="background:#E8F1FB;color:var(--brand);">🤖</div>Agents 配置</div></div>
     <div class="card-body">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-        <div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(20,92,255,0.03);">
-            <input type="checkbox" id="config-agent-result" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-            <div style="flex:1;">
-              <div style="font-size:14px;color:#1a202c;font-weight:600;">📝 文案审核 Agent</div>
-              <div style="font-size:11px;color:var(--text-muted);">检查文案的完整性、吸引力和上下文相关性</div>
-            </div>
-          </label>
-        </div>
-        <div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(20,92,255,0.03);">
-            <input type="checkbox" id="config-agent-compliance" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-            <div style="flex:1;">
-              <div style="font-size:14px;color:#1a202c;font-weight:600;">⚖️ 合规检查 Agent</div>
-              <div style="font-size:11px;color:var(--text-muted);">检查禁用词汇和宣传合规性</div>
-            </div>
-          </label>
-        </div>
-        <div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(20,92,255,0.03);">
-            <input type="checkbox" id="config-agent-wind" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-            <div style="flex:1;">
-              <div style="font-size:14px;color:#1a202c;font-weight:600;">📊 Wind数据验证 Agent</div>
-              <div style="font-size:11px;color:var(--text-muted);">通过Wind API验证基金数据准确性</div>
-            </div>
-          </label>
-        </div>
-      </div>
+      <div id="agentsConfigList" style="display:flex;flex-direction:column;gap:16px;"></div>
     </div>
   </div>
 
@@ -7800,62 +8043,7 @@
   <div class="card" style="margin-bottom:20px;">
     <div class="card-head"><div class="card-title"><div class="card-title-icon" style="background:#F5E9C8;color:var(--brand-gold);">🎨</div>Skills 配置 - 文案优化</div></div>
     <div class="card-body">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
-        <div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(184,137,42,0.05);">
-            <input type="checkbox" id="config-skill-shorten" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-            <div style="flex:1;">
-              <div style="font-size:14px;color:#1a202c;font-weight:600;">📝 缩短文案</div>
-              <div style="font-size:11px;color:var(--text-muted);">精简文案，保留核心信息</div>
-            </div>
-          </label>
-        </div>
-        <div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(184,137,42,0.05);">
-            <input type="checkbox" id="config-skill-lengthen" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-            <div style="flex:1;">
-              <div style="font-size:14px;color:#1a202c;font-weight:600;">📄 加长文案</div>
-              <div style="font-size:11px;color:var(--text-muted);">增加细节，丰富文案内容</div>
-            </div>
-          </label>
-        </div>
-        <div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(184,137,42,0.05);">
-            <input type="checkbox" id="config-skill-formal" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-            <div style="flex:1;">
-              <div style="font-size:14px;color:#1a202c;font-weight:600;">💼 更正式</div>
-              <div style="font-size:11px;color:var(--text-muted);">调整语气为专业正式</div>
-            </div>
-          </label>
-        </div>
-        <div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(184,137,42,0.05);">
-            <input type="checkbox" id="config-skill-casual" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-            <div style="flex:1;">
-              <div style="font-size:14px;color:#1a202c;font-weight:600;">😊 更口语化</div>
-              <div style="font-size:11px;color:var(--text-muted);">调整语气为亲切自然</div>
-            </div>
-          </label>
-        </div>
-        <div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(184,137,42,0.05);">
-            <input type="checkbox" id="config-skill-add-emoji" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-            <div style="flex:1;">
-              <div style="font-size:14px;color:#1a202c;font-weight:600;">🎉 添加表情</div>
-              <div style="font-size:11px;color:var(--text-muted);">插入适当的emoji增加活力</div>
-            </div>
-          </label>
-        </div>
-        <div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(184,137,42,0.05);">
-            <input type="checkbox" id="config-skill-more-attractive" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-            <div style="flex:1;">
-              <div style="font-size:14px;color:#1a202c;font-weight:600;">✨ 更吸引人</div>
-              <div style="font-size:11px;color:var(--text-muted);">优化表达，增强感染力</div>
-            </div>
-          </label>
-        </div>
-      </div>
+      <div id="skillsTextConfigList" style="display:flex;flex-direction:column;gap:16px;"></div>
     </div>
   </div>
 
@@ -7863,53 +8051,22 @@
   <div class="card">
     <div class="card-head"><div class="card-title"><div class="card-title-icon" style="background:#EBF7EE;color:var(--success);">🎯</div>Skills 配置 - 投资者类型</div></div>
     <div class="card-body">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
-        <div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(63,185,80,0.05);">
-            <input type="checkbox" id="config-skill-conservative" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-            <div style="flex:1;">
-              <div style="font-size:14px;color:#1a202c;font-weight:600;">🛡️ 保守型</div>
-              <div style="font-size:11px;color:var(--text-muted);">强调安全、稳定、本金保障</div>
-            </div>
-          </label>
-        </div>
-        <div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(63,185,80,0.05);">
-            <input type="checkbox" id="config-skill-steady" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-            <div style="flex:1;">
-              <div style="font-size:14px;color:#1a202c;font-weight:600;">🎯 稳健型</div>
-              <div style="font-size:11px;color:var(--text-muted);">追求稳健增值、风险可控</div>
-            </div>
-          </label>
-        </div>
-        <div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(63,185,80,0.05);">
-            <input type="checkbox" id="config-skill-balanced" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-            <div style="flex:1;">
-              <div style="font-size:14px;color:#1a202c;font-weight:600;">⚖️ 平衡型</div>
-              <div style="font-size:11px;color:var(--text-muted);">均衡风险与收益</div>
-            </div>
-          </label>
-        </div>
-        <div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(63,185,80,0.05);">
-            <input type="checkbox" id="config-skill-progressive" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-            <div style="flex:1;">
-              <div style="font-size:14px;color:#1a202c;font-weight:600;">📈 进取型</div>
-              <div style="font-size:11px;color:var(--text-muted);">追求较高收益</div>
-            </div>
-          </label>
-        </div>
-        <div>
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;background:rgba(63,185,80,0.05);">
-            <input type="checkbox" id="config-skill-aggressive" checked style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;">
-            <div style="flex:1;">
-              <div style="font-size:14px;color:#1a202c;font-weight:600;">🔥 激进型</div>
-              <div style="font-size:11px;color:var(--text-muted);">追求最大化收益</div>
-            </div>
-          </label>
-        </div>
-      </div>
+      <div id="skillsInvestorConfigList" style="display:flex;flex-direction:column;gap:16px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Agent/Skill编辑模态框 -->
+<div id="editItemModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.25);width:90%;max-width:700px;max-height:85vh;overflow-y:auto;">
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:18px;font-weight:700;" id="editModalTitle">编辑配置</div>
+      <button onclick="closeEditModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-muted);">&times;</button>
+    </div>
+    <div id="editModalContent" style="padding:24px;"></div>
+    <div style="padding:16px 24px;border-top:1px solid var(--border-light);display:flex;justify-content:flex-end;gap:12px;">
+      <button class="btn btn-outline" onclick="closeEditModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveEditItem()">保存</button>
     </div>
   </div>
 </div>
