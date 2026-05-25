@@ -1,4 +1,4 @@
-"""指数数据服务 - 获取沪深300、中证500等指数数据"""
+"""指数数据服务 - 使用 Wind MCP 获取沪深300、中证500等指数数据"""
 import requests
 import re
 import json
@@ -8,17 +8,18 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from config import Config
+from services.wind_mcp import WindMCP
 
 
 class IndexDataService:
-    """指数数据获取服务"""
+    """指数数据获取服务 - 使用 Wind MCP"""
     
-    INDEX_CODES = {
-        'hs300': {'code': '000300', 'name': '沪深300', 'market': 'SH'},
-        'zz500': {'code': '000905', 'name': '中证500', 'market': 'SH'},
-        'sh': {'code': '000001', 'name': '上证指数', 'market': 'SH'},
-        'sz': {'code': '399001', 'name': '深证成指', 'market': 'SZ'},
-        'gem': {'code': '399006', 'name': '创业板指', 'market': 'SZ'}
+    INDEX_NAMES = {
+        'hs300': '沪深300',
+        'zz500': '中证500',
+        'sh': '上证指数',
+        'sz': '深证成指',
+        'gem': '创业板指'
     }
     
     _cache = {}
@@ -27,58 +28,49 @@ class IndexDataService:
     
     @classmethod
     def get_index_history(cls, index_key, days=90):
-        """获取指数历史数据（只使用真实数据）"""
+        """获取指数历史数据（使用 Wind MCP）"""
         cache_key = f'index_{index_key}_{days}'
         if cache_key in cls._cache:
             if datetime.now().timestamp() - cls._cache_time.get(cache_key, 0) < cls.CACHE_DURATION:
                 return cls._cache[cache_key]
         
         try:
-            index_info = cls.INDEX_CODES.get(index_key)
-            if not index_info:
+            index_name = cls.INDEX_NAMES.get(index_key)
+            if not index_name:
                 return None
             
-            code = index_info['code']
-            market = index_info['market']
+            # 使用 Wind MCP 获取K线数据
+            end_date = datetime.now().strftime('%Y%m%d')
+            begin_date = (datetime.now() - timedelta(days=days)).strftime('%Y%m%d')
             
-            url = f'https://push2his.eastmoney.com/api/qt/stock/kline/get'
-            params = {
-                'secid': f'{market}.{code}',
-                'fields1': 'f1,f2,f3,f4,f5,f6',
-                'fields2': 'f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61',
-                'klt': '101',
-                'fqt': '1',
-                'beg': '20200101',
-                'end': datetime.now().strftime('%Y%m%d')
-            }
+            result = WindMCP.get_index_kline(index_name, begin_date, end_date, '10')
             
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-                'Referer': f'https://quote.eastmoney.com/{market}{code}.html'
-            }
+            if not result.get('success'):
+                print(f"Wind MCP 调用失败: {result.get('error')}")
+                return None
             
-            resp = requests.get(url, params=params, headers=headers, timeout=15)
-            data = resp.json()
+            data = result.get('data')
+            if not data or 'rows' not in data:
+                return None
             
-            if data.get('data') and data['data'].get('klines'):
-                klines = data['data']['klines']
-                result = []
-                
-                for kline in klines[-days:]:
-                    parts = kline.split(',')
-                    if len(parts) >= 6:
-                        result.append({
-                            'date': parts[0],
-                            'open': float(parts[1]),
-                            'close': float(parts[2]),
-                            'high': float(parts[3]),
-                            'low': float(parts[4]),
-                            'volume': int(parts[5])
-                        })
-                
-                cls._cache[cache_key] = result
+            # 解析K线数据
+            result_list = []
+            for row in data['rows']:
+                if len(row) >= 5:
+                    date_str = row[9] if len(row) > 9 else row[0][:10].replace('-', '')
+                    result_list.append({
+                        'date': date_str,
+                        'open': float(row[1]) if row[1] else 0,
+                        'close': float(row[2]) if row[2] else 0,
+                        'high': float(row[3]) if row[3] else 0,
+                        'low': float(row[4]) if row[4] else 0,
+                        'volume': int(row[6]) if row[6] else 0
+                    })
+            
+            if result_list:
+                cls._cache[cache_key] = result_list
                 cls._cache_time[cache_key] = datetime.now().timestamp()
-                return result
+                return result_list
             
         except Exception as e:
             print(f"获取指数数据失败 {index_key}: {e}")

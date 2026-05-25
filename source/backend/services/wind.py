@@ -38,7 +38,7 @@ class WindService:
             risk_metrics = cls._get_risk_metrics(fund_code)
             
             # 4. 分析文案中的数据准确性
-            data_analysis = cls._analyze_content_data(content, fund_info, market_data)
+            data_analysis = cls._analyze_content_data(content, fund_info, market_data, risk_metrics)
             
             # 5. 生成验证报告
             verification_report = cls._generate_verification_report(
