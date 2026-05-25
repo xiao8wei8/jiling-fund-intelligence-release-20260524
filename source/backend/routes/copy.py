@@ -81,6 +81,57 @@ def formats():
     })
 
 
+@copy_bp.route('/agent/result-check', methods=['POST'])
+def agent_result_check():
+    """文案审核Agent API"""
+    try:
+        data = request.get_json()
+        content = data.get('content', '')
+        fund_info = data.get('fund_info', {})
+        prompt = data.get('prompt', '')
+        
+        if not content:
+            return jsonify({'success': False, 'error': '请提供文案内容'}), 400
+        
+        # 调用MiniMax进行文案审核
+        result = MiniMaxService.check_content_quality(content, fund_info, prompt)
+        
+        return jsonify({
+            'success': True,
+            'data': result
+        })
+    except Exception as e:
+        print(f"文案审核错误: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@copy_bp.route('/agent/compliance-check', methods=['POST'])
+def agent_compliance_check():
+    """合规检查Agent API"""
+    try:
+        data = request.get_json()
+        content = data.get('content', '')
+        prompt = data.get('prompt', '')
+        
+        if not content:
+            return jsonify({'success': False, 'error': '请提供文案内容'}), 400
+        
+        # 调用MiniMax进行合规检查
+        result = MiniMaxService.check_compliance(content, prompt)
+        
+        return jsonify({
+            'success': True,
+            'data': result
+        })
+    except Exception as e:
+        print(f"合规检查错误: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @copy_bp.route('/wind/verify', methods=['POST'])
 def wind_verify():
     """Wind数据验证API"""
@@ -89,12 +140,13 @@ def wind_verify():
         fund_code = data.get('fund_code')
         fund_name = data.get('fund_name')
         content = data.get('content')
+        prompt = data.get('prompt', '')
         
         if not fund_code:
             return jsonify({'success': False, 'error': '请提供基金代码'}), 400
         
         # 调用Wind服务验证
-        result = WindService.verify_fund_data(fund_code, fund_name, content)
+        result = WindService.verify_fund_data(fund_code, fund_name, content, prompt)
         
         return jsonify(result)
     except Exception as e:
