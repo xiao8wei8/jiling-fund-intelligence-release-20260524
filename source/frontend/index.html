@@ -3814,6 +3814,30 @@
   }
 
   // 生成模拟基准数据（百分比变化）
+  let benchmarkDataCache = {};
+
+  async function loadBenchmarkData(indexKeys, days) {
+    const cacheKey = indexKeys.join(',') + '_' + days;
+    if (benchmarkDataCache[cacheKey]) {
+      return benchmarkDataCache[cacheKey];
+    }
+    
+    try {
+      const url = `${API_BASE}/fund/index/multiple?keys=${indexKeys.join(',')}&days=${days}`;
+      const resp = await fetch(url);
+      const result = await resp.json();
+      
+      if (result.success && result.data) {
+        benchmarkDataCache[cacheKey] = result.data;
+        return result.data;
+      }
+    } catch (err) {
+      console.warn('Failed to load benchmark data:', err);
+    }
+    
+    return null;
+  }
+
   function generateBenchmarkData(points, baseValue = 0) {
     let val = baseValue;
     const data = [];
@@ -3825,25 +3849,43 @@
   }
 
   // 更新图表
-  function updateChartWithData(data) {
+  async function updateChartWithData(data) {
     if (!fundChart) return;
 
     let pts = data.netTrend || [];
     if (pts.length < 10) return;
     
     // 根据时间范围筛选数据
+    let days = 90;
     if (currentTimeRange === 'ytd') {
-      // 今年以来：从今年1月1日开始
       const now = new Date();
       const startOfYear = new Date(now.getFullYear(), 0, 1);
       pts = pts.filter(p => new Date(p.x) >= startOfYear);
+      days = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
     } else if (currentTimeRange === 'all') {
-      // 成立以来：所有数据
-      // 不进行切片，保留所有数据
+      days = pts.length;
+    } else if (currentTimeRange === '1m') {
+      days = 30;
+      pts = pts.slice(-30);
+    } else if (currentTimeRange === '3m') {
+      days = 90;
+      pts = pts.slice(-90);
+    } else if (currentTimeRange === '6m') {
+      days = 180;
+      pts = pts.slice(-180);
+    } else if (currentTimeRange === '1y') {
+      days = 365;
+      pts = pts.slice(-365);
+    } else if (currentTimeRange === '3y') {
+      days = 365 * 3;
+      pts = pts.slice(-365 * 3);
+    } else if (currentTimeRange === '5y') {
+      days = 365 * 5;
+      pts = pts.slice(-365 * 5);
     } else {
-      // 其他时间范围：从末尾切片
       const points = getRangePoints(currentTimeRange);
       pts = pts.slice(-points);
+      days = points;
     }
     
     if (pts.length < 10) return;
@@ -3875,18 +3917,17 @@
       } else if (currentTimeRange === '3m' || currentTimeRange === '6m') {
         step = Math.max(1, Math.floor(totalPoints / 8));
       } else if (currentTimeRange === '1y') {
-        step = Math.max(1, Math.floor(totalPoints / 12)); // 每月一个标签
+        step = Math.max(1, Math.floor(totalPoints / 12));
       } else if (currentTimeRange === '3y') {
-        step = Math.max(1, Math.floor(totalPoints / 12)); // 每季度一个标签
+        step = Math.max(1, Math.floor(totalPoints / 12));
       } else if (currentTimeRange === '5y' || currentTimeRange === 'all') {
-        step = Math.max(1, Math.floor(totalPoints / 10)); // 每年一个标签
+        step = Math.max(1, Math.floor(totalPoints / 10));
       } else if (currentTimeRange === 'ytd') {
-        step = Math.max(1, Math.floor(totalPoints / 12)); // 每月一个标签
+        step = Math.max(1, Math.floor(totalPoints / 12));
       }
       
       // 对于ytd，只显示1月、2月...
       if (currentTimeRange === 'ytd') {
-        // 只在每月第一个数据点显示
         const prevDt = idx > 0 ? new Date(pts[idx - 1].x) : null;
         if (prevDt && prevDt.getMonth() === month) return '';
         return `${month}月`;
@@ -3896,7 +3937,6 @@
       if (currentTimeRange === 'all') {
         const prevDt = idx > 0 ? new Date(pts[idx - 1].x) : null;
         if (prevDt && prevDt.getFullYear() === year) {
-          // 同一年内，只在1月或7月显示
           if (month !== 1 && month !== 7) return '';
         }
         return `${year}年`;
@@ -3947,14 +3987,35 @@
       }
     ];
 
+    // 获取真实基准数据
+    const benchData = await loadBenchmarkData(selectedBenchmarks, days);
+    
     // 添加所有选中的基准（支持多选）
     selectedBenchmarks.forEach(benchKey => {
       const config = benchmarkConfigs[benchKey];
-      const benchData = generateBenchmarkData(pts.length);
+      let benchValues = generateBenchmarkData(pts.length);
+      
+      // 如果有真实数据，使用真实数据
+      if (benchData && benchData[benchKey]) {
+        const indexData = benchData[benchKey];
+        benchValues = [];
+        const ptsLen = pts.length;
+        const dataLen = indexData.length;
+        
+        // 对齐数据点
+        for (let i = 0; i < ptsLen; i++) {
+          const idx = Math.floor((i / ptsLen) * dataLen);
+          if (idx < dataLen && indexData[idx]) {
+            benchValues.push(parseFloat(indexData[idx].return.toFixed(2)));
+          } else {
+            benchValues.push(0);
+          }
+        }
+      }
       
       datasets.push({
         label: config.label,
-        data: benchData,
+        data: benchValues,
         borderColor: config.color,
         backgroundColor: 'transparent',
         borderWidth: 1.8,
