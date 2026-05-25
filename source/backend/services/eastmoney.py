@@ -62,19 +62,20 @@ class EastmoneyService:
                 'yield_3y': ''
             }
             
-            # 从HTML中查找所有百分比数值
-            all_percents = re.findall(r'([+\-]?\d+\.?\d*)%', raw)
+            # 使用更精确的方式提取近3年收益率
+            # 匹配格式: 近3年：</span><span class="ui-font-middle ui-color-red ui-num">49.62%</span>
+            patterns = [
+                r'近3年：</span><span[^>]*>([+\-]?\d+\.?\d*)%',
+                r'近三年：</span><span[^>]*>([+\-]?\d+\.?\d*)%',
+                r'>近3年：</span>\s*<span[^>]*>([+\-]?\d+\.?\d*)%',
+                r'>近三年：</span>\s*<span[^>]*>([+\-]?\d+\.?\d*)%',
+            ]
             
-            # 只需要找到近3年的数据即可，其他用pingzhongdata的（因为我们已经知道正确映射）
-            # 从前面的调试，我们知道近3年的36.38%会在这些数值中
-            for val in all_percents:
-                try:
-                    fval = float(val)
-                    if 35 <= fval <= 37:  # 36.38在这个范围
-                        yields['yield_3y'] = val
-                        break
-                except:
-                    pass
+            for pattern in patterns:
+                match = re.search(pattern, raw)
+                if match:
+                    yields['yield_3y'] = match.group(1)
+                    break
             
             return yields
         except Exception as e:
