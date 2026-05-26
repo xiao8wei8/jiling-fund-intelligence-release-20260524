@@ -58,6 +58,12 @@ class IndexDataService:
             for row in data['rows']:
                 if len(row) >= 5:
                     date_str = row[9] if len(row) > 9 else row[0][:10].replace('-', '')
+                    # 转换日期格式: 20260427 -> 2026-04-27
+                    if len(date_str) == 8 and date_str.isdigit():
+                        year = date_str[:4]
+                        month = date_str[4:6]
+                        day = date_str[6:8]
+                        date_str = f"{year}-{month}-{day}"
                     result_list.append({
                         'date': date_str,
                         'open': float(row[1]) if row[1] else 0,
@@ -112,7 +118,12 @@ class IndexDataService:
         """批量获取多个指数数据"""
         result = {}
         for key in index_keys:
-            data = cls.get_index_series(key, days)
-            if data:
-                result[key] = data
+            try:
+                data = cls.get_index_series(key, days)
+                if data:
+                    result[key] = data
+            except Exception as e:
+                print(f"获取指数 {key} 数据时出错: {e}")
+                # 如果获取失败，跳过该指数，继续获取其他指数
+                continue
         return result
