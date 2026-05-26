@@ -15,11 +15,11 @@ class IndexDataService:
     """指数数据获取服务 - 使用 Wind MCP"""
     
     INDEX_NAMES = {
-        'hs300': '沪深300',
-        'zz500': '中证500',
-        'sh': '上证指数',
-        'sz': '深证成指',
-        'gem': '创业板指'
+        'hs300': '000300.SH',
+        'zz500': '000905.SH',
+        'sh': '000001.SH',
+        'sz': '399001.SZ',
+        'gem': '399006.SZ'
     }
     
     _cache = {}
@@ -57,6 +57,7 @@ class IndexDataService:
             result_list = []
             for row in data['rows']:
                 if len(row) >= 5:
+                    # 从第9列获取日期(_DATE)，格式是 YYYYMMDD
                     date_str = row[9] if len(row) > 9 else row[0][:10].replace('-', '')
                     # 转换日期格式: 20260427 -> 2026-04-27
                     if len(date_str) == 8 and date_str.isdigit():
@@ -64,13 +65,14 @@ class IndexDataService:
                         month = date_str[4:6]
                         day = date_str[6:8]
                         date_str = f"{year}-{month}-{day}"
+                    # 第1列: OPEN, 第2列: MATCH(收盘价), 第3列: HIGH, 第4列: LOW
                     result_list.append({
                         'date': date_str,
                         'open': float(row[1]) if row[1] else 0,
                         'close': float(row[2]) if row[2] else 0,
                         'high': float(row[3]) if row[3] else 0,
                         'low': float(row[4]) if row[4] else 0,
-                        'volume': int(row[6]) if row[6] else 0
+                        'volume': int(float(row[6])) if row[6] else 0
                     })
             
             if result_list:

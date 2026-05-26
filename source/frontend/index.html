@@ -3822,7 +3822,7 @@
     console.log(`Loading benchmark data: keys=${indexKeys}, days=${days}, cacheKey=${cacheKey}`);
     
     // 只在缓存有数据时使用缓存
-    if (benchmarkDataCache[cacheKey] && Object.keys(benchmarkDataCache[cacheKey]).length > 0) {
+    if (benchmarkDataCache[cacheKey]) {
       console.log(`Using cached benchmark data for ${cacheKey}`);
       return benchmarkDataCache[cacheKey];
     }
@@ -3837,10 +3837,24 @@
       const result = await resp.json();
       console.log(`API result:`, result);
       
-      if (result.success && result.data && Object.keys(result.data).length > 0) {
-        benchmarkDataCache[cacheKey] = result.data;
-        console.log(`Benchmark data cached successfully: ${Object.keys(result.data).length} indexes`);
-        return result.data;
+      // 放宽检查条件，只要有数据就使用
+      if (result.success && result.data) {
+        // 检查至少有一个指数有数据
+        let hasData = false;
+        for (const key of indexKeys) {
+          if (result.data[key] && result.data[key].length > 0) {
+            hasData = true;
+            break;
+          }
+        }
+        
+        if (hasData) {
+          benchmarkDataCache[cacheKey] = result.data;
+          console.log(`Benchmark data cached successfully:`, result.data);
+          return result.data;
+        } else {
+          console.warn('No valid data found in API result');
+        }
       } else {
         console.warn('API returned empty or failed result:', result);
       }
