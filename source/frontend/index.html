@@ -4026,50 +4026,61 @@
           console.log(`Processing ${benchKey}: ${dataLen} data points, fund points: ${ptsLen}`);
           
           if (dataLen > 0 && ptsLen > 0) {
-            // 步骤1: 按日期对齐基准数据
-            const alignedIndexData = [];
-            for (let i = 0; i < ptsLen; i++) {
-              const fundDate = fullDateLabels[i];
-              // 找最接近的基准日期
-              let closestItem = null;
-              let closestDiff = Infinity;
-              
-              for (const item of indexData) {
-                const diff = Math.abs(new Date(item.date) - new Date(fundDate));
-                if (diff < closestDiff) {
-                  closestDiff = diff;
-                  closestItem = item;
-                }
-              }
-              
-              if (closestItem) {
-                alignedIndexData.push(closestItem);
-              }
-            }
+            // 获取基准数据的日期范围
+            const indexStartDate = new Date(indexData[0].date);
+            const indexEndDate = new Date(indexData[dataLen - 1].date);
             
-            // 步骤2: 找到第一个对齐后的数据的第一个有效收盘价作为基准
+            console.log(`Benchmark ${benchKey} date range: ${indexData[0].date} to ${indexData[dataLen - 1].date}`);
+            
+            // 步骤1: 找到与基金数据起始日期最接近的基准数据点作为基准点
             let basePrice = null;
-            for (const item of alignedIndexData) {
-              if (item && item.close) {
-                basePrice = item.close;
-                break;
+            let baseIndex = 0;
+            let minDiff = Infinity;
+            
+            for (let i = 0; i < dataLen; i++) {
+              const diff = Math.abs(new Date(indexData[i].date) - new Date(fullDateLabels[0]));
+              if (diff < minDiff) {
+                minDiff = diff;
+                basePrice = indexData[i].close;
+                baseIndex = i;
               }
             }
             
             if (basePrice) {
-              // 步骤3: 从对齐后的数据计算收益率
-              for (const item of alignedIndexData) {
-                if (item && item.close) {
-                  const returnValue = ((item.close - basePrice) / basePrice) * 100;
+              console.log(`Benchmark ${benchKey} base price: ${basePrice} at ${indexData[baseIndex].date}`);
+              
+              // 步骤2: 为每个基金日期找最合适的基准数据
+              for (let i = 0; i < ptsLen; i++) {
+                const fundDate = new Date(fullDateLabels[i]);
+                
+                // 如果基金日期早于基准起始日期，跳过（显示为null或不显示）
+                if (fundDate < indexStartDate) {
+                  benchValues.push(null); // null让Chart.js不绘制这个点
+                  continue;
+                }
+                
+                // 找最接近的基准日期
+                let closestItem = null;
+                let closestDiff = Infinity;
+                
+                for (const item of indexData) {
+                  const diff = Math.abs(new Date(item.date) - fundDate);
+                  if (diff < closestDiff) {
+                    closestDiff = diff;
+                    closestItem = item;
+                  }
+                }
+                
+                if (closestItem && closestItem.close) {
+                  const returnValue = ((closestItem.close - basePrice) / basePrice) * 100;
                   benchValues.push(parseFloat(returnValue.toFixed(2)));
                 } else {
-                  benchValues.push(0);
+                  benchValues.push(null);
                 }
               }
               
               console.log(`Benchmark ${benchKey} values (first 5):`, benchValues.slice(0, 5));
               console.log(`Benchmark ${benchKey} values (last 5):`, benchValues.slice(-5));
-              console.log(`Benchmark ${benchKey} base price:`, basePrice);
               
               datasets.push({
                 label: config.label,
@@ -4084,7 +4095,8 @@
                 pointHoverRadius: 5,
                 pointBackgroundColor: config.color,
                 pointBorderColor: '#fff',
-                pointBorderWidth: 1.5
+                pointBorderWidth: 1.5,
+                spanGaps: true // 允许跳过null值
               });
               
               console.log(`✓ Added benchmark ${config.label} with ${benchValues.length} points`);

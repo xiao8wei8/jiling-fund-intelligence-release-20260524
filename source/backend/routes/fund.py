@@ -412,7 +412,10 @@ def get_multiple_index_data():
         index_keys = keys.split(',') if keys else ['hs300']
         days = request.args.get('days', 90, type=int)
         
-        data = IndexDataService.get_multiple_index_data(index_keys, days)
+        # 获取额外的数据作为缓冲区，确保有足够数据对齐
+        buffer_days = days + 30
+        
+        data = IndexDataService.get_multiple_index_data(index_keys, buffer_days)
         return jsonify({'success': True, 'data': data})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
