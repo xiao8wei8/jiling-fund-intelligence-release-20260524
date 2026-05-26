@@ -4005,8 +4005,13 @@
       }
     ];
 
-    // 只获取真实基准数据
-    const benchData = await loadBenchmarkData(selectedBenchmarks, days);
+    // 计算基金数据的实际时间跨度
+    const firstFundDate = new Date(fullDateLabels[0]);
+    const lastFundDate = new Date(fullDateLabels[fullDateLabels.length - 1]);
+    const actualDays = Math.ceil((lastFundDate - firstFundDate) / (1000 * 60 * 60 * 24)) + 30; // 额外30天缓冲
+    
+    // 只获取真实基准数据 - 根据基金的实际时间跨度获取
+    const benchData = await loadBenchmarkData(selectedBenchmarks, actualDays);
     
     console.log('Benchmark data loaded:', benchData);
     console.log('Selected benchmarks:', selectedBenchmarks);
@@ -4053,13 +4058,7 @@
               for (let i = 0; i < ptsLen; i++) {
                 const fundDate = new Date(fullDateLabels[i]);
                 
-                // 如果基金日期早于基准起始日期，跳过（显示为null或不显示）
-                if (fundDate < indexStartDate) {
-                  benchValues.push(null); // null让Chart.js不绘制这个点
-                  continue;
-                }
-                
-                // 找最接近的基准日期
+                // 找最接近的基准日期（允许有一定误差，7天内都可以接受）
                 let closestItem = null;
                 let closestDiff = Infinity;
                 
@@ -4071,7 +4070,8 @@
                   }
                 }
                 
-                if (closestItem && closestItem.close) {
+                // 只在相差超过14天（2周）时才认为没有数据
+                if (closestItem && closestItem.close && closestDiff < 14 * 24 * 60 * 60 * 1000) {
                   const returnValue = ((closestItem.close - basePrice) / basePrice) * 100;
                   benchValues.push(parseFloat(returnValue.toFixed(2)));
                 } else {
