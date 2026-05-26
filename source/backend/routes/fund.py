@@ -412,8 +412,8 @@ def get_multiple_index_data():
         index_keys = keys.split(',') if keys else ['hs300']
         days = request.args.get('days', 90, type=int)
         
-        # 获取更多的数据作为缓冲区：至少获取1年的数据，确保任何时间范围都有足够数据
-        buffer_days = max(days + 60, 365)
+        # 至少获取5年的数据，确保"近3年"、"近5年"、"成立以来"都有完整数据
+        buffer_days = max(days + 60, 365 * 5)
         
         data = IndexDataService.get_multiple_index_data(index_keys, buffer_days)
         return jsonify({'success': True, 'data': data})
