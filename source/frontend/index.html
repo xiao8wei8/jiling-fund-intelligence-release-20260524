@@ -4009,37 +4009,47 @@
           const ptsLen = pts.length;
           const dataLen = indexData.length;
           
-          console.log(`Processing ${benchKey}: ${dataLen} data points`);
+          console.log(`Processing ${benchKey}: ${dataLen} data points, fund points: ${ptsLen}`);
           
-          // 对齐数据点
-          for (let i = 0; i < ptsLen; i++) {
-            const idx = Math.floor((i / ptsLen) * dataLen);
-            if (idx < dataLen && indexData[idx]) {
-              benchValues.push(parseFloat(indexData[idx].return.toFixed(2)));
-            } else {
-              benchValues.push(0);
+          // 对齐数据点 - 确保基准数据的数量与基金数据相同
+          if (dataLen > 0 && ptsLen > 0) {
+            for (let i = 0; i < ptsLen; i++) {
+              // 使用线性插值对齐
+              const idx = Math.floor((i / (ptsLen - 1)) * (dataLen - 1));
+              const safeIdx = Math.max(0, Math.min(dataLen - 1, idx));
+              
+              if (indexData[safeIdx] && typeof indexData[safeIdx].return === 'number') {
+                benchValues.push(parseFloat(indexData[safeIdx].return.toFixed(2)));
+              } else {
+                benchValues.push(0);
+              }
             }
+            
+            console.log(`Benchmark ${benchKey} values (first 5):`, benchValues.slice(0, 5));
+            console.log(`Benchmark ${benchKey} values (last 5):`, benchValues.slice(-5));
+            
+            datasets.push({
+              label: config.label,
+              data: benchValues,
+              borderColor: config.color,
+              backgroundColor: 'transparent',
+              borderWidth: 1.8,
+              borderDash: [6, 4],
+              fill: false,
+              tension: 0.35,
+              pointRadius: 0,
+              pointHoverRadius: 5,
+              pointBackgroundColor: config.color,
+              pointBorderColor: '#fff',
+              pointBorderWidth: 1.5
+            });
+            
+            console.log(`✓ Added benchmark ${config.label} with ${benchValues.length} points`);
           }
-          
-          console.log(`Benchmark ${benchKey} values:`, benchValues.slice(0, 5), '...');
-          
-          datasets.push({
-            label: config.label,
-            data: benchValues,
-            borderColor: config.color,
-            backgroundColor: 'transparent',
-            borderWidth: 1.8,
-            borderDash: [6, 4],
-            fill: false,
-            tension: 0.35,
-            pointRadius: 0,
-            pointHoverRadius: 5,
-            pointBackgroundColor: config.color,
-            pointBorderColor: '#fff',
-            pointBorderWidth: 1.5
-          });
         }
       });
+    } else {
+      console.warn('No benchmark data available!');
     }
 
     fundChart.data.labels = labels;
