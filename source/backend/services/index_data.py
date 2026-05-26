@@ -99,18 +99,16 @@ class IndexDataService:
     
     @classmethod
     def get_index_series(cls, index_key, days=90):
-        """获取指数收益率序列（用于图表）"""
+        """获取指数收盘价序列（原始价格数据，前端自己计算收益率）"""
         history = cls.get_index_history(index_key, days)
         if not history or len(history) < 2:
             return None
         
         result = []
-        base_price = history[0]['close']
-        
         for item in history:
             result.append({
                 'date': item['date'],
-                'return': ((item['close'] - base_price) / base_price) * 100
+                'close': item['close']
             })
         
         return result

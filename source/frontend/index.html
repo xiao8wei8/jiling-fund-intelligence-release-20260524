@@ -4025,40 +4025,70 @@
           
           console.log(`Processing ${benchKey}: ${dataLen} data points, fund points: ${ptsLen}`);
           
-          // 对齐数据点 - 确保基准数据的数量与基金数据相同
           if (dataLen > 0 && ptsLen > 0) {
+            // 步骤1: 按日期对齐基准数据
+            const alignedIndexData = [];
             for (let i = 0; i < ptsLen; i++) {
-              // 使用线性插值对齐
-              const idx = Math.floor((i / (ptsLen - 1)) * (dataLen - 1));
-              const safeIdx = Math.max(0, Math.min(dataLen - 1, idx));
+              const fundDate = fullDateLabels[i];
+              // 找最接近的基准日期
+              let closestItem = null;
+              let closestDiff = Infinity;
               
-              if (indexData[safeIdx] && typeof indexData[safeIdx].return === 'number') {
-                benchValues.push(parseFloat(indexData[safeIdx].return.toFixed(2)));
-              } else {
-                benchValues.push(0);
+              for (const item of indexData) {
+                const diff = Math.abs(new Date(item.date) - new Date(fundDate));
+                if (diff < closestDiff) {
+                  closestDiff = diff;
+                  closestItem = item;
+                }
+              }
+              
+              if (closestItem) {
+                alignedIndexData.push(closestItem);
               }
             }
             
-            console.log(`Benchmark ${benchKey} values (first 5):`, benchValues.slice(0, 5));
-            console.log(`Benchmark ${benchKey} values (last 5):`, benchValues.slice(-5));
+            // 步骤2: 找到第一个对齐后的数据的第一个有效收盘价作为基准
+            let basePrice = null;
+            for (const item of alignedIndexData) {
+              if (item && item.close) {
+                basePrice = item.close;
+                break;
+              }
+            }
             
-            datasets.push({
-              label: config.label,
-              data: benchValues,
-              borderColor: config.color,
-              backgroundColor: 'transparent',
-              borderWidth: 1.8,
-              borderDash: [6, 4],
-              fill: false,
-              tension: 0.35,
-              pointRadius: 0,
-              pointHoverRadius: 5,
-              pointBackgroundColor: config.color,
-              pointBorderColor: '#fff',
-              pointBorderWidth: 1.5
-            });
-            
-            console.log(`✓ Added benchmark ${config.label} with ${benchValues.length} points`);
+            if (basePrice) {
+              // 步骤3: 从对齐后的数据计算收益率
+              for (const item of alignedIndexData) {
+                if (item && item.close) {
+                  const returnValue = ((item.close - basePrice) / basePrice) * 100;
+                  benchValues.push(parseFloat(returnValue.toFixed(2)));
+                } else {
+                  benchValues.push(0);
+                }
+              }
+              
+              console.log(`Benchmark ${benchKey} values (first 5):`, benchValues.slice(0, 5));
+              console.log(`Benchmark ${benchKey} values (last 5):`, benchValues.slice(-5));
+              console.log(`Benchmark ${benchKey} base price:`, basePrice);
+              
+              datasets.push({
+                label: config.label,
+                data: benchValues,
+                borderColor: config.color,
+                backgroundColor: 'transparent',
+                borderWidth: 1.8,
+                borderDash: [6, 4],
+                fill: false,
+                tension: 0.35,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                pointBackgroundColor: config.color,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 1.5
+              });
+              
+              console.log(`✓ Added benchmark ${config.label} with ${benchValues.length} points`);
+            }
           }
         }
       });
