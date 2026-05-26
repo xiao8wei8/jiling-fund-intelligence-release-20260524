@@ -3772,17 +3772,17 @@
   let fullDateLabels = [];
 
   // 时间范围选择（按钮）
-  function selectTimeRangeBtn(btn) {
+  async function selectTimeRangeBtn(btn) {
     document.querySelectorAll('.time-option').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentTimeRange = btn.dataset.range;
     if (currentFundData) {
-      updateChartWithData(currentFundData);
+      await updateChartWithData(currentFundData);
     }
   }
 
   // 基准选择（多选）
-  function toggleBenchmark(checkbox) {
+  async function toggleBenchmark(checkbox) {
     const label = checkbox.closest('.benchmark-option');
     if (checkbox.checked) {
       label.classList.add('active');
@@ -3794,7 +3794,7 @@
       selectedBenchmarks = selectedBenchmarks.filter(b => b !== checkbox.value);
     }
     if (currentFundData) {
-      updateChartWithData(currentFundData);
+      await updateChartWithData(currentFundData);
     }
   }
 
@@ -3980,6 +3980,10 @@
     // 只获取真实基准数据
     const benchData = await loadBenchmarkData(selectedBenchmarks, days);
     
+    console.log('Benchmark data loaded:', benchData);
+    console.log('Selected benchmarks:', selectedBenchmarks);
+    console.log('Fund data points:', pts.length);
+    
     // 只添加有真实数据的基准
     if (benchData) {
       selectedBenchmarks.forEach(benchKey => {
@@ -3991,6 +3995,8 @@
           const ptsLen = pts.length;
           const dataLen = indexData.length;
           
+          console.log(`Processing ${benchKey}: ${dataLen} data points`);
+          
           // 对齐数据点
           for (let i = 0; i < ptsLen; i++) {
             const idx = Math.floor((i / ptsLen) * dataLen);
@@ -4000,6 +4006,8 @@
               benchValues.push(0);
             }
           }
+          
+          console.log(`Benchmark ${benchKey} values:`, benchValues.slice(0, 5), '...');
           
           datasets.push({
             label: config.label,
@@ -4179,14 +4187,15 @@
     });
 
     // 加载真实数据
-    loadPingzhongData(fundCode)
-      .then(d => {
+    (async () => {
+      try {
+        const d = await loadPingzhongData(fundCode);
         currentFundData = d;
-        updateChartWithData(d);
-      })
-      .catch(err => {
+        await updateChartWithData(d);
+      } catch (err) {
         console.warn('Failed to load fund data:', err);
-      });
+      }
+    })();
   }
 
   // Update chart when fund changes
