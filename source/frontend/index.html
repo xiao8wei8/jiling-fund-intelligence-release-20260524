@@ -5909,14 +5909,13 @@
     productAppBooted = true;
     updateSPCount();
     initBenchmarkStates();
-    initFundChart('004512');
     setupMainSearch();
     loadEastmoneyFundList().catch(() => {});
     const inviteBtn = document.getElementById('inviteBtn');
     if (inviteBtn) inviteBtn.addEventListener('click', showTeamInviteModal);
     switchPage('generator');
     
-    // 自动加载004512的数据
+    // 直接通过真实数据加载来初始化，避免重复和模拟数据
     loadFundDataByCode('004512');
   }
 
