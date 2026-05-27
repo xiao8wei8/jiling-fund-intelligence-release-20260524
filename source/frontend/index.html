@@ -5124,33 +5124,6 @@
   document.addEventListener('DOMContentLoaded', function() {
     // 加载Skills & Agents配置
     loadSkillsAgentsConfig();
-    
-    // 绑定Agent Checkbox变化事件
-    const agentResultCheck = document.getElementById('agentResultCheck');
-    const agentComplianceCheck = document.getElementById('agentComplianceCheck');
-    const agentWindCheck = document.getElementById('agentWindCheck');
-    
-    function updateCardVisibility() {
-      const resultCard = document.getElementById('agent-result');
-      const complianceCard = document.getElementById('agent-compliance');
-      const windCard = document.getElementById('agent-wind');
-      if (resultCard) resultCard.style.display = agentResultCheck?.checked ? 'block' : 'none';
-      if (complianceCard) complianceCard.style.display = agentComplianceCheck?.checked ? 'block' : 'none';
-      if (windCard) windCard.style.display = agentWindCheck?.checked ? 'block' : 'none';
-    }
-    
-    if (agentResultCheck) {
-      agentResultCheck.addEventListener('change', updateCardVisibility);
-    }
-    if (agentComplianceCheck) {
-      agentComplianceCheck.addEventListener('change', updateCardVisibility);
-    }
-    if (agentWindCheck) {
-      agentWindCheck.addEventListener('change', updateCardVisibility);
-    }
-    
-    // 初始执行一次
-    updateCardVisibility();
   });
   
   // 文案审核Agent - 真实API调用
