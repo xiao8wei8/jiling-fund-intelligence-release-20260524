@@ -3772,17 +3772,22 @@
   let fullDateLabels = [];
 
   // 时间范围选择（按钮）
-  async function selectTimeRangeBtn(btn) {
+  async function selectTimeRangeBtn(btn, showLoading = true) {
     document.querySelectorAll('.time-option').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentTimeRange = btn.dataset.range;
     if (currentFundData) {
-      await updateChartWithData(currentFundData);
+      if (showLoading) showGlobalLoading();
+      try {
+        await updateChartWithData(currentFundData);
+      } finally {
+        if (showLoading) hideGlobalLoading();
+      }
     }
   }
 
   // 基准选择（多选）
-  async function toggleBenchmark(checkbox) {
+  async function toggleBenchmark(checkbox, showLoading = true) {
     const label = checkbox.closest('.benchmark-option');
     if (checkbox.checked) {
       label.classList.add('active');
@@ -3794,7 +3799,12 @@
       selectedBenchmarks = selectedBenchmarks.filter(b => b !== checkbox.value);
     }
     if (currentFundData) {
-      await updateChartWithData(currentFundData);
+      if (showLoading) showGlobalLoading();
+      try {
+        await updateChartWithData(currentFundData);
+      } finally {
+        if (showLoading) hideGlobalLoading();
+      }
     }
   }
 
@@ -3867,8 +3877,12 @@
   }
 
   // 更新图表
-  async function updateChartWithData(data) {
+  async function updateChartWithData(data, showLoading = false) {
     if (!fundChart) return;
+    
+    if (showLoading) {
+      showGlobalLoading();
+    }
 
     let pts = data.netTrend || [];
     if (pts.length < 10) return;
@@ -4111,6 +4125,10 @@
     fundChart.data.labels = labels;
     fundChart.data.datasets = datasets;
     fundChart.update();
+    
+    if (showLoading) {
+      hideGlobalLoading();
+    }
   }
 
   // 初始化基准checkbox和label的同步状态
@@ -4128,7 +4146,7 @@
     });
   }
 
-  function initFundChart(fundCode) {
+  function initFundChart(fundCode, showLoading = false) {
     // 初始化基准checkbox状态
     initBenchmarkStates();
     
@@ -4232,16 +4250,19 @@
       try {
         const d = await loadPingzhongData(fundCode);
         currentFundData = d;
-        await updateChartWithData(d);
+        await updateChartWithData(d, showLoading);
       } catch (err) {
         console.warn('Failed to load fund data:', err);
+        if (showLoading) {
+          hideGlobalLoading();
+        }
       }
     })();
   }
 
   // Update chart when fund changes
-  function updateFundChart(fundCode) {
-    initFundChart(fundCode);
+  function updateFundChart(fundCode, showLoading = false) {
+    initFundChart(fundCode, showLoading);
   }
 
   // ---- Toast ----
@@ -5924,6 +5945,19 @@
     try {
       // 显示全局加载遮罩
       showGlobalLoading();
+      
+      // 先设置当前时间范围为近1月，按钮状态
+      currentTimeRange = '1m';
+      // 更新按钮的active状态
+      setTimeout(() => {
+        document.querySelectorAll('.time-option').forEach(b => {
+          if (b.dataset.range === '1m') {
+            b.classList.add('active');
+          } else {
+            b.classList.remove('active');
+          }
+        });
+      }, 50);
       
       const fund = await loadFundFromBackend(code);
       if (fund) {
