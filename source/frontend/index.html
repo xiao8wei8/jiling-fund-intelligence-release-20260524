@@ -4148,51 +4148,12 @@
       fundChart = null;
     }
 
-    // Generate initial mock data (百分比)
-    const months = ['2025-12','2026-01','2026-02','2026-03','2026-04','2026-05'];
-    const labels = ['12/1','1/1','2/1','3/1','4/1','5/1'];
-    
-    // 设置初始完整日期
-    fullDateLabels = months.map(month => month + '-01');
-    let fundData = [];
-    let fundVal = 0;
-
-    for (let i = 0; i < months.length; i++) {
-      if (fundCode === '163406') {
-        fundVal += (Math.random() * 2 - 0.5);
-      } else if (fundCode === '003095') {
-        fundVal += (Math.random() * 3 - 1.5);
-      } else if (fundCode === '004512') {
-        fundVal += (Math.random() * 0.6 - 0.15);
-      } else {
-        fundVal += (Math.random() * 1.5 - 0.6);
-      }
-      fundData.push(parseFloat(fundVal.toFixed(2)));
-    }
-
-    // 初始数据集（只包含本基金）
-    const initialDatasets = [
-      {
-        label: '本基金',
-        data: fundData,
-        borderColor: '#145CFF',
-        backgroundColor: 'rgba(20, 92, 255, 0.10)',
-        borderWidth: 2.5,
-        fill: true,
-        tension: 0.35,
-        pointRadius: 0,
-        pointHoverRadius: 6,
-        pointBackgroundColor: '#145CFF',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2
-      }
-    ];
-
+    // 创建空图表，等待真实数据加载
     fundChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: labels,
-        datasets: initialDatasets
+        labels: [],
+        datasets: []
       },
       options: {
         responsive: true,
@@ -4266,7 +4227,7 @@
       }
     });
 
-    // 加载真实数据
+    // 直接加载真实数据，不使用模拟数据
     (async () => {
       try {
         const d = await loadPingzhongData(fundCode);
