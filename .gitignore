@@ -10,7 +10,10 @@ __pycache__/
 node_modules/
 venv/
 .env
-.agents/
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/wind-mcp-skill/
 skills-lock.json
 jiling-source/
 jiling-source.zip
