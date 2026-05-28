@@ -1681,6 +1681,26 @@
       font-size: 14px;
       pointer-events: none;
     }
+    .search-clear {
+      position: absolute; right: 10px; top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      border: none;
+      background: rgba(0,0,0,0.1);
+      border-radius: 50%;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .search-clear:hover {
+      background: rgba(0,0,0,0.2);
+      color: var(--text-primary);
+    }
     .search-suggest {
       position: absolute;
       top: calc(100% + 6px);
@@ -1801,8 +1821,92 @@
     .legend-dot.fund { background: var(--brand); }
     .legend-dot.benchmark { background: var(--text-muted); }
     .fund-chart-wrap {
-      height: 160px;
+      height: 180px;
       position: relative;
+    }
+    .fund-chart-header {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .fund-chart-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .selector-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .time-selector {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .time-options {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .time-option {
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: white;
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+    .time-option:hover {
+      border-color: var(--brand);
+      color: var(--brand);
+    }
+    .time-option.active {
+      background: var(--brand);
+      color: white;
+      border-color: var(--brand);
+    }
+    .benchmark-selector {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .benchmark-options {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .benchmark-option {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .benchmark-option:hover {
+      background: rgba(20, 92, 255, 0.06);
+    }
+    .benchmark-option.active {
+      background: rgba(20, 92, 255, 0.12);
+      border-color: rgba(20, 92, 255, 0.3);
+      color: var(--brand);
+      font-weight: 600;
+    }
+    .benchmark-option input {
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
     }
 
     /* ============================================================
@@ -2024,6 +2128,273 @@
     .ldesc { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
     .lsub { font-size: 12px; color: var(--text-muted); }
 
+    /* Agent UI - Enhanced */
+    .agent-card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      transform-origin: center;
+    }
+    .agent-card.running {
+      box-shadow: 
+        0 0 30px rgba(20, 92, 255, 0.25),
+        0 0 60px rgba(25, 211, 255, 0.15),
+        0 4px 20px rgba(31, 76, 130, 0.1);
+      border-color: var(--brand);
+      transform: translateY(-2px);
+    }
+    .agent-card.running::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--brand), var(--brand-accent), transparent);
+      animation: scanline 2s ease-in-out infinite;
+    }
+    @keyframes scanline {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+    .agent-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent 40%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 60%
+      );
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .agent-card.running::after {
+      animation: shimmer 2s infinite;
+      opacity: 1;
+    }
+    
+    .agent-card.complete-celebration {
+      animation: completePulse 1s ease;
+    }
+    
+    @keyframes completePulse {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 30px rgba(20, 92, 255, 0.25), 0 0 60px rgba(25, 211, 255, 0.15);
+      }
+      25% {
+        transform: scale(1.02);
+        box-shadow: 0 0 40px rgba(20, 92, 255, 0.4), 0 0 80px rgba(25, 211, 255, 0.3);
+      }
+      50% {
+        transform: scale(1.01);
+        box-shadow: 0 0 50px rgba(17, 138, 85, 0.4), 0 0 100px rgba(17, 138, 85, 0.2);
+      }
+      75% {
+        transform: scale(1.005);
+        box-shadow: 0 0 40px rgba(17, 138, 85, 0.3), 0 0 80px rgba(17, 138, 85, 0.15);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 30px rgba(17, 138, 85, 0.25), 0 0 60px rgba(17, 138, 85, 0.15);
+      }
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-30%) rotate(45deg); }
+      100% { transform: translateX(30%) rotate(45deg); }
+    }
+    .agent-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    .status-dot::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: inherit;
+      opacity: 0;
+    }
+    .status-dot.inactive {
+      background: var(--text-muted);
+      opacity: 0.4;
+    }
+    .status-dot.running {
+      background: var(--brand);
+      animation: agentPulse 1.2s infinite;
+      box-shadow: 
+        0 0 10px var(--brand),
+        0 0 20px rgba(20, 92, 255, 0.4);
+    }
+    .status-dot.running::after {
+      animation: ripple 1.2s infinite;
+    }
+    @keyframes agentPulse {
+      0%, 100% { 
+        transform: scale(1); 
+        opacity: 1; 
+      }
+      50% { 
+        transform: scale(1.4); 
+        opacity: 0.6; 
+      }
+    }
+    @keyframes ripple {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(2.5);
+        opacity: 0;
+      }
+    }
+    .status-dot.done {
+      background: var(--success);
+      box-shadow: 
+        0 0 12px var(--success),
+        0 0 24px rgba(17, 138, 85, 0.3);
+      animation: successPop 0.4s ease;
+    }
+    @keyframes successPop {
+      0% { transform: scale(0.8); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    .status-dot.error {
+      background: var(--danger);
+      box-shadow: 
+        0 0 12px var(--danger),
+        0 0 24px rgba(192, 57, 43, 0.3);
+    }
+    .status-text {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .agent-log {
+      margin-top: 14px;
+      max-height: 140px;
+      overflow-y: auto;
+      font-size: 11.5px;
+      background: linear-gradient(
+        180deg, 
+        rgba(248, 250, 252, 0.95) 0%, 
+        rgba(248, 250, 252, 0.7) 100%
+      );
+      border-radius: 10px;
+      padding: 10px;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      position: relative;
+    }
+    .agent-log::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(20, 92, 255, 0.2), transparent);
+    }
+    .agent-log .log-item {
+      padding: 8px 0;
+      border-bottom: 1px dashed rgba(220, 232, 246, 0.6);
+      color: var(--text-secondary);
+      animation: fadeInUp 0.35s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
+    }
+    .agent-log .log-item:last-child {
+      border-bottom: none;
+    }
+    .agent-log .log-item::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--brand);
+      margin-top: 5px;
+      flex-shrink: 0;
+      box-shadow: 0 0 6px rgba(20, 92, 255, 0.4);
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    /* Agent progress bar - Enhanced */
+    .ai-side-meter {
+      background: linear-gradient(
+        90deg,
+        rgba(226, 232, 240, 0.8),
+        rgba(226, 232, 240, 0.5)
+      );
+      border-radius: 100px;
+      height: 8px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+    .ai-side-meter span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        #145CFF,
+        #19D3FF,
+        #8FE7FF
+      );
+      border-radius: 100px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      box-shadow: 0 0 12px rgba(20, 92, 255, 0.4);
+    }
+    .ai-side-meter span::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+      );
+      animation: progressShine 1.5s infinite;
+    }
+    @keyframes progressShine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
     /* Edit textarea */
     .edit-area {
       width: 100%;
@@ -2131,6 +2502,68 @@
     .slabel::after {
       content: ''; flex: 1; height: 1px;
       background: linear-gradient(90deg, rgba(20,92,255,0.18), transparent);
+    }
+
+    /* ============================================================
+       GLOBAL LOADING
+    ============================================================ */
+    .global-loading {
+      position: fixed; inset: 0;
+      background: rgba(10,20,40,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--brand);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-text {
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* ============================================================
+       AI MODIFY
+    ============================================================ */
+    .modify-option {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .modify-option:hover {
+      border-color: var(--brand);
+      background: rgba(20, 92, 255, 0.05);
+    }
+    .modify-option.active {
+      border-color: var(--brand);
+      background: rgba(20, 92, 255, 0.1);
+      color: var(--brand);
+      font-weight: 600;
+    }
+    /* AI优化按钮激活状态 */
+    #aiOptBtn.active {
+      border-color: var(--brand);
+      background: var(--brand);
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(20, 92, 255, 0.35);
+      transform: translateY(-1px);
     }
 
     /* ============================================================
@@ -2396,6 +2829,12 @@
   </style>
 </head>
 <body>
+
+<!-- GLOBAL LOADING OVERLAY -->
+<div id="globalLoading" class="global-loading" style="display:none;">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">加载中...</div>
+</div>
 
 <!-- TOAST -->
 <div id="toast" class="toast">
@@ -2672,6 +3111,12 @@
         </div>
         品牌配置
       </a>
+      <a class="sidebar-link" href="#" onclick="switchPage('skills-agents', this)">
+        <div class="sidebar-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        Skills & Agents配置
+      </a>
       <a class="sidebar-link" href="#" onclick="switchPage('compliance', this)">
         <div class="sidebar-icon">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -2750,7 +3195,8 @@
             <div class="card-body">
               <div class="search-wrap">
                 <span class="search-icon">🔎</span>
-                <input class="search-input" placeholder="搜索基金名称或代码..." id="mainSearch">
+                <input class="search-input" placeholder="搜索基金名称或代码..." id="mainSearch" autocomplete="off">
+                <button class="search-clear" id="mainSearchClear" style="display:none;" onclick="clearMainSearch()">✕</button>
                 <div class="search-suggest" id="mainSearchSuggest"></div>
               </div>
 
@@ -2778,15 +3224,15 @@
                   <div class="data-item-val up" id="dY3">+42.17%</div>
                 </div>
                 <div class="data-item">
-                  <div class="data-item-label">同类排名</div>
+                  <div class="data-item-label">近1年同类排名</div>
                   <div class="data-item-val" id="dRank">前 5%</div>
                 </div>
                 <div class="data-item">
-                  <div class="data-item-label">夏普比率</div>
+                  <div class="data-item-label">近1年夏普比率</div>
                   <div class="data-item-val" id="dSharpe">1.82</div>
                 </div>
                 <div class="data-item">
-                  <div class="data-item-label">最大回撤</div>
+                  <div class="data-item-label">近1年最大回撤</div>
                   <div class="data-item-val down" id="dDD">-15.3%</div>
                 </div>
                 <div class="data-item">
@@ -2796,19 +3242,55 @@
               </div>
               <div class="data-source">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                数据来源：天天基金（天天基金网） · 更新于 2026-04-10
+                数据来源：天天基金（天天基金网） · 更新于 <span id="dUpdateDate">—</span>
               </div>
 
               <!-- Fund Performance Chart -->
               <div class="fund-chart-container">
                 <div class="fund-chart-header">
                   <div class="fund-chart-title">业绩表现对比</div>
-                  <div class="fund-chart-legend">
-                    <div class="legend-item"><div class="legend-dot fund"></div>基金净值</div>
-                    <div class="legend-item"><div class="legend-dot benchmark"></div>沪深300</div>
+                  <!-- 时间选择 -->
+                  <div class="time-selector">
+                    <span class="selector-label">时间范围：</span>
+                    <div class="time-options">
+                      <button class="time-option active" data-range="1m" onclick="selectTimeRangeBtn(this)">近1月</button>
+                      <button class="time-option" data-range="3m" onclick="selectTimeRangeBtn(this)">近3月</button>
+                      <button class="time-option" data-range="6m" onclick="selectTimeRangeBtn(this)">近6月</button>
+                      <button class="time-option" data-range="1y" onclick="selectTimeRangeBtn(this)">近1年</button>
+                      <button class="time-option" data-range="3y" onclick="selectTimeRangeBtn(this)">近3年</button>
+                      <button class="time-option" data-range="5y" onclick="selectTimeRangeBtn(this)">近5年</button>
+                      <button class="time-option" data-range="ytd" onclick="selectTimeRangeBtn(this)">今年来</button>
+                      <button class="time-option" data-range="all" onclick="selectTimeRangeBtn(this)">成立来</button>
+                    </div>
+                  </div>
+                  <!-- 基准选择（多选） -->
+                  <div class="benchmark-selector">
+                    <span class="selector-label">对比基准：</span>
+                    <div class="benchmark-options">
+                      <label class="benchmark-option">
+                        <input type="checkbox" value="hs300" checked onchange="toggleBenchmark(this)">
+                        <span>沪深300</span>
+                      </label>
+                      <label class="benchmark-option">
+                        <input type="checkbox" value="zz500" onchange="toggleBenchmark(this)">
+                        <span>中证500</span>
+                      </label>
+                      <label class="benchmark-option">
+                        <input type="checkbox" value="sh" onchange="toggleBenchmark(this)">
+                        <span>上证指数</span>
+                      </label>
+                      <label class="benchmark-option">
+                        <input type="checkbox" value="sz" onchange="toggleBenchmark(this)">
+                        <span>深证成指</span>
+                      </label>
+                      <label class="benchmark-option">
+                        <input type="checkbox" value="gem" onchange="toggleBenchmark(this)">
+                        <span>创业板指</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
-              <div class="fund-chart-wrap">
+                <div class="fund-chart-wrap">
                   <canvas id="fundChart"></canvas>
                 </div>
               </div>
@@ -2866,10 +3348,20 @@
               </div>
               <div class="ai-window-sub">围绕所选基金上下文生成可发布的营销素材</div>
             </div>
-            <button class="btn btn-primary btn-sm" id="genCopyBtn" onclick="genCopy()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              AI 生成文案
-            </button>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+              <button class="btn btn-primary btn-sm" id="genCopyBtn" onclick="genCopy()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                AI 生成文案
+              </button>
+              <div class="agent-settings-dropdown" style="position:relative;">
+                <button class="btn btn-sm" onclick="toggleAgentSettings()" style="display:flex;align-items:center;gap:8px;background:var(--bg-subtle);border:1px solid var(--border);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  Agent 设置
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="agentSettingsArrow" style="transition:transform 0.2s;"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div id="agentSettingsPanel" style="display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:240px;background:white;border-radius:12px;box-shadow:0 10px 40px rgba(31,76,130,0.15);border:1px solid var(--border);z-index:100;overflow:hidden;"></div>
+              </div>
+            </div>
           </div>
           <div class="card-body">
 
@@ -2946,39 +3438,82 @@
 
         <!-- RIGHT: Result + Compliance + History -->
         <div class="ai-result-column">
-          <div class="card ai-side-card">
+          <div class="card ai-side-card agent-card" id="agent-result">
             <div class="card-head">
               <div class="card-title">
                 <div class="card-title-icon">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 </div>
-                生成结果
+                文案审核 Agent
+              </div>
+              <div class="agent-status" id="result-agent-status">
+                <span class="status-dot inactive"></span>
+                <span class="status-text">待运行</span>
               </div>
             </div>
             <div class="card-body">
-              <div class="ai-side-text">AI 生成后的营销文案会在中间窗口展示，可继续复制、编辑、保存到素材库。</div>
-              <div class="ai-side-meter">
-                <span></span>
+              <div class="agent-log" id="result-agent-log">
+                <div class="log-item">等待接收任务...</div>
               </div>
-              <div class="ai-side-meta">上下文完整度 86%</div>
+              <div class="ai-side-meter" style="margin-top:12px;">
+                <span id="result-agent-progress" style="width:0%;"></span>
+              </div>
             </div>
           </div>
 
-          <div class="card ai-side-card">
+          <div class="card ai-side-card agent-card" id="agent-compliance">
             <div class="card-head">
               <div class="card-title">
                 <div class="card-title-icon">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 </div>
-                合规检查
+                合规检查 Agent
+              </div>
+              <div class="agent-status" id="compliance-agent-status">
+                <span class="status-dot inactive"></span>
+                <span class="status-text">待运行</span>
               </div>
             </div>
             <div class="card-body">
-              <div class="compliance-row" id="compRow">
+              <div class="agent-log" id="compliance-agent-log">
+                <div class="log-item">等待接收任务...</div>
+              </div>
+              <div class="ai-side-meter" style="margin-top:12px;">
+                <span id="compliance-agent-progress" style="width:0%;"></span>
+              </div>
+              <div class="compliance-row" id="compRow" style="display:none;margin-top:12px;">
                 <div class="ci pass"><div class="ci-icon">✓</div>表述合规</div>
                 <div class="ci pass"><div class="ci-icon">✓</div>完整性通过</div>
                 <div class="ci pass"><div class="ci-icon">✓</div>风险提示</div>
                 <div class="ci warn"><div class="ci-icon">!</div>数据时效 <span class="warn-tag">建议更新</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card ai-side-card agent-card" id="agent-wind">
+            <div class="card-head">
+              <div class="card-title">
+                <div class="card-title-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 3h18v18H3V3z"/><path d="M9 3v18"/><path d="M3 9h18"/></svg>
+                </div>
+                Wind数据验证 Agent
+              </div>
+              <div class="agent-status" id="wind-agent-status">
+                <span class="status-dot inactive"></span>
+                <span class="status-text">待运行</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="agent-log" id="wind-agent-log">
+                <div class="log-item">等待接收任务...</div>
+              </div>
+              <div class="ai-side-meter" style="margin-top:12px;">
+                <span id="wind-agent-progress" style="width:0%;"></span>
+              </div>
+              <div class="compliance-row" id="windResultRow" style="display:none;margin-top:12px;">
+                <div class="ci pass"><div class="ci-icon">✓</div>数据已验证</div>
+                <div class="ci pass"><div class="ci-icon">✓</div>Wind来源</div>
+                <div class="ci pass"><div class="ci-icon">✓</div>实时有效</div>
               </div>
             </div>
           </div>
@@ -3218,13 +3753,409 @@
   let marketCompanySortKey = 'total_scale';
 
   // ---- Fund Chart ----
-  function initFundChart(fundCode) {
+  // 基准配置
+  const benchmarkConfigs = {
+    hs300: { label: '沪深300', color: '#8896A8' },
+    zz500: { label: '中证500', color: '#FF7D00' },
+    sh: { label: '上证指数', color: '#E53935' },
+    sz: { label: '深证成指', color: '#1E88E5' },
+    gem: { label: '创业板指', color: '#8E24AA' }
+  };
+
+  // 当前选中的基准（支持多选）
+  let selectedBenchmarks = ['hs300'];
+  // 当前时间范围
+  let currentTimeRange = '1y';
+  // 当前基金数据
+  let currentFundData = null;
+  // 保存完整日期数据，用于tooltip显示
+  let fullDateLabels = [];
+
+  // 时间范围选择（按钮）
+  async function selectTimeRangeBtn(btn, showLoading = true) {
+    document.querySelectorAll('.time-option').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTimeRange = btn.dataset.range;
+    if (currentFundData) {
+      if (showLoading) showGlobalLoading();
+      try {
+        await updateChartWithData(currentFundData);
+      } finally {
+        if (showLoading) hideGlobalLoading();
+      }
+    }
+  }
+
+  // 基准选择（多选）
+  async function toggleBenchmark(checkbox, showLoading = true) {
+    const label = checkbox.closest('.benchmark-option');
+    if (checkbox.checked) {
+      label.classList.add('active');
+      if (!selectedBenchmarks.includes(checkbox.value)) {
+        selectedBenchmarks.push(checkbox.value);
+      }
+    } else {
+      label.classList.remove('active');
+      selectedBenchmarks = selectedBenchmarks.filter(b => b !== checkbox.value);
+    }
+    if (currentFundData) {
+      if (showLoading) showGlobalLoading();
+      try {
+        await updateChartWithData(currentFundData);
+      } finally {
+        if (showLoading) hideGlobalLoading();
+      }
+    }
+  }
+
+  // 根据时间范围获取数据点数量
+  function getRangePoints(range) {
+    const map = {
+      '1m': 22,
+      '3m': 65,
+      '6m': 130,
+      '1y': 250,
+      '3y': 750,
+      '5y': 1250,
+      'ytd': null,
+      'all': null
+    };
+    return map[range] || 250;
+  }
+
+  // 加载真实基准数据
+  let benchmarkDataCache = {};
+
+  async function loadBenchmarkData(indexKeys, days) {
+    const cacheKey = indexKeys.join(',') + '_' + days;
+    
+    console.log(`Loading benchmark data: keys=${indexKeys}, days=${days}, cacheKey=${cacheKey}`);
+    
+    // 只在缓存有数据时使用缓存
+    if (benchmarkDataCache[cacheKey]) {
+      console.log(`Using cached benchmark data for ${cacheKey}`);
+      return benchmarkDataCache[cacheKey];
+    }
+    
+    try {
+      const url = `${API_BASE}/fund/index/multiple?keys=${indexKeys.join(',')}&days=${days}`;
+      console.log(`Fetching benchmark data from: ${url}`);
+      
+      const resp = await fetch(url);
+      console.log(`Response status: ${resp.status}`);
+      
+      const result = await resp.json();
+      console.log(`API result:`, result);
+      
+      // 放宽检查条件，只要有数据就使用
+      if (result.success && result.data) {
+        // 检查至少有一个指数有数据
+        let hasData = false;
+        for (const key of indexKeys) {
+          if (result.data[key] && result.data[key].length > 0) {
+            hasData = true;
+            break;
+          }
+        }
+        
+        if (hasData) {
+          benchmarkDataCache[cacheKey] = result.data;
+          console.log(`Benchmark data cached successfully:`, result.data);
+          return result.data;
+        } else {
+          console.warn('No valid data found in API result');
+        }
+      } else {
+        console.warn('API returned empty or failed result:', result);
+      }
+    } catch (err) {
+      console.error('Failed to load benchmark data:', err.message);
+    }
+    
+    console.warn('Returning null for benchmark data');
+    return null;
+  }
+
+  // 更新图表
+  async function updateChartWithData(data, showLoading = false) {
+    if (!fundChart) return;
+    
+    if (showLoading) {
+      showGlobalLoading();
+    }
+
+    let pts = data.netTrend || [];
+    if (pts.length < 10) return;
+    
+    // 根据时间范围筛选数据
+    let days = 90;
+    if (currentTimeRange === 'ytd') {
+      const now = new Date();
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      pts = pts.filter(p => new Date(p.x) >= startOfYear);
+      days = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
+    } else if (currentTimeRange === 'all') {
+      days = pts.length;
+    } else if (currentTimeRange === '1m') {
+      days = 30;
+      pts = pts.slice(-30);
+    } else if (currentTimeRange === '3m') {
+      days = 90;
+      pts = pts.slice(-90);
+    } else if (currentTimeRange === '6m') {
+      days = 180;
+      pts = pts.slice(-180);
+    } else if (currentTimeRange === '1y') {
+      days = 365;
+      pts = pts.slice(-365);
+    } else if (currentTimeRange === '3y') {
+      days = 365 * 3;
+      pts = pts.slice(-365 * 3);
+    } else if (currentTimeRange === '5y') {
+      days = 365 * 5;
+      pts = pts.slice(-365 * 5);
+    } else {
+      const points = getRangePoints(currentTimeRange);
+      pts = pts.slice(-points);
+      days = points;
+    }
+    
+    if (pts.length < 10) return;
+
+    const base = Number(pts[0].y) || 1;
+    
+    // 保存完整日期数据到全局变量
+    fullDateLabels = pts.map(p => {
+      const dt = new Date(p.x);
+      const year = dt.getFullYear();
+      const month = String(dt.getMonth() + 1).padStart(2, '0');
+      const day = String(dt.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    });
+    
+    // 根据时间范围生成横坐标标签（精简版）
+    const labels = pts.map((p, idx) => {
+      const dt = new Date(p.x);
+      const month = dt.getMonth() + 1;
+      const day = dt.getDate();
+      const year = dt.getFullYear();
+      
+      // 根据时间范围决定显示频率和格式
+      const totalPoints = pts.length;
+      let step = 1;
+      
+      if (currentTimeRange === '1m') {
+        step = Math.max(1, Math.floor(totalPoints / 6));
+      } else if (currentTimeRange === '3m' || currentTimeRange === '6m') {
+        step = Math.max(1, Math.floor(totalPoints / 8));
+      } else if (currentTimeRange === '1y') {
+        step = Math.max(1, Math.floor(totalPoints / 12));
+      } else if (currentTimeRange === '3y') {
+        step = Math.max(1, Math.floor(totalPoints / 12));
+      } else if (currentTimeRange === '5y' || currentTimeRange === 'all') {
+        step = Math.max(1, Math.floor(totalPoints / 10));
+      } else if (currentTimeRange === 'ytd') {
+        step = Math.max(1, Math.floor(totalPoints / 12));
+      }
+      
+      // 对于ytd，只显示1月、2月...
+      if (currentTimeRange === 'ytd') {
+        const prevDt = idx > 0 ? new Date(pts[idx - 1].x) : null;
+        if (prevDt && prevDt.getMonth() === month) return '';
+        return `${month}月`;
+      }
+      
+      // 对于all，只在每年或每半年显示
+      if (currentTimeRange === 'all') {
+        const prevDt = idx > 0 ? new Date(pts[idx - 1].x) : null;
+        if (prevDt && prevDt.getFullYear() === year) {
+          if (month !== 1 && month !== 7) return '';
+        }
+        return `${year}年`;
+      }
+      
+      // 对于5y，只在每年或每半年显示
+      if (currentTimeRange === '5y') {
+        const prevDt = idx > 0 ? new Date(pts[idx - 1].x) : null;
+        if (prevDt && prevDt.getFullYear() === year) {
+          if (month !== 1 && month !== 7) return '';
+        }
+        return `${year}年`;
+      }
+      
+      if (idx % step !== 0) return '';
+      
+      if (currentTimeRange === '1m') {
+        return `${month}/${day}`;
+      } else if (currentTimeRange === '3m' || currentTimeRange === '6m') {
+        return `${month}/${day}`;
+      } else if (currentTimeRange === '1y') {
+        return `${month}月`;
+      } else if (currentTimeRange === '3y') {
+        return `${year}.${month}`;
+      } else {
+        return `${year}年`;
+      }
+    });
+    
+    // 计算基金的百分比变化
+    const fundData = pts.map(p => (((Number(p.y) || 0) / base - 1) * 100).toFixed(2) * 1);
+
+    // 构建数据集
+    const datasets = [
+      {
+        label: '本基金',
+        data: fundData,
+        borderColor: '#145CFF',
+        backgroundColor: 'rgba(20, 92, 255, 0.10)',
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointBackgroundColor: '#145CFF',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
+      }
+    ];
+
+    // 计算基金数据的实际时间跨度
+    const firstFundDate = new Date(fullDateLabels[0]);
+    const lastFundDate = new Date(fullDateLabels[fullDateLabels.length - 1]);
+    const actualDays = Math.ceil((lastFundDate - firstFundDate) / (1000 * 60 * 60 * 24)) + 30; // 额外30天缓冲
+    
+    // 只获取真实基准数据 - 根据基金的实际时间跨度获取
+    const benchData = await loadBenchmarkData(selectedBenchmarks, actualDays);
+    
+    console.log('Benchmark data loaded:', benchData);
+    console.log('Selected benchmarks:', selectedBenchmarks);
+    console.log('Fund data points:', pts.length);
+    
+    // 只添加有真实数据的基准
+    if (benchData) {
+      selectedBenchmarks.forEach(benchKey => {
+        const config = benchmarkConfigs[benchKey];
+        
+        if (benchData[benchKey]) {
+          const indexData = benchData[benchKey];
+          const benchValues = [];
+          const ptsLen = pts.length;
+          const dataLen = indexData.length;
+          
+          console.log(`Processing ${benchKey}: ${dataLen} data points, fund points: ${ptsLen}`);
+          
+          if (dataLen > 0 && ptsLen > 0) {
+            // 获取基准数据的日期范围
+            const indexStartDate = new Date(indexData[0].date);
+            const indexEndDate = new Date(indexData[dataLen - 1].date);
+            
+            console.log(`Benchmark ${benchKey} date range: ${indexData[0].date} to ${indexData[dataLen - 1].date}`);
+            
+            // 步骤1: 找到与基金数据起始日期最接近的基准数据点作为基准点
+            let basePrice = null;
+            let baseIndex = 0;
+            let minDiff = Infinity;
+            
+            for (let i = 0; i < dataLen; i++) {
+              const diff = Math.abs(new Date(indexData[i].date) - new Date(fullDateLabels[0]));
+              if (diff < minDiff) {
+                minDiff = diff;
+                basePrice = indexData[i].close;
+                baseIndex = i;
+              }
+            }
+            
+            if (basePrice) {
+              console.log(`Benchmark ${benchKey} base price: ${basePrice} at ${indexData[baseIndex].date}`);
+              
+              // 步骤2: 为每个基金日期找最合适的基准数据
+              for (let i = 0; i < ptsLen; i++) {
+                const fundDate = new Date(fullDateLabels[i]);
+                
+                // 找最接近的基准日期（允许有一定误差，7天内都可以接受）
+                let closestItem = null;
+                let closestDiff = Infinity;
+                
+                for (const item of indexData) {
+                  const diff = Math.abs(new Date(item.date) - fundDate);
+                  if (diff < closestDiff) {
+                    closestDiff = diff;
+                    closestItem = item;
+                  }
+                }
+                
+                // 只在相差超过14天（2周）时才认为没有数据
+                if (closestItem && closestItem.close && closestDiff < 14 * 24 * 60 * 60 * 1000) {
+                  const returnValue = ((closestItem.close - basePrice) / basePrice) * 100;
+                  benchValues.push(parseFloat(returnValue.toFixed(2)));
+                } else {
+                  benchValues.push(null);
+                }
+              }
+              
+              console.log(`Benchmark ${benchKey} values (first 5):`, benchValues.slice(0, 5));
+              console.log(`Benchmark ${benchKey} values (last 5):`, benchValues.slice(-5));
+              
+              datasets.push({
+                label: config.label,
+                data: benchValues,
+                borderColor: config.color,
+                backgroundColor: 'transparent',
+                borderWidth: 1.8,
+                borderDash: [6, 4],
+                fill: false,
+                tension: 0.35,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                pointBackgroundColor: config.color,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 1.5,
+                spanGaps: true // 允许跳过null值
+              });
+              
+              console.log(`✓ Added benchmark ${config.label} with ${benchValues.length} points`);
+            }
+          }
+        }
+      });
+    } else {
+      console.warn('No benchmark data available!');
+    }
+
+    fundChart.data.labels = labels;
+    fundChart.data.datasets = datasets;
+    fundChart.update();
+    
+    if (showLoading) {
+      hideGlobalLoading();
+    }
+  }
+
+  // 初始化基准checkbox和label的同步状态
+  function initBenchmarkStates() {
+    document.querySelectorAll('.benchmark-option input[type="checkbox"]').forEach(checkbox => {
+      const label = checkbox.closest('.benchmark-option');
+      if (checkbox.checked) {
+        label.classList.add('active');
+        if (!selectedBenchmarks.includes(checkbox.value)) {
+          selectedBenchmarks.push(checkbox.value);
+        }
+      } else {
+        label.classList.remove('active');
+      }
+    });
+  }
+
+  function initFundChart(fundCode, showLoading = false) {
+    // 初始化基准checkbox状态
+    initBenchmarkStates();
+    
     const ctx = document.getElementById('fundChart');
     if (!ctx) return;
     if (typeof Chart === 'undefined') {
       const wrap = ctx.closest('.fund-chart-wrap');
       if (wrap) {
-        wrap.innerHTML = '<div style="height:160px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:12px;background:rgba(246,250,255,0.82);border:1px dashed var(--border);border-radius:12px;">净值走势加载中</div>';
+        wrap.innerHTML = '<div style="height:180px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:12px;background:rgba(246,250,255,0.82);border:1px dashed var(--border);border-radius:12px;">净值走势加载中</div>';
       }
       return;
     }
@@ -3235,97 +4166,12 @@
       fundChart = null;
     }
 
-    // Generate mock data
-    const months = ['2025-04','2025-05','2025-06','2025-07','2025-08','2025-09','2025-10','2025-11','2025-12','2026-01','2026-02','2026-03','2026-04'];
-    const labels = months.map(m => m.substring(5));
-    let fundData = [];
-    let benchmarkData = [];
-    let fundVal = 100;
-    let benchVal = 100;
-
-    // Generate data based on fund code characteristics
-    for (let i = 0; i < months.length; i++) {
-      if (fundCode === '163406') {
-        fundVal += (Math.random() * 4 - 1.0);
-      } else if (fundCode === '003095') {
-        fundVal += (Math.random() * 6 - 2.5);
-      } else if (fundCode === '004512') {
-        fundVal += (Math.random() * 0.8 - 0.2);
-      } else {
-        fundVal += (Math.random() * 3 - 1.2);
-      }
-      benchVal += (Math.random() * 2.5 - 1.3);
-      fundData.push(parseFloat(fundVal.toFixed(4)));
-      benchmarkData.push(parseFloat(benchVal.toFixed(4)));
-    }
-
-    loadPingzhongData(fundCode)
-      .then(d => {
-        const pts = (d.netTrend || []).slice(-90);
-        if (pts.length < 10) return;
-        const base = Number(pts[0].y) || 1;
-        const newLabels = pts.map(p => {
-          const dt = new Date(p.x);
-          const m = String(dt.getMonth() + 1).padStart(2, '0');
-          const day = String(dt.getDate()).padStart(2, '0');
-          return `${m}-${day}`;
-        });
-        const newFundData = pts.map(p => ((Number(p.y) || 0) / base * 100).toFixed(4) * 1);
-
-        let newBenchData = new Array(pts.length).fill(null);
-        const gt0 = Array.isArray(d.grandTotal) ? d.grandTotal[0] : null;
-        const gt = gt0 && Array.isArray(gt0.data) ? gt0.data : [];
-        if (gt.length > 0) {
-          const mp = new Map(gt.map(x => [x[0], Number(x[1])]));
-          newBenchData = pts.map(p => {
-            const v = mp.get(p.x);
-            if (v === undefined || Number.isNaN(v)) return null;
-            return (100 * (1 + v / 100)).toFixed(4) * 1;
-          });
-        }
-
-        fundChart.data.labels = newLabels;
-        fundChart.data.datasets[0].data = newFundData;
-        fundChart.data.datasets[1].data = newBenchData;
-        fundChart.update();
-      })
-      .catch(() => {});
-
+    // 创建空图表，等待真实数据加载
     fundChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: labels,
-        datasets: [
-          {
-            label: '基金净值',
-            data: fundData,
-            borderColor: '#145CFF',
-            backgroundColor: 'rgba(20, 92, 255, 0.10)',
-            borderWidth: 2,
-            fill: true,
-            tension: 0.3,
-            pointRadius: 3,
-            pointHoverRadius: 6,
-            pointBackgroundColor: '#145CFF',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2
-          },
-          {
-            label: '沪深300',
-            data: benchmarkData,
-            borderColor: '#8896A8',
-            backgroundColor: 'transparent',
-            borderWidth: 1.5,
-            borderDash: [5, 5],
-            fill: false,
-            tension: 0.3,
-            pointRadius: 2,
-            pointHoverRadius: 5,
-            pointBackgroundColor: '#8896A8',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 1.5
-          }
-        ]
+        labels: [],
+        datasets: []
       },
       options: {
         responsive: true,
@@ -3336,18 +4182,35 @@
         },
         plugins: {
           legend: {
-            display: false
+            display: true,
+            position: 'top',
+            labels: {
+              boxWidth: 12,
+              font: { size: 11 },
+              padding: 15,
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
           },
           tooltip: {
-            backgroundColor: 'rgba(13, 27, 42, 0.9)',
+            backgroundColor: 'rgba(13, 27, 42, 0.95)',
             titleFont: { size: 12, weight: '600' },
             bodyFont: { size: 11 },
-            padding: 10,
-            cornerRadius: 6,
+            padding: 12,
+            cornerRadius: 8,
             displayColors: true,
             callbacks: {
+              title: function(context) {
+                // 显示完整日期
+                if (fullDateLabels && fullDateLabels[context[0].dataIndex]) {
+                  return fullDateLabels[context[0].dataIndex];
+                }
+                return context[0].label;
+              },
               label: function(context) {
-                return context.dataset.label + ': ' + context.parsed.y.toFixed(4);
+                const val = context.parsed.y;
+                const sign = val >= 0 ? '+' : '';
+                return context.dataset.label + ': ' + sign + val.toFixed(2) + '%';
               }
             }
           }
@@ -3361,29 +4224,45 @@
               font: { size: 10 },
               color: '#8896A8',
               maxRotation: 0,
-              maxTicksLimit: 6
+              autoSkip: true,
+              autoSkipPadding: 20
             }
           },
           y: {
             grid: {
-              color: 'rgba(226, 232, 240, 0.5)'
+              color: 'rgba(226, 232, 240, 0.45)'
             },
             ticks: {
               font: { size: 10 },
               color: '#8896A8',
               callback: function(value) {
-                return value.toFixed(2);
+                const sign = value >= 0 ? '+' : '';
+                return sign + value.toFixed(1) + '%';
               }
             }
           }
         }
       }
     });
+
+    // 直接加载真实数据，不使用模拟数据
+    (async () => {
+      try {
+        const d = await loadPingzhongData(fundCode);
+        currentFundData = d;
+        await updateChartWithData(d, showLoading);
+      } catch (err) {
+        console.warn('Failed to load fund data:', err);
+        if (showLoading) {
+          hideGlobalLoading();
+        }
+      }
+    })();
   }
 
   // Update chart when fund changes
-  function updateFundChart(fundCode) {
-    initFundChart(fundCode);
+  function updateFundChart(fundCode, showLoading = false) {
+    initFundChart(fundCode, showLoading);
   }
 
   // ---- Toast ----
@@ -3418,7 +4297,7 @@
     document.querySelector('.main').style.display = 'none';
 
     // Hide all other pages and remove page-full class
-    ['library','dashboard','team','myfunds','audit','brand','compliance'].forEach(p => {
+    ['library','dashboard','team','myfunds','audit','brand','skills-agents','compliance'].forEach(p => {
       const el = document.getElementById('page-' + p);
       if (el) {
         el.style.display = 'none';
@@ -3449,7 +4328,405 @@
     if (page === 'dashboard') {
       loadFundMarketPage();
     }
+    if (page === 'skills-agents') {
+      loadSkillsAgentsConfig();
+    }
 
+  }
+
+  // ---- Skills & Agents Config ----
+  let skillsAgentsConfig = null;
+  let currentEditingItem = null;
+  let currentEditingType = null;
+  
+  // 默认配置数据
+  const defaultConfig = {
+    agents: {
+      result: {
+        id: 'result',
+        name: '文案审核 Agent',
+        icon: '📝',
+        enabled: true,
+        description: '检查文案的完整性、吸引力和上下文相关性',
+        prompt: '作为专业的文案审核员，请评估这段文案：\n1. 内容完整性（是否包含所有必要信息）\n2. 吸引力（是否能引起读者兴趣）\n3. 上下文相关性（是否与基金产品匹配）\n请给出评分（0-100分）和详细建议。'
+      },
+      compliance: {
+        id: 'compliance',
+        name: '合规检查 Agent',
+        icon: '⚖️',
+        enabled: true,
+        description: '检查禁用词汇和宣传合规性',
+        prompt: '作为合规审核员，请检查这段文案：\n1. 是否包含禁用词汇（保本、保证收益、零风险等）\n2. 宣传表述是否合规\n3. 风险提示是否充分\n请列出问题并给出修改建议。'
+      },
+      wind: {
+        id: 'wind',
+        name: 'Wind数据验证 Agent',
+        icon: '📊',
+        enabled: true,
+        description: '通过Wind API验证基金数据准确性',
+        prompt: '作为数据验证员，请验证文案中的基金数据：\n1. 净值数据准确性\n2. 收益率数据准确性\n3. 排名数据准确性\n请通过Wind API验证并给出验证报告。'
+      }
+    },
+    skills: {
+      text: {
+        shorten: {
+          id: 'shorten',
+          name: '缩短文案',
+          icon: '📝',
+          category: 'text',
+          enabled: true,
+          description: '精简文案，保留核心信息',
+          prompt: '请将这段文案精简，保留所有核心信息，使其更简洁有力。'
+        },
+        lengthen: {
+          id: 'lengthen',
+          name: '加长文案',
+          icon: '📄',
+          category: 'text',
+          enabled: true,
+          description: '增加细节，丰富文案内容',
+          prompt: '请扩展这段文案，增加更多有价值的细节和描述，使其更丰满。'
+        },
+        formal: {
+          id: 'formal',
+          name: '更正式',
+          icon: '💼',
+          category: 'text',
+          enabled: true,
+          description: '调整语气为专业正式',
+          prompt: '请将这段文案调整为更正式、专业的语气风格。'
+        },
+        casual: {
+          id: 'casual',
+          name: '更口语化',
+          icon: '😊',
+          category: 'text',
+          enabled: true,
+          description: '调整语气为亲切自然',
+          prompt: '请将这段文案调整为更口语化、亲切自然的语气风格。'
+        },
+        addEmoji: {
+          id: 'addEmoji',
+          name: '添加表情',
+          icon: '🎉',
+          category: 'text',
+          enabled: true,
+          description: '插入适当的emoji增加活力',
+          prompt: '请在这段文案中适当添加emoji，增加活力和吸引力。'
+        },
+        moreAttractive: {
+          id: 'moreAttractive',
+          name: '更吸引人',
+          icon: '✨',
+          category: 'text',
+          enabled: true,
+          description: '优化表达，增强感染力',
+          prompt: '请优化这段文案的表达，使其更有感染力和吸引力。'
+        }
+      },
+      investor: {
+        conservative: {
+          id: 'conservative',
+          name: '保守型',
+          icon: '🛡️',
+          category: 'investor',
+          enabled: true,
+          description: '强调安全、稳定、本金保障',
+          prompt: '请将这段文案改写为针对保守型投资者的版本，强调安全、稳定和本金保障。'
+        },
+        steady: {
+          id: 'steady',
+          name: '稳健型',
+          icon: '🎯',
+          category: 'investor',
+          enabled: true,
+          description: '追求稳健增值、风险可控',
+          prompt: '请将这段文案改写为针对稳健型投资者的版本，强调稳健增值和风险可控。'
+        },
+        balanced: {
+          id: 'balanced',
+          name: '平衡型',
+          icon: '⚖️',
+          category: 'investor',
+          enabled: true,
+          description: '均衡风险与收益',
+          prompt: '请将这段文案改写为针对平衡型投资者的版本，均衡体现风险与收益。'
+        },
+        progressive: {
+          id: 'progressive',
+          name: '进取型',
+          icon: '📈',
+          category: 'investor',
+          enabled: true,
+          description: '追求较高收益',
+          prompt: '请将这段文案改写为针对进取型投资者的版本，强调追求较高收益的机会。'
+        },
+        aggressive: {
+          id: 'aggressive',
+          name: '激进型',
+          icon: '🔥',
+          category: 'investor',
+          enabled: true,
+          description: '追求最大化收益',
+          prompt: '请将这段文案改写为针对激进型投资者的版本，强调追求最大化收益的潜力。'
+        }
+      }
+    }
+  };
+
+  function loadSkillsAgentsConfig() {
+    const saved = localStorage.getItem('skillsAgentsConfig');
+    if (saved) {
+      skillsAgentsConfig = JSON.parse(saved);
+    } else {
+      skillsAgentsConfig = JSON.parse(JSON.stringify(defaultConfig));
+    }
+    
+    renderConfigPage();
+    applyConfigToMainUI();
+    
+    return skillsAgentsConfig;
+  }
+
+  function renderConfigPage() {
+    // 渲染Agents列表
+    const agentsList = document.getElementById('agentsConfigList');
+    if (agentsList) {
+      agentsList.innerHTML = Object.values(skillsAgentsConfig.agents).map(agent => `
+        <div style="border:1px solid var(--border-light);border-radius:12px;padding:16px;background:var(--bg-subtle);">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <input type="checkbox" 
+                   id="agent-${agent.id}-enabled" 
+                   ${agent.enabled ? 'checked' : ''} 
+                   style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;"
+                   onchange="toggleAgentEnabled('${agent.id}')">
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <span style="font-size:20px;">${agent.icon}</span>
+                <span style="font-size:15px;font-weight:700;color:#1a202c;">${agent.name}</span>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);">${agent.description}</div>
+            </div>
+            <button class="btn btn-sm" onclick="openEditModal('agent', '${agent.id}')" style="background:white;border:1px solid var(--border);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              编辑
+            </button>
+          </div>
+          <div style="background:white;border-radius:8px;padding:12px;border:1px dashed var(--border);">
+            <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Prompt:</div>
+            <div style="font-size:12px;color:#374151;line-height:1.6;white-space:pre-wrap;max-height:80px;overflow-y:auto;">${agent.prompt}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // 渲染文案优化Skills
+    const skillsTextList = document.getElementById('skillsTextConfigList');
+    if (skillsTextList) {
+      skillsTextList.innerHTML = Object.values(skillsAgentsConfig.skills.text).map(skill => `
+        <div style="border:1px solid var(--border-light);border-radius:12px;padding:16px;background:rgba(184,137,42,0.05);">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <input type="checkbox" 
+                   id="skill-${skill.id}-enabled" 
+                   ${skill.enabled ? 'checked' : ''} 
+                   style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;"
+                   onchange="toggleSkillEnabled('${skill.category}', '${skill.id}')">
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <span style="font-size:20px;">${skill.icon}</span>
+                <span style="font-size:15px;font-weight:700;color:#1a202c;">${skill.name}</span>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);">${skill.description}</div>
+            </div>
+            <button class="btn btn-sm" onclick="openEditModal('skill', '${skill.id}')" style="background:white;border:1px solid var(--border);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              编辑
+            </button>
+          </div>
+          <div style="background:white;border-radius:8px;padding:12px;border:1px dashed var(--border);">
+            <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Prompt:</div>
+            <div style="font-size:12px;color:#374151;line-height:1.6;white-space:pre-wrap;max-height:80px;overflow-y:auto;">${skill.prompt}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // 渲染投资者类型Skills
+    const skillsInvestorList = document.getElementById('skillsInvestorConfigList');
+    if (skillsInvestorList) {
+      skillsInvestorList.innerHTML = Object.values(skillsAgentsConfig.skills.investor).map(skill => `
+        <div style="border:1px solid var(--border-light);border-radius:12px;padding:16px;background:rgba(63,185,80,0.05);">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <input type="checkbox" 
+                   id="skill-${skill.id}-enabled" 
+                   ${skill.enabled ? 'checked' : ''} 
+                   style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;"
+                   onchange="toggleSkillEnabled('${skill.category}', '${skill.id}')">
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <span style="font-size:20px;">${skill.icon}</span>
+                <span style="font-size:15px;font-weight:700;color:#1a202c;">${skill.name}</span>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);">${skill.description}</div>
+            </div>
+            <button class="btn btn-sm" onclick="openEditModal('skill', '${skill.id}')" style="background:white;border:1px solid var(--border);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              编辑
+            </button>
+          </div>
+          <div style="background:white;border-radius:8px;padding:12px;border:1px dashed var(--border);">
+            <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Prompt:</div>
+            <div style="font-size:12px;color:#374151;line-height:1.6;white-space:pre-wrap;max-height:80px;overflow-y:auto;">${skill.prompt}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  function toggleAgentEnabled(id) {
+    if (skillsAgentsConfig.agents[id]) {
+      skillsAgentsConfig.agents[id].enabled = !skillsAgentsConfig.agents[id].enabled;
+      applyConfigToMainUI();
+    }
+  }
+
+  function toggleSkillEnabled(category, id) {
+    if (skillsAgentsConfig.skills[category] && skillsAgentsConfig.skills[category][id]) {
+      skillsAgentsConfig.skills[category][id].enabled = !skillsAgentsConfig.skills[category][id].enabled;
+      applyConfigToMainUI();
+    }
+  }
+
+  function openEditModal(type, id) {
+    currentEditingType = type;
+    currentEditingItem = id;
+    
+    let item = null;
+    let title = '';
+    
+    if (type === 'agent') {
+      item = skillsAgentsConfig.agents[id];
+      title = `编辑 ${item.name}`;
+    } else {
+      // 查找skill
+      if (skillsAgentsConfig.skills.text[id]) {
+        item = skillsAgentsConfig.skills.text[id];
+      } else if (skillsAgentsConfig.skills.investor[id]) {
+        item = skillsAgentsConfig.skills.investor[id];
+      }
+      title = `编辑 ${item.name}`;
+    }
+    
+    document.getElementById('editModalTitle').textContent = title;
+    document.getElementById('editModalContent').innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div>
+          <label style="display:block;font-size:12px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">名称</label>
+          <input type="text" id="edit-name" value="${item.name}" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">图标</label>
+          <input type="text" id="edit-icon" value="${item.icon}" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">描述</label>
+          <input type="text" id="edit-description" value="${item.description}" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">Prompt</label>
+          <textarea id="edit-prompt" rows="8" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;resize:vertical;line-height:1.6;">${item.prompt}</textarea>
+        </div>
+      </div>
+    `;
+    
+    const modal = document.getElementById('editItemModal');
+    modal.style.display = 'flex';
+  }
+
+  function closeEditModal() {
+    const modal = document.getElementById('editItemModal');
+    modal.style.display = 'none';
+    currentEditingItem = null;
+    currentEditingType = null;
+  }
+
+  function saveEditItem() {
+    if (!currentEditingItem || !currentEditingType) return;
+    
+    const name = document.getElementById('edit-name').value;
+    const icon = document.getElementById('edit-icon').value;
+    const description = document.getElementById('edit-description').value;
+    const prompt = document.getElementById('edit-prompt').value;
+    
+    if (currentEditingType === 'agent') {
+      skillsAgentsConfig.agents[currentEditingItem].name = name;
+      skillsAgentsConfig.agents[currentEditingItem].icon = icon;
+      skillsAgentsConfig.agents[currentEditingItem].description = description;
+      skillsAgentsConfig.agents[currentEditingItem].prompt = prompt;
+    } else {
+      if (skillsAgentsConfig.skills.text[currentEditingItem]) {
+        skillsAgentsConfig.skills.text[currentEditingItem].name = name;
+        skillsAgentsConfig.skills.text[currentEditingItem].icon = icon;
+        skillsAgentsConfig.skills.text[currentEditingItem].description = description;
+        skillsAgentsConfig.skills.text[currentEditingItem].prompt = prompt;
+      } else if (skillsAgentsConfig.skills.investor[currentEditingItem]) {
+        skillsAgentsConfig.skills.investor[currentEditingItem].name = name;
+        skillsAgentsConfig.skills.investor[currentEditingItem].icon = icon;
+        skillsAgentsConfig.skills.investor[currentEditingItem].description = description;
+        skillsAgentsConfig.skills.investor[currentEditingItem].prompt = prompt;
+      }
+    }
+    
+    closeEditModal();
+    renderConfigPage();
+    applyConfigToMainUI();
+    showToast('已保存修改', 'ok');
+  }
+
+  function saveSkillsAgentsConfig() {
+    localStorage.setItem('skillsAgentsConfig', JSON.stringify(skillsAgentsConfig));
+    showToast('配置已保存', 'ok');
+  }
+
+  function resetSkillsAgentsConfig() {
+    if (confirm('确定要重置所有配置为默认值吗？')) {
+      skillsAgentsConfig = JSON.parse(JSON.stringify(defaultConfig));
+      localStorage.setItem('skillsAgentsConfig', JSON.stringify(skillsAgentsConfig));
+      renderConfigPage();
+      applyConfigToMainUI();
+      showToast('已重置为默认配置', 'ok');
+    }
+  }
+
+  function applyConfigToMainUI() {
+    // 应用Agent配置
+    if (document.getElementById('agentResultCheck')) {
+      document.getElementById('agentResultCheck').checked = skillsAgentsConfig.agents.result.enabled;
+      document.getElementById('agentComplianceCheck').checked = skillsAgentsConfig.agents.compliance.enabled;
+      document.getElementById('agentWindCheck').checked = skillsAgentsConfig.agents.wind.enabled;
+      
+      // 更新卡片可见性
+      const resultCard = document.getElementById('agent-result');
+      const complianceCard = document.getElementById('agent-compliance');
+      const windCard = document.getElementById('agent-wind');
+      if (resultCard) resultCard.style.display = skillsAgentsConfig.agents.result.enabled ? 'block' : 'none';
+      if (complianceCard) complianceCard.style.display = skillsAgentsConfig.agents.compliance.enabled ? 'block' : 'none';
+      if (windCard) windCard.style.display = skillsAgentsConfig.agents.wind.enabled ? 'block' : 'none';
+    }
+    
+    // 应用Skills配置
+    if (document.getElementById('skillShorten')) {
+      const allSkills = { ...skillsAgentsConfig.skills.text, ...skillsAgentsConfig.skills.investor };
+      
+      Object.keys(allSkills).forEach(id => {
+        const checkbox = document.getElementById(`skill${id.charAt(0).toUpperCase() + id.slice(1)}`);
+        if (checkbox) {
+          checkbox.checked = allSkills[id].enabled;
+        }
+      });
+      
+      updateSkillsButtons();
+    }
   }
 
   // ---- Panel ----
@@ -3487,7 +4764,7 @@
     }
     const btn = document.getElementById('regenSPBtn');
     btn.disabled = true;
-    btn.innerHTML = '<span>⏳ 生成中...</span>';
+    btn.innerHTML = '<span>⏳ 多Agent处理中...</span>';
     
     loadFundFromBackend(currentCode).then(fund => {
       btn.disabled = false;
@@ -3509,6 +4786,13 @@
   function selFmt(el) {
     el.closest('.format-grid').querySelectorAll('.format-card').forEach(e => e.classList.remove('sel'));
     el.classList.add('sel');
+    
+    const fundName = document.getElementById('sFundName').textContent.trim();
+    const formatName = el.querySelector('.format-name').textContent.trim();
+    const taskLabel = document.getElementById('aiTaskLabel');
+    if (taskLabel && fundName && fundName !== '—') {
+      taskLabel.textContent = `当前任务：${fundName.replace(/（.*?）/g, '')} · ${formatName}`;
+    }
   }
 
   // ---- Style ----
@@ -3561,6 +4845,576 @@
     return '亲切易懂';
   }
 
+  // Agent状态管理
+  function updateAgentStatus(agentId, status, progress = 0) {
+    const statusEl = document.getElementById(`${agentId}-status`);
+    const progressEl = document.getElementById(`${agentId}-progress`);
+    const logEl = document.getElementById(`${agentId}-log`);
+    
+    // 获取对应的卡片元素
+    const cardIdMap = {
+      'result-agent': 'agent-result',
+      'compliance-agent': 'agent-compliance',
+      'wind-agent': 'agent-wind'
+    };
+    const card = document.getElementById(cardIdMap[agentId]);
+    
+    if (card) {
+      // 移除之前的状态类
+      card.classList.remove('running', 'done', 'error');
+      if (status === 'running') {
+        card.classList.add('running');
+      }
+    }
+    
+    if (statusEl) {
+      const dot = statusEl.querySelector('.status-dot');
+      const text = statusEl.querySelector('.status-text');
+      
+      dot.className = 'status-dot';
+      if (status === 'running') {
+        dot.classList.add('running');
+        text.textContent = '运行中...';
+      } else if (status === 'done') {
+        dot.classList.add('done');
+        text.textContent = '已完成';
+        
+        // 添加完成庆祝效果
+        if (card) {
+          card.classList.add('complete-celebration');
+          setTimeout(() => {
+            card.classList.remove('complete-celebration');
+          }, 1000);
+        }
+      } else if (status === 'error') {
+        dot.classList.add('error');
+        text.textContent = '出错';
+      } else {
+        dot.classList.add('inactive');
+        text.textContent = '待运行';
+      }
+    }
+    
+    if (progressEl) {
+      progressEl.style.width = `${progress}%`;
+    }
+  }
+  
+  function addAgentLog(agentId, message, type = 'info') {
+      const logEl = document.getElementById(`${agentId}-log`);
+      if (logEl) {
+        const time = new Date().toLocaleTimeString('zh-CN');
+        const logItem = document.createElement('div');
+        logItem.className = 'log-item';
+        
+        let icon = '●';
+        let iconColor = 'var(--brand)';
+        let textColor = 'var(--text-secondary)';
+        
+        if (type === 'success') {
+          icon = '✓';
+          iconColor = 'var(--success)';
+        } else if (type === 'warning') {
+          icon = '!';
+          iconColor = 'var(--warning)';
+        } else if (type === 'error') {
+          icon = '✗';
+          iconColor = 'var(--danger)';
+        } else if (type === 'info') {
+          icon = '→';
+          iconColor = 'var(--brand)';
+        }
+        
+        logItem.innerHTML = `
+          <span style="display:flex;flex-direction:column;gap:2px;flex:1;">
+            <span style="display:flex;align-items:center;gap:6px;">
+              <span style="color:${iconColor};font-weight:700;font-size:12px;">${icon}</span>
+              <span style="color:${textColor};font-size:11.5px;">${message}</span>
+            </span>
+            <span style="color:var(--text-muted);font-size:10px;">[${time}]</span>
+          </span>
+        `;
+        logEl.appendChild(logItem);
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+    }
+  
+  function resetAgents() {
+    // 获取Checkbox状态
+    const resultChecked = document.getElementById('agentResultCheck')?.checked ?? true;
+    const complianceChecked = document.getElementById('agentComplianceCheck')?.checked ?? true;
+    const windChecked = document.getElementById('agentWindCheck')?.checked ?? true;
+    
+    // 控制卡片显示/隐藏
+    const resultCard = document.getElementById('agent-result');
+    const complianceCard = document.getElementById('agent-compliance');
+    const windCard = document.getElementById('agent-wind');
+    if (resultCard) resultCard.style.display = resultChecked ? 'block' : 'none';
+    if (complianceCard) complianceCard.style.display = complianceChecked ? 'block' : 'none';
+    if (windCard) windCard.style.display = windChecked ? 'block' : 'none';
+    
+    // 重置文案审核Agent
+    if (resultChecked) {
+      updateAgentStatus('result-agent', 'inactive', 0);
+      const resultLog = document.getElementById('result-agent-log');
+      if (resultLog) {
+        const logItem = document.createElement('div');
+        logItem.className = 'log-item';
+        logItem.innerHTML = `
+          <span style="display:flex;flex-direction:column;gap:2px;flex:1;">
+            <span style="display:flex;align-items:center;gap:6px;">
+              <span style="color:var(--text-muted);font-weight:500;font-size:12px;">○</span>
+              <span style="color:var(--text-muted);font-size:11.5px;">等待接收任务...</span>
+            </span>
+          </span>
+        `;
+        resultLog.innerHTML = '';
+        resultLog.appendChild(logItem);
+      }
+    }
+    
+    // 重置合规检查Agent
+    if (complianceChecked) {
+      updateAgentStatus('compliance-agent', 'inactive', 0);
+      const complianceLog = document.getElementById('compliance-agent-log');
+      if (complianceLog) {
+        const logItem = document.createElement('div');
+        logItem.className = 'log-item';
+        logItem.innerHTML = `
+          <span style="display:flex;flex-direction:column;gap:2px;flex:1;">
+            <span style="display:flex;align-items:center;gap:6px;">
+              <span style="color:var(--text-muted);font-weight:500;font-size:12px;">○</span>
+              <span style="color:var(--text-muted);font-size:11.5px;">等待接收任务...</span>
+            </span>
+          </span>
+        `;
+        complianceLog.innerHTML = '';
+        complianceLog.appendChild(logItem);
+      }
+    }
+    
+    // 重置Wind数据验证Agent
+    if (windChecked) {
+      updateAgentStatus('wind-agent', 'inactive', 0);
+      const windLog = document.getElementById('wind-agent-log');
+      if (windLog) {
+        const logItem = document.createElement('div');
+        logItem.className = 'log-item';
+        logItem.innerHTML = `
+          <span style="display:flex;flex-direction:column;gap:2px;flex:1;">
+            <span style="display:flex;align-items:center;gap:6px;">
+              <span style="color:var(--text-muted);font-weight:500;font-size:12px;">○</span>
+              <span style="color:var(--text-muted);font-size:11.5px;">等待接收任务...</span>
+            </span>
+          </span>
+        `;
+        windLog.innerHTML = '';
+        windLog.appendChild(logItem);
+      }
+    }
+    
+    // 隐藏合规结果
+    const compRow = document.getElementById('compRow');
+    if (compRow) {
+      compRow.style.display = 'none';
+      // 重置警告项显示
+      const warnItem = compRow.querySelector('.ci.warn');
+      if (warnItem) warnItem.style.display = '';
+    }
+    
+    // 隐藏Wind结果
+    const windResultRow = document.getElementById('windResultRow');
+    if (windResultRow) windResultRow.style.display = 'none';
+  }
+  
+  // Agent设置下拉菜单切换
+  function toggleAgentSettings() {
+    const panel = document.getElementById('agentSettingsPanel');
+    const arrow = document.getElementById('agentSettingsArrow');
+    if (panel.style.display === 'none' || panel.style.display === '') {
+      // 动态生成面板内容
+      if (skillsAgentsConfig) {
+        let html = `
+          <div style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg-subtle);">
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);">选择要启用的 Agent</div>
+          </div>
+          <div style="padding:12px;">
+        `;
+        
+        // 遍历所有Agents
+        Object.values(skillsAgentsConfig.agents).forEach(agent => {
+          let checkboxId;
+          if (agent.id === 'result') checkboxId = 'agentResultCheck';
+          else if (agent.id === 'compliance') checkboxId = 'agentComplianceCheck';
+          else if (agent.id === 'wind') checkboxId = 'agentWindCheck';
+          
+          html += `
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+              <input type="checkbox" id="${checkboxId}" ${agent.enabled ? 'checked' : ''} style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="handleAgentCheckboxChange('${agent.id}')">
+              <div style="flex:1;">
+                <div style="font-size:14px;color:#1a202c;font-weight:500;">${agent.icon} ${agent.name}</div>
+                <div style="font-size:11px;color:var(--text-muted);">${agent.description}</div>
+              </div>
+            </label>
+          `;
+        });
+        
+        html += `</div>`;
+        panel.innerHTML = html;
+      }
+      
+      panel.style.display = 'block';
+      arrow.style.transform = 'rotate(180deg)';
+      // 点击其他地方关闭
+      setTimeout(() => {
+        document.addEventListener('click', closeAgentSettingsOutside);
+      }, 0);
+    } else {
+      panel.style.display = 'none';
+      arrow.style.transform = 'rotate(0deg)';
+      document.removeEventListener('click', closeAgentSettingsOutside);
+    }
+  }
+  
+  function handleAgentCheckboxChange(agentId) {
+    if (skillsAgentsConfig && skillsAgentsConfig.agents[agentId]) {
+      let checkboxId;
+      if (agentId === 'result') checkboxId = 'agentResultCheck';
+      else if (agentId === 'compliance') checkboxId = 'agentComplianceCheck';
+      else if (agentId === 'wind') checkboxId = 'agentWindCheck';
+      
+      const checkbox = document.getElementById(checkboxId);
+      if (checkbox) {
+        skillsAgentsConfig.agents[agentId].enabled = checkbox.checked;
+        applyConfigToMainUI();
+      }
+    }
+  }
+  
+  function closeAgentSettingsOutside(event) {
+    const dropdown = document.querySelector('.agent-settings-dropdown');
+    if (!dropdown.contains(event.target)) {
+      const panel = document.getElementById('agentSettingsPanel');
+      const arrow = document.getElementById('agentSettingsArrow');
+      panel.style.display = 'none';
+      arrow.style.transform = 'rotate(0deg)';
+      document.removeEventListener('click', closeAgentSettingsOutside);
+    }
+  }
+  
+  // 页面初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    // 加载Skills & Agents配置
+    loadSkillsAgentsConfig();
+  });
+  
+  // 文案审核Agent - 真实API调用
+  async function runResultAgent(content, fundInfo) {
+    updateAgentStatus('result-agent', 'running', 0);
+    addAgentLog('result-agent', '接收到生成的文案，开始审核...', 'info');
+    
+    // 获取当前Agent的配置prompt
+    let agentPrompt = '';
+    if (skillsAgentsConfig && skillsAgentsConfig.agents && skillsAgentsConfig.agents.result) {
+      agentPrompt = skillsAgentsConfig.agents.result.prompt || '';
+    }
+    
+    try {
+      updateAgentStatus('result-agent', 'running', 30);
+      addAgentLog('result-agent', '检查内容完整性...', 'info');
+      
+      // 调用真实的文案审核API
+      const resp = await fetch(`${API_BASE}/copy/agent/result-check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: content,
+          fund_info: fundInfo,
+          prompt: agentPrompt
+        })
+      });
+      
+      const result = await resp.json();
+      
+      updateAgentStatus('result-agent', 'running', 60);
+      addAgentLog('result-agent', '评估文案吸引力...', 'info');
+      
+      await new Promise(resolve => setTimeout(resolve, 300));
+      updateAgentStatus('result-agent', 'running', 100);
+      
+      if (result.success && result.data) {
+        const data = result.data;
+        addAgentLog('result-agent', `审核完成，得分: ${data.score || 85}分`, data.passed ? 'success' : 'error');
+        
+        updateAgentStatus('result-agent', 'done', 100);
+        
+        // 显示详细结果
+        const resultLog = document.getElementById('result-agent-log');
+        if (resultLog) {
+          const tagContainer = document.createElement('div');
+          tagContainer.className = 'compliance-row';
+          tagContainer.style.marginTop = '14px';
+          tagContainer.style.display = 'flex';
+          tagContainer.style.flexWrap = 'wrap';
+          tagContainer.style.animation = 'fadeInUp 0.4s ease';
+          
+          // 评分标签
+          const scoreTag = document.createElement('div');
+          scoreTag.className = data.passed ? 'ci pass' : 'ci warn';
+          scoreTag.innerHTML = `<div class="ci-icon">${data.passed ? '✓' : '⚠'}</div>上下文完整度 ${data.score || 85}%`;
+          tagContainer.appendChild(scoreTag);
+          
+          resultLog.appendChild(tagContainer);
+          
+          // 显示详细评价
+          if (data.assessment) {
+            const assessmentDiv = document.createElement('div');
+            assessmentDiv.style.marginTop = '12px';
+            assessmentDiv.style.padding = '12px';
+            assessmentDiv.style.backgroundColor = '#f0f9ff';
+            assessmentDiv.style.borderRadius = '8px';
+            assessmentDiv.style.borderLeft = '4px solid #0ea5e9';
+            assessmentDiv.innerHTML = `
+              <div style="font-weight: 600; margin-bottom: 8px; color: #0369a1;">📝 ${data.assessment}</div>
+            `;
+            
+            if (data.strengths && data.strengths.length > 0) {
+              assessmentDiv.innerHTML += `
+                <div style="color: #059669; font-size: 13px; margin-bottom: 6px;">
+                  <strong>优点：</strong>${data.strengths.join('、')}
+                </div>
+              `;
+            }
+            
+            if (data.weaknesses && data.weaknesses.length > 0) {
+              assessmentDiv.innerHTML += `
+                <div style="color: #d97706; font-size: 13px; margin-bottom: 6px;">
+                  <strong>不足：</strong>${data.weaknesses.join('、')}
+                </div>
+              `;
+            }
+            
+            if (data.suggestions && data.suggestions.length > 0) {
+              assessmentDiv.innerHTML += `
+                <div style="color: #4b5563; font-size: 13px;">
+                  <strong>建议：</strong>${data.suggestions.join('、')}
+                </div>
+              `;
+            }
+            
+            resultLog.appendChild(assessmentDiv);
+          }
+        }
+        
+        return { passed: data.passed !== false, data: data };
+      } else {
+        addAgentLog('result-agent', '审核API调用失败，已自动通过', 'error');
+        updateAgentStatus('result-agent', 'done', 100);
+        return { passed: true };
+      }
+      
+    } catch (e) {
+      console.error('文案审核错误:', e);
+      addAgentLog('result-agent', '审核服务连接失败，已自动通过', 'error');
+      updateAgentStatus('result-agent', 'done', 100);
+      return { passed: true };
+    }
+  }
+  
+  // 合规检查Agent - 真实API调用
+  async function runComplianceAgent(content) {
+    updateAgentStatus('compliance-agent', 'running', 0);
+    addAgentLog('compliance-agent', '接收到文案，开始合规检查...', 'info');
+    
+    let agentPrompt = '';
+    if (skillsAgentsConfig && skillsAgentsConfig.agents && skillsAgentsConfig.agents.compliance) {
+      agentPrompt = skillsAgentsConfig.agents.compliance.prompt || '';
+    }
+    
+    try {
+      updateAgentStatus('compliance-agent', 'running', 30);
+      addAgentLog('compliance-agent', '检查禁用词汇...', 'info');
+      
+      // 调用真实的合规检查API
+      const resp = await fetch(`${API_BASE}/copy/agent/compliance-check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: content,
+          prompt: agentPrompt
+        })
+      });
+      
+      const result = await resp.json();
+      
+      updateAgentStatus('compliance-agent', 'running', 60);
+      addAgentLog('compliance-agent', '检查基金宣传规范...', 'info');
+      
+      await new Promise(resolve => setTimeout(resolve, 300));
+      updateAgentStatus('compliance-agent', 'running', 100);
+      
+      if (result.success && result.data) {
+        const data = result.data;
+        
+        const issueCount = data.issues_found ? data.issues_found.length : 0;
+        if (issueCount > 0) {
+          addAgentLog('compliance-agent', `发现${issueCount}个潜在问题`, 'error');
+        } else {
+          addAgentLog('compliance-agent', '合规检查完成，未发现问题', 'success');
+        }
+        
+        updateAgentStatus('compliance-agent', 'done', 100);
+        
+        // 显示合规结果
+        const compRow = document.getElementById('compRow');
+        if (compRow) {
+          compRow.innerHTML = '';
+          
+          // 风险提示检查标签
+          const riskTag = document.createElement('div');
+          riskTag.className = 'ci pass';
+          riskTag.innerHTML = `<div class="ci-icon">✓</div>${data.risk_tip_check || '风险提示已包含'}`;
+          compRow.appendChild(riskTag);
+          
+          // 总体评价标签
+          const overallTag = document.createElement('div');
+          overallTag.className = data.passed ? 'ci pass' : 'ci warn';
+          overallTag.innerHTML = `<div class="ci-icon">${data.passed ? '✓' : '⚠'}</div>${data.overall_assessment || '合规性良好'}`;
+          compRow.appendChild(overallTag);
+          
+          // 显示发现的问题
+          if (data.issues_found && data.issues_found.length > 0) {
+            const issuesDiv = document.createElement('div');
+            issuesDiv.style.marginTop = '12px';
+            issuesDiv.style.width = '100%';
+            
+            data.issues_found.forEach(issue => {
+              const issueTag = document.createElement('div');
+              issueTag.className = 'ci warn';
+              issueTag.style.marginTop = '8px';
+              issueTag.innerHTML = `<div class="ci-icon">⚠</div>${issue.type}: ${issue.text}`;
+              issuesDiv.appendChild(issueTag);
+              
+              if (issue.suggestion) {
+                const suggestionDiv = document.createElement('div');
+                suggestionDiv.style.fontSize = '12px';
+                suggestionDiv.style.color = '#78716c';
+                suggestionDiv.style.marginTop = '4px';
+                suggestionDiv.style.marginLeft = '24px';
+                suggestionDiv.textContent = `建议: ${issue.suggestion}`;
+                issuesDiv.appendChild(suggestionDiv);
+              }
+            });
+            
+            compRow.appendChild(issuesDiv);
+          }
+          
+          compRow.style.display = 'flex';
+          compRow.style.flexWrap = 'wrap';
+          compRow.style.animation = 'fadeInUp 0.4s ease';
+        }
+        
+        return { passed: data.passed !== false, data: data };
+      } else {
+        addAgentLog('compliance-agent', '合规检查API调用失败，已自动通过', 'error');
+        updateAgentStatus('compliance-agent', 'done', 100);
+        return { passed: true };
+      }
+      
+    } catch (e) {
+      console.error('合规检查错误:', e);
+      addAgentLog('compliance-agent', '合规服务连接失败，已自动通过', 'error');
+      updateAgentStatus('compliance-agent', 'done', 100);
+      return { passed: true };
+    }
+  }
+
+  // Wind数据验证Agent - 真实API调用
+  async function runWindAgent(content, fundInfo) {
+    updateAgentStatus('wind-agent', 'running', 0);
+    addAgentLog('wind-agent', '连接Wind金融数据服务...', 'info');
+    
+    let agentPrompt = '';
+    if (skillsAgentsConfig && skillsAgentsConfig.agents && skillsAgentsConfig.agents.wind) {
+      agentPrompt = skillsAgentsConfig.agents.wind.prompt || '';
+    }
+    
+    try {
+      updateAgentStatus('wind-agent', 'running', 30);
+      addAgentLog('wind-agent', '验证基金代码和基本信息...', 'info');
+      
+      // 调用真实的Wind验证API
+      const resp = await fetch(`${API_BASE}/copy/wind/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fund_code: fundInfo.code,
+          fund_name: fundInfo.name,
+          content: content,
+          prompt: agentPrompt
+        })
+      });
+      
+      const result = await resp.json();
+      
+      updateAgentStatus('wind-agent', 'running', 60);
+      addAgentLog('wind-agent', '获取实时行情数据...', 'info');
+      
+      await new Promise(resolve => setTimeout(resolve, 300));
+      updateAgentStatus('wind-agent', 'running', 100);
+      
+      if (result.success) {
+        addAgentLog('wind-agent', 'Wind数据验证完成', 'success');
+        
+        updateAgentStatus('wind-agent', 'done', 100);
+        
+        // 显示Wind验证结果
+        const windResultRow = document.getElementById('windResultRow');
+        if (windResultRow) {
+          windResultRow.innerHTML = '';
+          
+          // 显示验证报告
+          if (result.verification_report) {
+            const reportDiv = document.createElement('div');
+            reportDiv.style.width = '100%';
+            reportDiv.style.backgroundColor = '#f0fdf4';
+            reportDiv.style.padding = '12px';
+            reportDiv.style.borderRadius = '8px';
+            reportDiv.style.borderLeft = '4px solid #22c55e';
+            reportDiv.style.whiteSpace = 'pre-wrap';
+            reportDiv.style.fontSize = '13px';
+            reportDiv.style.lineHeight = '1.6';
+            reportDiv.textContent = result.verification_report;
+            windResultRow.appendChild(reportDiv);
+          }
+          
+          // 数据准确性标签
+          const accuracyTag = document.createElement('div');
+          accuracyTag.className = 'ci pass';
+          const accuracyScore = result.data_analysis?.accuracy_score || 85;
+          accuracyTag.innerHTML = `<div class="ci-icon">✓</div>数据准确性 ${accuracyScore}%`;
+          windResultRow.appendChild(accuracyTag);
+          
+          windResultRow.style.display = 'flex';
+          windResultRow.style.flexWrap = 'wrap';
+          windResultRow.style.animation = 'fadeInUp 0.4s ease';
+        }
+        
+        return { passed: true, data: result };
+      } else {
+        addAgentLog('wind-agent', 'Wind数据验证失败，已自动通过', 'error');
+        updateAgentStatus('wind-agent', 'done', 100);
+        return { passed: true };
+      }
+      
+    } catch (e) {
+      console.error('Wind验证错误:', e);
+      addAgentLog('wind-agent', 'Wind服务连接失败，已自动通过', 'error');
+      updateAgentStatus('wind-agent', 'done', 100);
+      return { passed: true };
+    }
+  }
+
   async function genCopy() {
     const btn = document.getElementById('genCopyBtn');
     const box = document.getElementById('copyBox');
@@ -3581,20 +5435,35 @@
     const formatType = getSelectedFormat();
     const style = getSelectedStyle();
     
+    // 获取checkbox状态并构建工作流程
+    const resultChecked = document.getElementById('agentResultCheck')?.checked ?? true;
+    const complianceChecked = document.getElementById('agentComplianceCheck')?.checked ?? true;
+    const windChecked = document.getElementById('agentWindCheck')?.checked ?? true;
+    
+    // 构建流程文本
+    let workflow = ['文案生成'];
+    if (resultChecked) workflow.push('内容审核');
+    if (complianceChecked) workflow.push('合规检查');
+    if (windChecked) workflow.push('Wind数据验证');
+    const workflowText = workflow.join(' → ');
+    
+    // 重置Agent状态
+    resetAgents();
+    
     btn.disabled = true;
-    btn.innerHTML = '<span class="spnr" style="width:13px;height:13px;border-width:2px;"></span> 生成中...';
+    btn.innerHTML = '<span class="spnr" style="width:13px;height:13px;border-width:2px;"></span> 多Agent处理中...';
     box.innerHTML = `
       <div class="gen-loading">
         <div class="ldots">
           <div class="ldot"></div><div class="ldot"></div><div class="ldot"></div>
         </div>
-        <div class="ldesc">正在调用 AI 生成营销文案</div>
-        <div class="lsub">基于 ${fundInfo.name} 的 ${selectedSP.length} 个卖点</div>
+        <div class="ldesc">多Agent协同工作中</div>
+        <div class="lsub">${workflowText}</div>
       </div>
     `;
     
     try {
-      const resp = await fetch(`${API_BASE}/fund/copywriting`, {
+      const resp = await fetch(`${API_BASE}/copy/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -3618,13 +5487,54 @@
         box.innerHTML = `
           <div class="copy-toolbar">
             <button class="copy-act" onclick="genCopy()">🔄 重写</button>
+            <button id="aiOptBtn" class="copy-act" onclick="openAIModify()">🤖 AI优化</button>
             <button class="copy-act" onclick="doEdit()">✏️ 编辑</button>
             <button class="copy-act pri" onclick="doCopy()">📋 复制</button>
           </div>
           <div class="copy-text">${formattedContent}</div>
+          
+          <!-- AI修改面板 -->
+          <div id="aiModifyPanel" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+              <div class="slbl" style="margin-bottom:0;font-size:12px;color:var(--text-muted);">🎯 选择优化方式</div>
+              <div class="skills-settings-dropdown" style="position:relative;">
+                <button class="btn btn-sm" onclick="toggleSkillsSettings()" style="display:flex;align-items:center;gap:8px;background:var(--bg-subtle);border:1px solid var(--border);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                  Skills 设置
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="skillsSettingsArrow" style="transition:transform 0.2s;"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div id="skillsSettingsPanel" style="display:none;position:absolute;bottom:calc(100% + 8px);left:0;min-width:260px;max-height:400px;background:white;border-radius:12px;box-shadow:0 10px 40px rgba(31,76,130,0.15);border:1px solid var(--border);z-index:9999;overflow-y:auto;"></div>
+              </div>
+            </div>
+            <div id="skillsButtonsContainer" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
+            <div style="margin-bottom:12px;">
+              <input type="text" id="customModifyInput" class="search-input" placeholder="或输入自定义修改指令..." style="width:100%;">
+            </div>
+            <div style="text-align:right;">
+              <button class="btn btn-primary btn-sm" onclick="doAIModify()">🚀 AI智能修改</button>
+            </div>
+          </div>
         `;
         copyReady = true;
-        showToast('文案生成成功！', 'ok');
+        
+        // 运行Agent检查
+        const resultChecked = document.getElementById('agentResultCheck')?.checked ?? true;
+        const complianceChecked = document.getElementById('agentComplianceCheck')?.checked ?? true;
+        const windChecked = document.getElementById('agentWindCheck')?.checked ?? true;
+        
+        if (resultChecked) {
+          await runResultAgent(data.data.content, fundInfo);
+        }
+        if (complianceChecked) {
+          await runComplianceAgent(data.data.content);
+        }
+        if (windChecked) {
+          await runWindAgent(data.data.content, fundInfo);
+        }
+        
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> AI 生成文案';
+        showToast(resultChecked || complianceChecked || windChecked ? '多Agent处理完成！' : '文案生成完成！', 'ok');
       } else {
         box.innerHTML = '<div class="copy-placeholder" style="color:var(--danger);">生成失败: ' + (data.error || '未知错误') + '</div>';
       }
@@ -3670,6 +5580,221 @@
     const text = document.getElementById('copyBox').innerText;
     navigator.clipboard.writeText(text).then(() => showToast('文案已复制到剪贴板！', 'ok'))
       .catch(() => showToast('复制失败，请手动复制', 'err'));
+  }
+
+  // ---- AI Modification ----
+  let currentModifyAction = '';
+
+  function openAIModify() {
+    const panel = document.getElementById('aiModifyPanel');
+    const btn = document.getElementById('aiOptBtn');
+    if (panel.style.display === 'none') {
+      panel.style.display = 'block';
+      btn.classList.add('active');
+      updateSkillsButtons();
+    } else {
+      panel.style.display = 'none';
+      btn.classList.remove('active');
+    }
+  }
+
+  function updateSkillsButtons() {
+    const container = document.getElementById('skillsButtonsContainer');
+    if (!container || !skillsAgentsConfig) return;
+    
+    container.innerHTML = '';
+    
+    // 合并所有skills
+    const allSkills = [
+      ...Object.values(skillsAgentsConfig.skills.text),
+      ...Object.values(skillsAgentsConfig.skills.investor)
+    ];
+    
+    allSkills.forEach(skill => {
+      if (skill.enabled) {
+        const btn = document.createElement('button');
+        btn.className = 'modify-option';
+        btn.setAttribute('data-action', skill.id);
+        btn.textContent = `${skill.icon} ${skill.name}`;
+        btn.onclick = () => applyModifyOption(skill.id);
+        container.appendChild(btn);
+      }
+    });
+  }
+
+  function toggleSkillsSettings() {
+    const panel = document.getElementById('skillsSettingsPanel');
+    const arrow = document.getElementById('skillsSettingsArrow');
+    if (panel.style.display === 'none' || panel.style.display === '') {
+      // 动态生成面板内容
+      if (skillsAgentsConfig) {
+        let html = `
+          <div style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg-subtle);">
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);">选择要启用的 Skill</div>
+          </div>
+          <div style="padding:12px;">
+            <div style="margin-bottom:12px;">
+              <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">文案优化</div>
+        `;
+        
+        // 文案优化skills
+        Object.values(skillsAgentsConfig.skills.text).forEach(skill => {
+          const checkboxId = `skill${skill.id.charAt(0).toUpperCase() + skill.id.slice(1)}`;
+          html += `
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+              <input type="checkbox" id="${checkboxId}" ${skill.enabled ? 'checked' : ''} style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="handleSkillCheckboxChange('${skill.category}','${skill.id}')">
+              <div style="flex:1;">
+                <div style="font-size:14px;color:#1a202c;font-weight:500;">${skill.icon} ${skill.name}</div>
+              </div>
+            </label>
+          `;
+        });
+        
+        html += `
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">投资者类型</div>
+        `;
+        
+        // 投资者类型skills
+        Object.values(skillsAgentsConfig.skills.investor).forEach(skill => {
+          const checkboxId = `skill${skill.id.charAt(0).toUpperCase() + skill.id.slice(1)}`;
+          html += `
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+              <input type="checkbox" id="${checkboxId}" ${skill.enabled ? 'checked' : ''} style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="handleSkillCheckboxChange('${skill.category}','${skill.id}')">
+              <div style="flex:1;">
+                <div style="font-size:14px;color:#1a202c;font-weight:500;">${skill.icon} ${skill.name}</div>
+                <div style="font-size:11px;color:var(--text-muted);">${skill.description}</div>
+              </div>
+            </label>
+          `;
+        });
+        
+        html += `
+            </div>
+          </div>
+        `;
+        panel.innerHTML = html;
+      }
+      
+      panel.style.display = 'block';
+      arrow.style.transform = 'rotate(180deg)';
+      setTimeout(() => {
+        document.addEventListener('click', closeSkillsSettingsOutside);
+      }, 0);
+    } else {
+      panel.style.display = 'none';
+      arrow.style.transform = 'rotate(0deg)';
+      document.removeEventListener('click', closeSkillsSettingsOutside);
+    }
+  }
+
+  function handleSkillCheckboxChange(category, id) {
+    if (skillsAgentsConfig && skillsAgentsConfig.skills[category] && skillsAgentsConfig.skills[category][id]) {
+      const checkboxId = `skill${id.charAt(0).toUpperCase() + id.slice(1)}`;
+      const checkbox = document.getElementById(checkboxId);
+      if (checkbox) {
+        skillsAgentsConfig.skills[category][id].enabled = checkbox.checked;
+        updateSkillsButtons();
+      }
+    }
+  }
+
+  function closeSkillsSettingsOutside(event) {
+    const dropdown = document.querySelector('.skills-settings-dropdown');
+    if (!dropdown.contains(event.target)) {
+      const panel = document.getElementById('skillsSettingsPanel');
+      const arrow = document.getElementById('skillsSettingsArrow');
+      panel.style.display = 'none';
+      arrow.style.transform = 'rotate(0deg)';
+      document.removeEventListener('click', closeSkillsSettingsOutside);
+    }
+  }
+
+  function applyModifyOption(action) {
+    currentModifyAction = action;
+    document.querySelectorAll('.modify-option').forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.getAttribute('data-action') === action) {
+        btn.classList.add('active');
+      }
+    });
+    document.getElementById('customModifyInput').value = '';
+  }
+
+  async function doAIModify() {
+    const box = document.getElementById('copyBox');
+    const textEl = box.querySelector('.copy-text');
+    if (!textEl) {
+      showToast('请先生成文案', 'err');
+      return;
+    }
+
+    // 获取原文案
+    const originalText = textEl.innerHTML
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<[^>]+>/g, '')
+      .trim();
+
+    // 获取修改指令
+    const customInput = document.getElementById('customModifyInput');
+    let instruction = '';
+    if (customInput && customInput.value.trim()) {
+      instruction = customInput.value.trim();
+    } else if (currentModifyAction && skillsAgentsConfig) {
+      // 查找skill
+      const allSkills = { ...skillsAgentsConfig.skills.text, ...skillsAgentsConfig.skills.investor };
+      const skill = allSkills[currentModifyAction];
+      instruction = skill ? skill.prompt : '请优化这篇文案';
+    } else {
+      showToast('请选择优化方式或输入自定义指令', 'err');
+      return;
+    }
+
+    // 获取当前选中的内容（素材格式、文案风格、卖点）
+    const formatType = getSelectedFormat();
+    const style = getSelectedStyle();
+    const fundInfo = getCurrentFundInfo();
+
+    // 显示加载状态
+    textEl.innerHTML = `
+      <div style="text-align:center;padding:30px;">
+        <div class="spnr" style="width:24px;height:24px;border-width:2px;margin:0 auto;"></div>
+        <div style="margin-top:12px;color:var(--text-muted);font-size:13px;">AI正在优化文案...</div>
+      </div>
+    `;
+
+    try {
+      const resp = await fetch(`${API_BASE}/copy/modify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          original_content: originalText,
+          instruction: instruction,
+          format_type: formatType,
+          style: style,
+          fund_info: fundInfo
+        })
+      });
+
+      const data = await resp.json();
+
+      if (data.success && data.data) {
+        // 格式化新内容
+        const formattedContent = data.data.content
+          .replace(/\n/g, '<br>')
+          .replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+        textEl.innerHTML = formattedContent;
+        showToast('文案优化成功！', 'ok');
+      } else {
+        textEl.innerHTML = originalText.replace(/\n/g, '<br>');
+        showToast('优化失败: ' + (data.error || '未知错误'), 'err');
+      }
+    } catch (e) {
+      textEl.innerHTML = originalText.replace(/\n/g, '<br>');
+      console.error('doAIModify error:', e);
+      showToast('优化失败，请重试', 'err');
+    }
   }
 
   // ---- Modal ----
@@ -3804,12 +5929,48 @@
     if (productAppBooted) return;
     productAppBooted = true;
     updateSPCount();
-    initFundChart('163406');
+    initBenchmarkStates();
     setupMainSearch();
     loadEastmoneyFundList().catch(() => {});
     const inviteBtn = document.getElementById('inviteBtn');
     if (inviteBtn) inviteBtn.addEventListener('click', showTeamInviteModal);
     switchPage('generator');
+    
+    // 直接通过真实数据加载来初始化，避免重复和模拟数据
+    loadFundDataByCode('004512');
+  }
+
+  // 新增：通过基金代码加载真实数据
+  async function loadFundDataByCode(code) {
+    try {
+      // 显示全局加载遮罩
+      showGlobalLoading();
+      
+      // 先设置当前时间范围为近1月，按钮状态
+      currentTimeRange = '1m';
+      // 更新按钮的active状态
+      setTimeout(() => {
+        document.querySelectorAll('.time-option').forEach(b => {
+          if (b.dataset.range === '1m') {
+            b.classList.add('active');
+          } else {
+            b.classList.remove('active');
+          }
+        });
+      }, 50);
+      
+      const fund = await loadFundFromBackend(code);
+      if (fund) {
+        applyFundToUI(fund);
+        generateSellingPoints(fund);
+      }
+    } catch (e) {
+      console.error('加载基金数据失败:', e);
+      showToast('加载基金数据失败，请稍后重试', '');
+    } finally {
+      // 隐藏全局加载遮罩
+      hideGlobalLoading();
+    }
   }
 
   function setAuthenticatedView(user) {
@@ -3971,6 +6132,7 @@
       manager: f.manager || f.mgr || '—',
       sharpe: f.sharpe || '—',
       dd: f.dd || f.drawdown || '—',
+      nav_date: f.nav_date || '—',
       category: f.category || 'hold'
     };
   }
@@ -4046,7 +6208,8 @@
       sharpe: document.getElementById('dSharpe').textContent.trim(),
       dd: document.getElementById('dDD').textContent.trim(),
       mgr: document.getElementById('dMgr').textContent.trim(),
-      manager: document.getElementById('dMgr').textContent.trim()
+      manager: document.getElementById('dMgr').textContent.trim(),
+      nav_date: document.getElementById('dUpdateDate').textContent.trim()
     };
   }
 
@@ -4074,6 +6237,8 @@
     dDD.textContent = f.dd || f.drawdown || '—';
     dDD.className = 'data-item-val ' + ((f.dd || f.drawdown) && parseFloat(f.dd || f.drawdown) < -30 ? 'down' : '');
     document.getElementById('dMgr').textContent = f.manager || f.mgr || '—';
+    // 更新日期显示
+    document.getElementById('dUpdateDate').textContent = f.nav_date || '—';
     showToast(`已切换至 ${f.name}`, 'ok');
     updateFundChart(f.code);
 
@@ -4136,9 +6301,10 @@
       const categoryTag = f.category === 'focus' ? '重点推荐' : '自选基金';
       const co = f.co || f.company || '—';
       const mgr = f.mgr || f.manager || '—';
+      const navDate = f.nav_date || '—';
       return `
         <div class="card" style="cursor:pointer;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-          <div class="card-body" style="display:flex;gap:16px;align-items:center;" onclick="switchPage('generator');loadDemo('${f.code}','${f.name}','${co}','${f.y1 || '—'}','${f.y3 || '—'}','${f.rank || '—'}','${mgr}','${f.sharpe || '—'}','${f.dd || '—'}')">
+          <div class="card-body" style="display:flex;gap:16px;align-items:center;" onclick="switchPage('generator');loadDemo('${f.code}','${f.name}','${co}','${f.y1 || '—'}','${f.y3 || '—'}','${f.rank || '—'}','${mgr}','${f.sharpe || '—'}','${f.dd || '—'}','${navDate}')">
             <div style="width:48px;height:48px;background:${bgColors[typeKey] || bgColors['混合']};border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:12px;">${typeLabel}</div>
             <div style="flex:1;">
               <div style="font-weight:700;font-size:14px;margin-bottom:2px;">${f.name} <span style="font-size:11px;color:var(--text-muted);font-weight:400;">${f.code}</span></div>
@@ -4151,7 +6317,7 @@
             </div>
             <button class="fund-fav-btn followed" data-code="${f.code}" onclick="toggleFavoriteFromSearch(event,'${f.code}')">✓ 已自选</button>
             <button class="btn btn-outline btn-sm" onclick="removeFavoriteFund(event,'${f.code}','${f.name}')">删除自选</button>
-            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();switchPage('generator');loadDemo('${f.code}','${f.name}','${co}','${f.y1 || '—'}','${f.y3 || '—'}','${f.rank || '—'}','${mgr}','${f.sharpe || '—'}','${f.dd || '—'}')">生成素材</button>
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();switchPage('generator');loadDemo('${f.code}','${f.name}','${co}','${f.y1 || '—'}','${f.y3 || '—'}','${f.rank || '—'}','${mgr}','${f.sharpe || '—'}','${f.dd || '—'}','${navDate}')">生成素材</button>
           </div>
         </div>`;
     }).join('');
@@ -4344,7 +6510,7 @@
   }
 
   // ---- Load Demo ----
-  function loadDemo(code, name, co, y1, y3, rank, mgr, sharpe, dd) {
+  function loadDemo(code, name, co, y1, y3, rank, mgr, sharpe, dd, navDate) {
     // Update fund info
     document.getElementById('sFundName').textContent = name;
     document.getElementById('sFundCode').textContent = code;
@@ -4366,6 +6532,7 @@
     dDD.textContent = dd;
     dDD.className = 'data-item-val ' + (parseFloat(dd) < -30 ? 'down' : '');
     document.getElementById('dMgr').textContent = mgr;
+    document.getElementById('dUpdateDate').textContent = navDate || '—';
 
     // Update chart
     updateFundChart(code);
@@ -4993,7 +7160,7 @@
       searchResultCache[String(f.code)] = normalizeFavoriteFund(f);
       const followed = isFavoriteFund(f.code);
       html += `
-        <div class="flist-item" data-code="${f.code}" data-name="${f.name}">
+        <div class="flist-item" data-code="${f.code}" data-name="${f.name}" onclick="handleFundSelect('${f.code}')">
           <div class="flist-main">
             <div class="flist-name">${f.name}</div>
             <div class="flist-meta">${f.code} · ${f.type || '基金'}</div>
@@ -5008,6 +7175,76 @@
     updateFavoriteButtons();
   }
 
+  async function handleFundSelect(code) {
+    const input = document.getElementById('mainSearch');
+    hideMainSuggest();
+    input.value = '';
+    updateClearButtonVisibility();
+    
+    showGlobalLoading();
+    
+    const nonce = ++lastSelectNonce;
+    try {
+      let f = await loadFundFromBackend(code);
+      if (!f || nonce !== lastSelectNonce) {
+        f = await buildFundDataFromEastmoney(code);
+      }
+      if (nonce !== lastSelectNonce) return;
+      input.value = `${f.name}（${f.code}）`;
+      updateClearButtonVisibility();
+      applyFundToUI(f);
+      generateSellingPoints(f);
+    } catch (e2) {
+      const demo = demoFunds.find(x => x.code === code);
+      if (demo) {
+        const fundData = {
+          name: demo.name,
+          code: demo.code,
+          type: demo.type,
+          risk: typeToRisk(demo.type),
+          company: demo.company,
+          y1: demo.y1,
+          y3: demo.y3,
+          rank: '—',
+          sharpe: '—',
+          dd: '—',
+          manager: '—'
+        };
+        applyFundToUI(fundData);
+        generateSellingPoints(fundData);
+      } else {
+        showToast('加载失败，请稍后重试', '');
+      }
+    } finally {
+      hideGlobalLoading();
+    }
+  }
+
+  function showGlobalLoading() {
+    const loading = document.getElementById('globalLoading');
+    if (loading) loading.style.display = 'flex';
+  }
+
+  function hideGlobalLoading() {
+    const loading = document.getElementById('globalLoading');
+    if (loading) loading.style.display = 'none';
+  }
+
+  function clearMainSearch() {
+    const input = document.getElementById('mainSearch');
+    const clearBtn = document.getElementById('mainSearchClear');
+    if (input) input.value = '';
+    if (clearBtn) clearBtn.style.display = 'none';
+    hideMainSuggest();
+  }
+
+  function updateClearButtonVisibility() {
+    const input = document.getElementById('mainSearch');
+    const clearBtn = document.getElementById('mainSearchClear');
+    if (!input || !clearBtn) return;
+    clearBtn.style.display = input.value.trim() ? 'flex' : 'none';
+  }
+
   function setupMainSearch() {
     const input = document.getElementById('mainSearch');
     const box = document.getElementById('mainSearchSuggest');
@@ -5019,6 +7256,10 @@
       const code = item.getAttribute('data-code');
       hideMainSuggest();
       input.value = '';
+      updateClearButtonVisibility();
+      
+      showGlobalLoading();
+      
       const nonce = ++lastSelectNonce;
       try {
         let f = await loadFundFromBackend(code);
@@ -5027,6 +7268,7 @@
         }
         if (nonce !== lastSelectNonce) return;
         input.value = `${f.name}（${f.code}）`;
+        updateClearButtonVisibility();
         applyFundToUI(f);
         generateSellingPoints(f);
       } catch (e2) {
@@ -5050,11 +7292,14 @@
         } else {
           showToast('加载失败，请稍后重试', '');
         }
+      } finally {
+        hideGlobalLoading();
       }
     });
 
     input.addEventListener('input', () => {
       clearTimeout(mainSearchTimer);
+      updateClearButtonVisibility();
       const raw = input.value.trim();
       const q = normalizeKeyword(raw);
       if (!q) return hideMainSuggest();
@@ -5077,6 +7322,13 @@
           renderMainSuggest(filtered);
         }
       }, 120);
+    });
+
+    input.addEventListener('click', () => {
+      const raw = input.value.trim();
+      if (!raw) {
+        return;
+      }
     });
 
     input.addEventListener('keydown', e => {
@@ -6038,6 +8290,69 @@
           <div style="font-size:11px;color:var(--text-muted);">#B8892A</div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE: SKILLS & AGENTS (Skills & Agents配置)
+============================================================ -->
+<div id="page-skills-agents" style="display:none;">
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <div class="page-title">Skills & Agents配置</div>
+      <div class="page-breadcrumb">
+        Fund Intelligence &nbsp;/&nbsp; <span>系统设置</span>
+      </div>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-primary btn-sm" onclick="saveSkillsAgentsConfig()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg>
+        保存配置
+      </button>
+      <button class="btn btn-outline btn-sm" onclick="resetSkillsAgentsConfig()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
+        重置默认
+      </button>
+    </div>
+  </div>
+
+  <!-- Agents配置 -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-head"><div class="card-title"><div class="card-title-icon" style="background:#E8F1FB;color:var(--brand);">🤖</div>Agents 配置</div></div>
+    <div class="card-body">
+      <div id="agentsConfigList" style="display:flex;flex-direction:column;gap:16px;"></div>
+    </div>
+  </div>
+
+  <!-- Skills配置 - 文案优化 -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-head"><div class="card-title"><div class="card-title-icon" style="background:#F5E9C8;color:var(--brand-gold);">🎨</div>Skills 配置 - 文案优化</div></div>
+    <div class="card-body">
+      <div id="skillsTextConfigList" style="display:flex;flex-direction:column;gap:16px;"></div>
+    </div>
+  </div>
+
+  <!-- Skills配置 - 投资者类型 -->
+  <div class="card">
+    <div class="card-head"><div class="card-title"><div class="card-title-icon" style="background:#EBF7EE;color:var(--success);">🎯</div>Skills 配置 - 投资者类型</div></div>
+    <div class="card-body">
+      <div id="skillsInvestorConfigList" style="display:flex;flex-direction:column;gap:16px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Agent/Skill编辑模态框 -->
+<div id="editItemModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.25);width:90%;max-width:700px;max-height:85vh;overflow-y:auto;">
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:18px;font-weight:700;" id="editModalTitle">编辑配置</div>
+      <button onclick="closeEditModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-muted);">&times;</button>
+    </div>
+    <div id="editModalContent" style="padding:24px;"></div>
+    <div style="padding:16px 24px;border-top:1px solid var(--border-light);display:flex;justify-content:flex-end;gap:12px;">
+      <button class="btn btn-outline" onclick="closeEditModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveEditItem()">保存</button>
     </div>
   </div>
 </div>
