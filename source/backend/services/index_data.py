@@ -224,7 +224,7 @@ class IndexDataService:
         
         result_list = None
         
-        # 数据源优先级列表
+        # 数据源优先级列表 - 注意：兜底数据必须放在最后一个
         data_sources = [
             ('Wind MCP', lambda: cls._get_wind_data(index_key, days)),
             ('东方财富', lambda: cls.get_index_history_from_eastmoney(index_key, days)),
@@ -238,7 +238,13 @@ class IndexDataService:
             try:
                 print(f"尝试从{source_name}获取指数数据 {index_key}")
                 data = get_data()
-                if data and len(data) >= 10:
+                # 对兜底数据，不检查数据量，总是接受
+                if source_name == '兜底数据' and data and len(data) > 0:
+                    result_list = data
+                    print(f"{source_name}成功获取 {len(result_list)} 条数据")
+                    break
+                # 对其他数据源，至少需要10条数据
+                elif data and len(data) >= 10:
                     result_list = data
                     print(f"{source_name}成功获取 {len(result_list)} 条数据")
                     break
@@ -246,6 +252,8 @@ class IndexDataService:
                     print(f"{source_name}返回数据不足({len(data) if data else 0}条)")
             except Exception as e:
                 print(f"{source_name}获取数据失败: {e}")
+                import traceback
+                traceback.print_exc()
         
         if result_list and len(result_list) > 0:
             cls._cache[cache_key] = result_list

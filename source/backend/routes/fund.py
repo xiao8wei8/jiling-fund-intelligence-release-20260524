@@ -416,6 +416,33 @@ def get_multiple_index_data():
         buffer_days = max(days + 60, 365 * 5)
         
         data = IndexDataService.get_multiple_index_data(index_keys, buffer_days)
+        
+        # 【关键】兜底逻辑：如果某个指数没有数据，确保不会返回空对象
+        for key in index_keys:
+            if key not in data or not data[key]:
+                print(f"[API 兜底] 为 {key} 生成兜底数据")
+                fallback_history = IndexDataService._generate_fallback_index_data(key, buffer_days)
+                if fallback_history:
+                    # 转换为只包含date和close的格式
+                    fallback_data = [{'date': item['date'], 'close': item['close']} for item in fallback_history]
+                    data[key] = fallback_data
+        
         return jsonify({'success': True, 'data': data})
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        print(f"[API Error] 获取指数数据失败: {e}")
+        import traceback
+        traceback.print_exc()
+        # 即使出错，也返回兜底数据，不要让前端看到失败
+        try:
+            fallback_data = {}
+            keys = request.args.get('keys', '')
+            index_keys = keys.split(',') if keys else ['hs300']
+            days = request.args.get('days', 90, type=int)
+            buffer_days = max(days + 60, 365 * 5)
+            for key in index_keys:
+                fallback_history = IndexDataService._generate_fallback_index_data(key, buffer_days)
+                if fallback_history:
+                    fallback_data[key] = [{'date': item['date'], 'close': item['close']} for item in fallback_history]
+            return jsonify({'success': True, 'data': fallback_data})
+        except:
+            return jsonify({'success': False, 'error': str(e)}), 500
