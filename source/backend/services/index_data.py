@@ -225,12 +225,12 @@ class IndexDataService:
         result_list = None
         
         # 数据源优先级列表 - 注意：兜底数据必须放在最后一个
-        # Wind MCP 放到后面，因为生产环境可能没有正确配置
+        # Wind MCP 优先（数据更权威），失败则降级到其他数据源
         data_sources = [
+            ('Wind MCP', lambda: cls._get_wind_data(index_key, days)),
             ('东方财富', lambda: cls.get_index_history_from_eastmoney(index_key, days)),
             ('新浪财经', lambda: cls.get_index_history_from_sina(index_key, days)),
             ('天天基金', lambda: cls.get_index_history_from_tiantian(index_key, days)),
-            ('Wind MCP', lambda: cls._get_wind_data(index_key, days)),
             ('兜底数据', lambda: cls._generate_fallback_index_data(index_key, days))
         ]
         
@@ -268,32 +268,24 @@ class IndexDataService:
     def _get_wind_data(cls, index_key, days):
         """从Wind MCP获取指数数据"""
         index_name = cls.INDEX_NAMES.get(index_key)
-        # 只在调试模式下打印详细日志，避免生产环境日志噪音
-        debug_mode = False
+        # 生产环境开启关键日志
+        debug_mode = True
         
         if debug_mode:
-            print(f"[Wind MCP] 开始获取 {index_key} ({index_name}) 数据，天数: {days}")
+            print(f'[Wind MCP] 获取 {index_key} ({index_name}) 数据，天数: {days}')
         
         if not index_name:
             if debug_mode:
-                print(f"[Wind MCP] 找不到指数代码: {index_key}")
+                print(f'[Wind MCP] 找不到指数代码: {index_key}')
             return None
         
         end_date = datetime.now().strftime('%Y%m%d')
         begin_date = (datetime.now() - timedelta(days=days)).strftime('%Y%m%d')
         
-        if debug_mode:
-            print(f"[Wind MCP] 查询日期范围: {begin_date} 到 {end_date}")
-        
         result = WindMCP.get_index_kline(index_name, begin_date, end_date, '10')
-        
-        if debug_mode:
-            print(f"[Wind MCP] 返回结果: {result}")
         
         if result.get('success'):
             data = result.get('data')
-            if debug_mode:
-                print(f"[Wind MCP] 数据内容: {data}")
             if data and 'rows' in data and len(data['rows']) > 0:
                 result_list = []
                 for row in data['rows']:
@@ -303,7 +295,7 @@ class IndexDataService:
                             year = date_str[:4]
                             month = date_str[4:6]
                             day = date_str[6:8]
-                            date_str = f"{year}-{month}-{day}"
+                            date_str = f'{year}-{month}-{day}'
                         result_list.append({
                             'date': date_str,
                             'open': float(row[1]) if row[1] else 0,
@@ -313,14 +305,14 @@ class IndexDataService:
                             'volume': int(float(row[6])) if row[6] else 0
                         })
                 if debug_mode:
-                    print(f"[Wind MCP] 成功获取 {len(result_list)} 条数据")
+                    print(f'[Wind MCP] ✓ 成功获取 {len(result_list)} 条数据')
                 return result_list
             else:
                 if debug_mode:
-                    print(f"[Wind MCP] 数据为空或格式不正确: {data}")
+                    print(f'[Wind MCP] ✗ 数据为空或格式不正确')
         else:
             if debug_mode:
-                print(f"[Wind MCP] 调用失败: {result.get('error')}")
+                print(f'[Wind MCP] ✗ 调用失败: {result.get("error")}')
         return None
     
     @classmethod

@@ -73,11 +73,11 @@ class WindMCP:
     @classmethod
     def call(cls, server_type, tool_name, params):
         """调用 Wind MCP CLI"""
-        # 只在调试模式下打印详细日志，避免生产环境日志噪音
-        debug_mode = False
+        # 生产环境开启重要日志，帮助排查问题
+        debug_mode = True
         
         if debug_mode:
-            print(f"[Wind MCP] 调用: {server_type}.{tool_name}, 参数: {params}")
+            print(f'[Wind MCP] 调用: {server_type}.{tool_name}')
         
         try:
             skill_dir = cls._get_skill_dir()
