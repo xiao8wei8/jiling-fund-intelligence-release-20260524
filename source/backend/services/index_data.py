@@ -332,11 +332,33 @@ class IndexDataService:
         result = {}
         for key in index_keys:
             try:
-                data = cls.get_index_series(key, days)
-                if data:
-                    result[key] = data
+                # 禁用缓存，每次都重新获取
+                # 通过临时清空缓存来确保不使用旧数据
+                original_cache = dict(cls._cache)
+                original_cache_time = dict(cls._cache_time)
+                cls._cache = {}
+                cls._cache_time = {}
+                
+                try:
+                    data = cls.get_index_series(key, days)
+                    if data and len(data) > 0:
+                        result[key] = data
+                    else:
+                        # 获取失败，直接用兜底数据
+                        print(f'[get_multiple_index_data] {key} 获取失败，使用兜底数据')
+                        fallback_history = cls._generate_fallback_index_data(key, days)
+                        if fallback_history and len(fallback_history) > 0:
+                            result[key] = [{'date': item['date'], 'close': item['close']} for item in fallback_history]
+                finally:
+                    # 恢复缓存
+                    cls._cache = original_cache
+                    cls._cache_time = original_cache_time
             except Exception as e:
-                print(f"获取指数 {key} 数据时出错: {e}")
-                # 如果获取失败，跳过该指数，继续获取其他指数
-                continue
+                print(f'获取指数 {key} 数据时出错: {e}')
+                import traceback
+                traceback.print_exc()
+                # 即使异常，也用兜底数据
+                fallback_history = cls._generate_fallback_index_data(key, days)
+                if fallback_history and len(fallback_history) > 0:
+                    result[key] = [{'date': item['date'], 'close': item['close']} for item in fallback_history]
         return result
