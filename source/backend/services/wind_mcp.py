@@ -10,7 +10,7 @@ class WindMCP:
     
     @classmethod
     def _find_skill_dir(cls):
-        """查找 Wind MCP skill目录"""
+        """查找 Wind MCP skill目录，支持多种路径"""
         # 尝试多个可能的路径
         candidates = []
         
@@ -41,10 +41,20 @@ class WindMCP:
         if os.path.exists(path):
             return path
             
-        # 4. 相对于当前工作目录的jiling-source目录
-        path = os.path.join(os.getcwd(), 'jiling-source', '.agents', 'skills', 'wind-mcp-skill')
+        # 4. 相对于当前工作目录的source目录
+        path = os.path.join(os.getcwd(), 'source', '.agents', 'skills', 'wind-mcp-skill')
         if os.path.exists(path):
             return path
+            
+        # 5. 相对于当前工作目录的source/backend目录
+        path = os.path.join(os.getcwd(), 'source', 'backend', '.agents', 'skills', 'wind-mcp-skill')
+        if os.path.exists(path):
+            return path
+            
+        # 6. 检查环境变量
+        wind_skill_dir = os.environ.get('WIND_MCP_SKILL_DIR', '')
+        if wind_skill_dir and os.path.exists(wind_skill_dir):
+            return wind_skill_dir
             
         return None
 
