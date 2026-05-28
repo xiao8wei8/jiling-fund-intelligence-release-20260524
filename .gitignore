@@ -10,3 +10,10 @@ __pycache__/
 node_modules/
 venv/
 .env
+.agents/
+skills-lock.json
+jiling-source/
+jiling-source.zip
+source/backend/server.pid
+source/backend/test_*.py
+verify_benchmark.py
