@@ -63,9 +63,34 @@ class WindMCP:
     @classmethod
     def call(cls, server_type, tool_name, params):
         """调用 Wind MCP CLI"""
+        print(f"[Wind MCP] 调用: {server_type}.{tool_name}, 参数: {params}")
+        
         try:
             skill_dir = cls._get_skill_dir()
+            print(f"[Wind MCP] Skill 目录: {skill_dir}")
+            
             cli_path = os.path.join(skill_dir, 'scripts', 'cli.mjs')
+            print(f"[Wind MCP] CLI 路径: {cli_path}")
+            
+            if not os.path.exists(cli_path):
+                print(f"[Wind MCP] 错误: CLI 脚本不存在!")
+                return {
+                    'success': False,
+                    'error': f'CLI 脚本不存在: {cli_path}',
+                    'code': 'CLI_NOT_FOUND'
+                }
+            
+            # 检查 Node.js 是否存在
+            try:
+                subprocess.run(['node', '--version'], capture_output=True, text=True, timeout=5)
+                print(f"[Wind MCP] Node.js 环境检查通过")
+            except Exception as e:
+                print(f"[Wind MCP] 错误: Node.js 不可用! {e}")
+                return {
+                    'success': False,
+                    'error': f'Node.js 不可用: {e}',
+                    'code': 'NODEJS_NOT_FOUND'
+                }
             
             # 构建命令
             cmd = [
@@ -76,6 +101,7 @@ class WindMCP:
                 tool_name,
                 json.dumps(params, ensure_ascii=False)
             ]
+            print(f"[Wind MCP] 执行命令: {' '.join(cmd)}")
             
             # 执行命令
             result = subprocess.run(
@@ -85,6 +111,10 @@ class WindMCP:
                 timeout=30,
                 cwd=skill_dir
             )
+            
+            print(f"[Wind MCP] 退出码: {result.returncode}")
+            print(f"[Wind MCP] 标准输出: {repr(result.stdout)}")
+            print(f"[Wind MCP] 标准错误: {repr(result.stderr)}")
             
             # 检查退出码
             if result.returncode != 0:
@@ -106,6 +136,8 @@ class WindMCP:
             # 解析成功结果
             try:
                 data = json.loads(result.stdout)
+                print(f"[Wind MCP] 解析后的数据: {data}")
+                
                 if isinstance(data, dict) and 'content' in data:
                     # CLI 返回格式：{"content": [{"type": "text", "text": "..."}]}
                     content_text = data['content'][0]['text']
@@ -120,19 +152,24 @@ class WindMCP:
                         'success': True,
                         'data': data
                     }
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as e:
+                print(f"[Wind MCP] JSON 解析失败: {e}")
                 return {
                     'success': True,
                     'data': result.stdout
                 }
                 
         except subprocess.TimeoutExpired:
+            print(f"[Wind MCP] 调用超时")
             return {
                 'success': False,
                 'error': 'Wind MCP 调用超时',
                 'code': 'TIMEOUT'
             }
         except Exception as e:
+            print(f"[Wind MCP] 调用异常: {e}")
+            import traceback
+            traceback.print_exc()
             return {
                 'success': False,
                 'error': str(e),
