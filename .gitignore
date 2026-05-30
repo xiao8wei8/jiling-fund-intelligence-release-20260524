@@ -20,3 +20,4 @@ jiling-source.zip
 source/backend/server.pid
 source/backend/test_*.py
 verify_benchmark.py
+source/backend/cache/

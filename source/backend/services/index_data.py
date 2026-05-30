@@ -31,9 +31,88 @@ class IndexDataService:
         'gem': '399006'
     }
     
-    _cache = {}
-    _cache_time = {}
-    CACHE_DURATION = Config.CACHE_DURATION
+    # 缓存配置
+    CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cache', 'index_data')
+    CACHE_EXPIRE_HOURS = 24  # 缓存24小时过期
+    
+    @classmethod
+    def _ensure_cache_dir(cls):
+        """确保缓存目录存在"""
+        if not os.path.exists(cls.CACHE_DIR):
+            os.makedirs(cls.CACHE_DIR, exist_ok=True)
+    
+    @classmethod
+    def _get_cache_path(cls, index_key, days):
+        """获取缓存文件路径 - 按日期区分"""
+        today = datetime.now().strftime('%Y%m%d')
+        # 缓存文件名包含：日期、指数、天数
+        filename = f'{today}_{index_key}_{days}d.json'
+        return os.path.join(cls.CACHE_DIR, filename)
+    
+    @classmethod
+    def _is_cache_valid(cls, cache_path):
+        """检查缓存是否有效"""
+        if not os.path.exists(cache_path):
+            return False
+        
+        # 检查文件修改时间
+        file_time = datetime.fromtimestamp(os.path.getmtime(cache_path))
+        age = datetime.now() - file_time
+        
+        # 缓存24小时过期
+        if age.total_seconds() > cls.CACHE_EXPIRE_HOURS * 3600:
+            return False
+        
+        return True
+    
+    @classmethod
+    def _load_cache(cls, index_key, days):
+        """从缓存加载数据"""
+        cache_path = cls._get_cache_path(index_key, days)
+        if not cls._is_cache_valid(cache_path):
+            return None
+        
+        try:
+            with open(cache_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                print(f'[缓存] 加载缓存: {index_key} ({days}天)')
+                return data
+        except Exception as e:
+            print(f'[缓存] 加载缓存失败: {e}')
+            return None
+    
+    @classmethod
+    def _save_cache(cls, index_key, days, data):
+        """保存数据到缓存"""
+        try:
+            cls._ensure_cache_dir()
+            cache_path = cls._get_cache_path(index_key, days)
+            
+            with open(cache_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            
+            print(f'[缓存] 保存缓存: {index_key} ({days}天)')
+        except Exception as e:
+            print(f'[缓存] 保存缓存失败: {e}')
+    
+    @classmethod
+    def _clear_old_cache(cls):
+        """清理过期缓存（可选，定期清理）"""
+        try:
+            cls._ensure_cache_dir()
+            now = datetime.now()
+            
+            for filename in os.listdir(cls.CACHE_DIR):
+                file_path = os.path.join(cls.CACHE_DIR, filename)
+                if os.path.isfile(file_path):
+                    file_time = datetime.fromtimestamp(os.path.getmtime(file_path))
+                    age = now - file_time
+                    # 删除超过7天的缓存
+                    if age.total_seconds() > 7 * 24 * 3600:
+                        os.remove(file_path)
+                        print(f'[缓存] 清理过期缓存: {filename}')
+        except Exception as e:
+            print(f'[缓存] 清理缓存失败: {e}')
     
     @classmethod
     def get_index_history_from_eastmoney(cls, index_key, days=90):
@@ -216,11 +295,10 @@ class IndexDataService:
     @classmethod
     def get_index_history(cls, index_key, days=90):
         """获取指数历史数据（优先使用 Wind MCP，失败则依次尝试多个备用数据源）"""
-        cache_key = f'index_{index_key}_{days}'
-        if cache_key in cls._cache:
-            if datetime.now().timestamp() - cls._cache_time.get(cache_key, 0) < cls.CACHE_DURATION:
-                print(f"使用缓存数据 {cache_key}")
-                return cls._cache[cache_key]
+        # 先尝试从缓存加载
+        cached_data = cls._load_cache(index_key, days)
+        if cached_data:
+            return cached_data
         
         result_list = None
         
@@ -257,8 +335,8 @@ class IndexDataService:
                 traceback.print_exc()
         
         if result_list and len(result_list) > 0:
-            cls._cache[cache_key] = result_list
-            cls._cache_time[cache_key] = datetime.now().timestamp()
+            # 保存到缓存
+            cls._save_cache(index_key, days, result_list)
             return result_list
         
         print(f"所有数据源均无法获取 {index_key} 的数据")
