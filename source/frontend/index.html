@@ -5532,6 +5532,26 @@
     const formatType = getSelectedFormat();
     const style = getSelectedStyle();
     
+    // 如果选择"朋友圈文案（带市场风格）"，自动获取市场风格数据
+    let marketStyleData = null;
+    if (formatType === '朋友圈文案（带市场风格）') {
+      try {
+        const styleResp = await fetch(`${API_BASE}/fund/market/style`);
+        const styleResult = await styleResp.json();
+        if (styleResult.success && styleResult.data) {
+          marketStyleData = styleResult.data;
+        }
+      } catch (err) {
+        console.error('获取市场风格数据失败:', err);
+      }
+    }
+    
+    // 如果有对比数据，也传递给后端
+    let compareData = null;
+    if (formatType === '双基金对比' && window.compareData) {
+      compareData = window.compareData;
+    }
+    
     // 获取checkbox状态并构建工作流程
     const resultChecked = document.getElementById('agentResultCheck')?.checked ?? true;
     const complianceChecked = document.getElementById('agentComplianceCheck')?.checked ?? true;
@@ -5539,6 +5559,7 @@
     
     // 构建流程文本
     let workflow = ['文案生成'];
+    if (marketStyleData) workflow.push('市场分析');
     if (resultChecked) workflow.push('内容审核');
     if (complianceChecked) workflow.push('合规检查');
     if (windChecked) workflow.push('Wind数据验证');
@@ -5567,7 +5588,9 @@
           fund_info: fundInfo,
           selling_points: selectedSP,
           format_type: formatType,
-          style: style
+          style: style,
+          market_style: marketStyleData,
+          compare_data: compareData
         })
       });
       
@@ -8064,36 +8087,73 @@
       return;
     }
     
-    // 模拟搜索
-    const results = [
-      { code: '005827', name: '易方达蓝筹精选混合', type: '混合型', manager: '张坤' },
-      { code: '260108', name: '景顺长城新兴成长混合', type: '混合型', manager: '刘彦春' },
-      { code: '001938', name: '易方达中小盘混合', type: '混合型', manager: '张坤' },
-    ].filter(item => item.name.includes(q) || item.code.includes(q));
-    
-    suggestBox.innerHTML = results.map(r => `
-      <div class="suggest-item" onclick="selectCompareFund('${r.code}','${r.name}')">
-        <div style="font-weight:600;">${r.name}</div>
-        <div style="font-size:12px;color:var(--text-muted);">${r.code} · ${r.type} · ${r.manager}</div>
-      </div>
-    `).join('');
+    try {
+      const resp = await fetch(`${API_BASE}/fund/search?q=${encodeURIComponent(q)}&limit=5`);
+      const result = await resp.json();
+      
+      if (result.success && result.data && result.data.length > 0) {
+        suggestBox.innerHTML = result.data.map(r => `
+          <div class="suggest-item" onclick="selectCompareFund('${r.code}','${r.name}')">
+            <div style="font-weight:600;">${r.name}</div>
+            <div style="font-size:12px;color:var(--text-muted);">${r.code} · ${r.type || '混合型'}</div>
+          </div>
+        `).join('');
+      } else {
+        suggestBox.innerHTML = '<div class="suggest-item" style="color:var(--text-muted);">未找到相关基金</div>';
+      }
+    } catch (err) {
+      console.error('搜索基金失败:', err);
+      suggestBox.innerHTML = '<div class="suggest-item" style="color:var(--text-muted);">搜索失败，请重试</div>';
+    }
   }
   
-  function confirmCompareFund() {
-    if (!selectedCompareFund) return;
-    closeCompareFundModal();
+  async function confirmCompareFund() {
+    if (!selectedCompareFund || !currentFundData) {
+      showToast('请先选择基金', 'err');
+      return;
+    }
     
-    // 自动切换到双基金对比文案格式
+    showGlobalLoading();
+    try {
+      const resp = await fetch(`${API_BASE}/fund/compare/multiple`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          codes: [currentFundData.code, selectedCompareFund.code]
+        })
+      });
+      
+      const result = await resp.json();
+      if (result.success && result.data && result.data.length >= 2) {
+        closeCompareFundModal();
+        showCompareResult(result.data);
+        showToast('对比数据加载成功');
+      } else {
+        showToast('获取对比数据失败', 'err');
+      }
+    } catch (err) {
+      console.error('获取对比数据失败:', err);
+      showToast('获取对比数据失败', 'err');
+    } finally {
+      hideGlobalLoading();
+    }
+  }
+  
+  function showCompareResult(data) {
+    // 切换到双基金对比文案格式
     const formatCards = document.querySelectorAll('.format-card');
-    formatCards.forEach((card, idx) => {
+    formatCards.forEach(card => {
       card.classList.remove('sel');
       if (card.textContent.includes('双基金对比')) {
         card.classList.add('sel');
       }
     });
     
-    // 保存对比信息
-    showToast('已选择对比基金，可生成对比文案');
+    // 保存对比数据到全局变量
+    window.compareData = data;
+    
+    // 显示对比提示
+    showToast(`已加载 ${data.length} 只基金的对比数据，可生成对比文案`);
   }
 
   // Init

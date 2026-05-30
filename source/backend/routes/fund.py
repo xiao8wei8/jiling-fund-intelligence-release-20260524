@@ -311,6 +311,122 @@ def fund_comparison(code):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@fund_bp.route('/compare/multiple', methods=['POST'])
+def compare_multiple_funds():
+    """多基金对比API"""
+    try:
+        data = request.json
+        codes = data.get('codes', [])
+        
+        if len(codes) < 2:
+            return jsonify({'success': False, 'error': '至少需要两个基金代码'}), 400
+        
+        if len(codes) > 5:
+            return jsonify({'success': False, 'error': '最多支持5个基金对比'}), 400
+        
+        results = []
+        for code in codes:
+            try:
+                detail = EastmoneyService.get_fund_detail(code)
+                rank_data = TiantianFundService.get_fund_rank(code)
+                comparison_data = TiantianFundService.get_performance_comparison(code)
+                
+                if detail:
+                    results.append({
+                        'code': code,
+                        'name': detail.get('name', ''),
+                        'type': detail.get('type', ''),
+                        'company': detail.get('company', ''),
+                        'manager': detail.get('manager', ''),
+                        'rank': rank_data,
+                        'comparison': comparison_data
+                    })
+            except Exception as e:
+                print(f"获取基金 {code} 数据失败: {e}")
+                continue
+        
+        if len(results) < 2:
+            return jsonify({'success': False, 'error': '至少需要成功获取两个基金的数据'}), 404
+        
+        return jsonify({'success': True, 'data': results})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@fund_bp.route('/market/style')
+def get_market_style():
+    """获取市场风格分析"""
+    try:
+        hs300_data = IndexDataService.get_index_history('hs300', 60)
+        zz500_data = IndexDataService.get_index_history('zz500', 60)
+        
+        market_style = _analyze_market_style(hs300_data, zz500_data)
+        
+        return jsonify({'success': True, 'data': market_style})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+def _analyze_market_style(hs300_data, zz500_data):
+    """分析市场风格"""
+    import statistics
+    
+    def calc_return(data):
+        if not data or len(data) < 2:
+            return 0
+        return (data[-1]['close'] - data[0]['close']) / data[0]['close'] * 100
+    
+    def calc_volatility(data):
+        if not data or len(data) < 2:
+            return 0
+        returns = []
+        for i in range(1, len(data)):
+            ret = (data[i]['close'] - data[i-1]['close']) / data[i-1]['close']
+            returns.append(ret)
+        if not returns:
+            return 0
+        return statistics.stdev(returns) * 100 if len(returns) > 1 else 0
+    
+    hs300_return = calc_return(hs300_data)
+    zz500_return = calc_return(zz500_data)
+    hs300_vol = calc_volatility(hs300_data)
+    zz500_vol = calc_volatility(zz500_data)
+    
+    style = "均衡配置"
+    if hs300_return > 5 and zz500_return > 5:
+        if zz500_return > hs300_return + 2:
+            style = "成长占优"
+        elif hs300_return > zz500_return + 2:
+            style = "价值占优"
+        else:
+            style = "均衡上涨"
+    elif hs300_return < -3 or zz500_return < -3:
+        style = "防御为主"
+    else:
+        style = "震荡调整"
+    
+    macro_analysis = "当前市场环境总体平稳，建议保持均衡配置，关注政策导向和市场流动性变化。"
+    if hs300_vol > 1.5:
+        macro_analysis = "市场波动较大，建议控制仓位，关注风险。可以适当配置防御性较强的价值型基金。"
+    elif hs300_vol < 0.8:
+        macro_analysis = "市场波动较小，情绪较为平稳，可以适度增加配置，把握结构性机会。"
+    
+    if style in ["成长占优", "均衡上涨"]:
+        allocation_advice = "建议配置比例：成长型基金30-40%，价值型基金20-30%，债券基金30%"
+    elif style == "价值占优":
+        allocation_advice = "建议配置比例：价值型基金30-40%，成长型基金20-30%，债券基金30%"
+    else:
+        allocation_advice = "建议配置比例：均衡型基金40%，成长型基金20%，债券基金40%"
+    
+    return {
+        'style': style,
+        'hs300_return': round(hs300_return, 2),
+        'zz500_return': round(zz500_return, 2),
+        'hs300_volatility': round(hs300_vol, 2),
+        'zz500_volatility': round(zz500_vol, 2),
+        'macro_analysis': macro_analysis,
+        'allocation_advice': allocation_advice,
+        'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M')
+    }
+
 @fund_bp.route('/<code>/full_plus')
 def fund_full_plus(code):
     try:
