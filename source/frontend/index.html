@@ -2622,6 +2622,19 @@
       background: linear-gradient(180deg, rgba(248,251,255,0.92), rgba(255,255,255,0.68));
     }
     .modal-title { font-size: 16px; font-weight: 700; }
+    .recommend-fund-item {
+      padding: 12px 14px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .recommend-fund-item:hover {
+      background: linear-gradient(135deg, rgba(20,92,255,0.08), rgba(25,211,255,0.05));
+      border-color: rgba(20,92,255,0.2);
+    }
+    
     .modal-x {
       width: 32px; height: 32px;
       border-radius: var(--radius-sm); border: none;
@@ -3203,7 +3216,10 @@
               <div class="selected-fund" id="selectedFundBox">
                 <div class="selected-fund-top">
                   <div class="selected-fund-name" id="sFundName">兴全合润混合（LOF）</div>
-                  <button class="fund-fav-btn followed" id="selectedFundFavoriteBtn" onclick="toggleCurrentFundFavorite(event)">✓ 已自选</button>
+                  <div style="display:flex;gap:8px;">
+                    <button class="fund-fav-btn" id="fundPkBtn" onclick="openCompareFundModal()">⚡ PK对比</button>
+                    <button class="fund-fav-btn followed" id="selectedFundFavoriteBtn" onclick="toggleCurrentFundFavorite(event)">✓ 已自选</button>
+                  </div>
                 </div>
                 <div class="selected-fund-tags">
                   <span class="fund-tag fund-tag-blue" id="sFundCode">163406</span>
@@ -3747,6 +3763,74 @@
 </div>
 
 <!-- ============================================================
+     COMPARE FUND MODAL
+============================================================ -->
+<div class="modal-overlay" id="compareFundModal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-hdr">
+      <div class="modal-title">选择对比基金</div>
+      <button class="modal-x" onclick="closeCompareFundModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px;">
+      <div style="margin-bottom:16px;">
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">当前基金</div>
+        <div class="selected-fund" style="padding:12px;background:var(--bg-subtle);border-radius:10px;">
+          <div class="selected-fund-top">
+            <div class="selected-fund-name" id="currentCompareFundName">兴全合润混合（LOF）</div>
+          </div>
+          <div class="selected-fund-tags">
+            <span class="fund-tag fund-tag-blue" id="currentCompareFundCode">163406</span>
+            <span class="fund-tag fund-tag-blue" id="currentCompareFundType">混合型</span>
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin-bottom:16px;">
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">选择对比基金</div>
+        <div class="search-wrap">
+          <span class="search-icon">🔎</span>
+          <input class="search-input" placeholder="输入基金名称或代码搜索..." id="compareFundSearch" oninput="searchCompareFunds()">
+        </div>
+        <div class="search-suggest" id="compareFundSearchSuggest" style="position:relative;top:0;"></div>
+      </div>
+      
+      <div style="margin-bottom:16px;">
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">智能推荐</div>
+        <div style="display:flex;flex-direction:column;gap:8px;" id="compareFundRecommendations">
+          <div class="recommend-fund-item" onclick="selectCompareFund('005827','易方达蓝筹精选混合')">
+            <div style="font-weight:600;font-size:14px;">易方达蓝筹精选混合</div>
+            <div style="font-size:12px;color:var(--text-muted);">005827 · 混合型 · 张坤</div>
+          </div>
+          <div class="recommend-fund-item" onclick="selectCompareFund('260108','景顺长城新兴成长混合')">
+            <div style="font-weight:600;font-size:14px;">景顺长城新兴成长混合</div>
+            <div style="font-size:12px;color:var(--text-muted);">260108 · 混合型 · 刘彦春</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 已选对比基金 -->
+      <div id="selectedCompareFundBox" style="display:none;margin-bottom:16px;">
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">已选对比基金</div>
+        <div class="selected-fund" style="padding:12px;background:linear-gradient(135deg,rgba(20,92,255,0.08),rgba(25,211,255,0.05));border-radius:10px;border:1px dashed var(--border);">
+          <div class="selected-fund-top">
+            <div class="selected-fund-name" id="selectedCompareFundName">—</div>
+            <button class="fund-fav-btn" style="font-size:12px;" onclick="clearCompareFund()">✕ 移除</button>
+          </div>
+          <div class="selected-fund-tags">
+            <span class="fund-tag fund-tag-blue" id="selectedCompareFundCode">—</span>
+            <span class="fund-tag fund-tag-blue" id="selectedCompareFundType">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeCompareFundModal()">取消</button>
+      <button class="btn btn-primary" id="confirmCompareBtn" onclick="confirmCompareFund()" disabled>开始对比</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
      JAVASCRIPT
 ============================================================ -->
 <script>
@@ -3761,6 +3845,9 @@
   let currentMarketData = null;
   let marketChartMode = 'scale';
   let marketCompanySortKey = 'total_scale';
+  
+  // 对比基金相关
+  let selectedCompareFund = null;
 
   // ---- Fund Chart ----
   // 基准配置
@@ -7927,6 +8014,86 @@
         }
       }
     });
+  }
+
+  // ---- Compare Fund Functions ----
+  function openCompareFundModal() {
+    if (!currentFundData) {
+      showToast('请先选择基金', 'err');
+      return;
+    }
+    // 更新当前基金信息
+    document.getElementById('currentCompareFundName').textContent = currentFundData.name || '—';
+    document.getElementById('currentCompareFundCode').textContent = currentFundData.code || '—';
+    document.getElementById('currentCompareFundType').textContent = currentFundData.type || '—';
+    
+    // 清空选择
+    selectedCompareFund = null;
+    document.getElementById('selectedCompareFundBox').style.display = 'none';
+    document.getElementById('confirmCompareBtn').disabled = true;
+    document.getElementById('compareFundSearch').value = '';
+    document.getElementById('compareFundSearchSuggest').innerHTML = '';
+    
+    document.getElementById('compareFundModal').classList.add('show');
+  }
+  
+  function closeCompareFundModal() {
+    document.getElementById('compareFundModal').classList.remove('show');
+  }
+  
+  function selectCompareFund(code, name) {
+    selectedCompareFund = { code, name };
+    document.getElementById('selectedCompareFundName').textContent = name;
+    document.getElementById('selectedCompareFundCode').textContent = code;
+    document.getElementById('selectedCompareFundType').textContent = '混合型';
+    document.getElementById('selectedCompareFundBox').style.display = 'block';
+    document.getElementById('confirmCompareBtn').disabled = false;
+  }
+  
+  function clearCompareFund() {
+    selectedCompareFund = null;
+    document.getElementById('selectedCompareFundBox').style.display = 'none';
+    document.getElementById('confirmCompareBtn').disabled = true;
+  }
+  
+  async function searchCompareFunds() {
+    const q = document.getElementById('compareFundSearch').value.trim();
+    const suggestBox = document.getElementById('compareFundSearchSuggest');
+    if (!q) {
+      suggestBox.innerHTML = '';
+      return;
+    }
+    
+    // 模拟搜索
+    const results = [
+      { code: '005827', name: '易方达蓝筹精选混合', type: '混合型', manager: '张坤' },
+      { code: '260108', name: '景顺长城新兴成长混合', type: '混合型', manager: '刘彦春' },
+      { code: '001938', name: '易方达中小盘混合', type: '混合型', manager: '张坤' },
+    ].filter(item => item.name.includes(q) || item.code.includes(q));
+    
+    suggestBox.innerHTML = results.map(r => `
+      <div class="suggest-item" onclick="selectCompareFund('${r.code}','${r.name}')">
+        <div style="font-weight:600;">${r.name}</div>
+        <div style="font-size:12px;color:var(--text-muted);">${r.code} · ${r.type} · ${r.manager}</div>
+      </div>
+    `).join('');
+  }
+  
+  function confirmCompareFund() {
+    if (!selectedCompareFund) return;
+    closeCompareFundModal();
+    
+    // 自动切换到双基金对比文案格式
+    const formatCards = document.querySelectorAll('.format-card');
+    formatCards.forEach((card, idx) => {
+      card.classList.remove('sel');
+      if (card.textContent.includes('双基金对比')) {
+        card.classList.add('sel');
+      }
+    });
+    
+    // 保存对比信息
+    showToast('已选择对比基金，可生成对比文案');
   }
 
   // Init
