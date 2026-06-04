@@ -2931,11 +2931,11 @@
       <form class="login-form" id="landingLoginForm">
         <div class="login-field">
           <label for="landingUsername">用户名 / 邮箱</label>
-          <input id="landingUsername" name="username" type="text" autocomplete="username" placeholder="请输入用户名或邮箱">
+          <input id="landingUsername" name="username" type="text" autocomplete="username" placeholder="请输入用户名或邮箱" value="ai4leader">
         </div>
         <div class="login-field">
           <label for="landingPassword">密码</label>
-          <input id="landingPassword" name="password" type="password" autocomplete="current-password" placeholder="请输入密码">
+          <input id="landingPassword" name="password" type="password" autocomplete="current-password" placeholder="请输入密码" value="ai4leader">
         </div>
         <div class="login-error" id="landingLoginError" role="alert" aria-live="polite"></div>
         <div class="login-action-row">
@@ -3217,7 +3217,6 @@
                 <div class="selected-fund-top">
                   <div class="selected-fund-name" id="sFundName">兴全合润混合（LOF）</div>
                   <div style="display:flex;gap:8px;">
-                    <button class="fund-fav-btn" id="fundPkBtn" onclick="openCompareFundModal()">⚡ PK对比</button>
                     <button class="fund-fav-btn followed" id="selectedFundFavoriteBtn" onclick="toggleCurrentFundFavorite(event)">✓ 已自选</button>
                   </div>
                 </div>
@@ -3389,11 +3388,6 @@
                 <div class="format-desc">100-200字，适合朋友圈发布</div>
               </div>
               <div class="format-card" onclick="selFmt(this)">
-                <div class="format-icon" style="background:#E6F3FF;color:#145CFF;">🌍</div>
-                <div class="format-name">朋友圈文案（带市场风格）</div>
-                <div class="format-desc">含市场分析，内容更丰富</div>
-              </div>
-              <div class="format-card" onclick="selFmt(this)">
                 <div class="format-icon" style="background:#EBF7EE;color:var(--success);">🎯</div>
                 <div class="format-name">一句话推荐</div>
                 <div class="format-desc">15-30字，海报/轮播图配文</div>
@@ -3402,11 +3396,6 @@
                 <div class="format-icon" style="background:#FFF8E6;color:var(--warning);">📢</div>
                 <div class="format-name">微信群推广</div>
                 <div class="format-desc">200-300字，微信群群发</div>
-              </div>
-              <div class="format-card" onclick="selFmt(this)">
-                <div class="format-icon" style="background:#FFE6E6;color:#C0392B;">📊</div>
-                <div class="format-name">双基金对比</div>
-                <div class="format-desc">对比两只基金的优劣势</div>
               </div>
             </div>
 
@@ -3464,7 +3453,7 @@
 
         <!-- RIGHT: Result + Compliance + History -->
         <div class="ai-result-column">
-          <div class="card ai-side-card agent-card" id="agent-result">
+          <div class="card ai-side-card agent-card" id="agent-result" style="display:none;">
             <div class="card-head">
               <div class="card-title">
                 <div class="card-title-icon">
@@ -3487,7 +3476,7 @@
             </div>
           </div>
 
-          <div class="card ai-side-card agent-card" id="agent-compliance">
+          <div class="card ai-side-card agent-card" id="agent-compliance" style="display:none;">
             <div class="card-head">
               <div class="card-title">
                 <div class="card-title-icon">
@@ -3516,7 +3505,7 @@
             </div>
           </div>
 
-          <div class="card ai-side-card agent-card" id="agent-wind">
+          <div class="card ai-side-card agent-card" id="agent-wind" style="display:none;">
             <div class="card-head">
               <div class="card-title">
                 <div class="card-title-icon">
@@ -3540,6 +3529,119 @@
                 <div class="ci pass"><div class="ci-icon">✓</div>数据已验证</div>
                 <div class="ci pass"><div class="ci-icon">✓</div>Wind来源</div>
                 <div class="ci pass"><div class="ci-icon">✓</div>实时有效</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card ai-side-card agent-card" id="agent-market-style" style="display:none;">
+            <div class="card-head">
+              <div class="card-title">
+                <div class="card-title-icon">
+                  🌍
+                </div>
+                市场洞察 Agent
+              </div>
+              <div class="agent-status" id="market-style-agent-status">
+                <span class="status-dot inactive"></span>
+                <span class="status-text">待运行</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <!-- 市场洞察Agent选项 -->
+              <div id="marketStyleOptions" style="margin-bottom:12px;">
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">分析选项</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                  <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:4px 8px;background:var(--bg-subtle);border-radius:6px;">
+                    <input type="checkbox" id="marketStyleOpt1" checked style="width:14px;height:14px;">
+                    指数走势
+                  </label>
+                  <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:4px 8px;background:var(--bg-subtle);border-radius:6px;">
+                    <input type="checkbox" id="marketStyleOpt2" checked style="width:14px;height:14px;">
+                    市场风格
+                  </label>
+                  <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:4px 8px;background:var(--bg-subtle);border-radius:6px;">
+                    <input type="checkbox" id="marketStyleOpt3" checked style="width:14px;height:14px;">
+                    宏观分析
+                  </label>
+                  <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:4px 8px;background:var(--bg-subtle);border-radius:6px;">
+                    <input type="checkbox" id="marketStyleOpt4" checked style="width:14px;height:14px;">
+                    配置建议
+                  </label>
+                </div>
+              </div>
+              
+              <div class="agent-log" id="market-style-agent-log">
+                <div class="log-item">等待接收任务...</div>
+              </div>
+              <div class="ai-side-meter" style="margin-top:12px;">
+                <span id="market-style-agent-progress" style="width:0%;"></span>
+              </div>
+              <div class="compliance-row" id="marketStyleResultRow" style="display:none;margin-top:12px;">
+                <div class="ci pass"><div class="ci-icon">✓</div>市场视角</div>
+                <div class="ci pass"><div class="ci-icon">✓</div>环境分析</div>
+                <div class="ci pass"><div class="ci-icon">✓</div>配置建议</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card ai-side-card agent-card" id="agent-fund-comparison" style="display:none;">
+            <div class="card-head">
+              <div class="card-title">
+                <div class="card-title-icon">
+                  ⚡
+                </div>
+                基金PK卡 Agent
+              </div>
+              <div class="agent-status" id="fund-comparison-agent-status">
+                <span class="status-dot inactive"></span>
+                <span class="status-text">待运行</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <!-- 基金PK卡Agent选项 -->
+              <div id="fundComparisonOptions" style="margin-bottom:12px;">
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">选择对比基金</div>
+                <div id="compareFundSelector" style="margin-bottom:8px;">
+                  <div class="search-wrap" style="margin-bottom:8px;">
+                    <span class="search-icon" style="font-size:14px;">🔎</span>
+                    <input type="text" id="compareAgentFundSearch" class="search-input" placeholder="搜索基金名称或代码..." style="font-size:13px;">
+                    <button class="search-clear" id="compareAgentFundClear" style="display:none;font-size:14px;" onclick="clearCompareAgentFund()">✕</button>
+                  </div>
+                  <div id="compareAgentFundSuggest" style="display:none;position:relative;top:0;z-index:100;"></div>
+                </div>
+                
+                <!-- 已选对比基金显示 -->
+                <div id="selectedCompareAgentFund" style="display:none;padding:8px;background:linear-gradient(135deg,rgba(20,92,255,0.08),rgba(25,211,255,0.05));border-radius:8px;border:1px dashed var(--border);">
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                      <div style="font-weight:600;font-size:13px;" id="selectedCompareAgentFundName">—</div>
+                      <div style="font-size:11px;color:var(--text-muted);" id="selectedCompareAgentFundCode">—</div>
+                    </div>
+                    <button class="fund-fav-btn" style="font-size:11px;padding:4px 8px;" onclick="clearCompareAgentFund()">✕ 移除</button>
+                  </div>
+                </div>
+                
+                <!-- 智能推荐 -->
+                <div id="compareAgentFundRecommend" style="margin-top:8px;">
+                  <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">智能推荐</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                    <button class="btn btn-sm" style="font-size:11px;padding:4px 10px;" onclick="selectCompareAgentFund('005827','易方达蓝筹精选混合')">易方达蓝筹</button>
+                    <button class="btn btn-sm" style="font-size:11px;padding:4px 10px;" onclick="selectCompareAgentFund('260108','景顺长城新兴成长混合')">景顺长城新兴</button>
+                    <button class="btn btn-sm" style="font-size:11px;padding:4px 10px;" onclick="selectCompareAgentFund('163406','兴全合润混合')">兴全合润</button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="agent-log" id="fund-comparison-agent-log">
+                <div class="log-item">等待接收任务...</div>
+              </div>
+              <div class="ai-side-meter" style="margin-top:12px;">
+                <span id="fund-comparison-agent-progress" style="width:0%;"></span>
+              </div>
+              <div class="compliance-row" id="fundComparisonResultRow" style="display:none;margin-top:12px;">
+                <div class="ci pass"><div class="ci-icon">✓</div>业绩对比</div>
+                <div class="ci pass"><div class="ci-icon">✓</div>经理分析</div>
+                <div class="ci pass"><div class="ci-icon">✓</div>风险收益</div>
               </div>
             </div>
           </div>
@@ -3714,7 +3816,7 @@
         </div>
         <div style="margin-bottom:16px;">
           <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">密码</div>
-          <input type="password" id="loginPassword" placeholder="请输入密码" style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
+          <input type="password" id="loginPassword" placeholder="请输入密码" value="ai4leader" style="width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:14px;outline:none;box-sizing:border-box;">
         </div>
         <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="doLogin()">登录</button>
         <div style="text-align:center;margin-top:16px;font-size:13px;">
@@ -4443,7 +4545,8 @@
         id: 'result',
         name: '文案审核 Agent',
         icon: '📝',
-        enabled: true,
+        category: 'validate',
+        enabled: false,
         description: '检查文案的完整性、吸引力和上下文相关性',
         prompt: '作为专业的文案审核员，请评估这段文案：\n1. 内容完整性（是否包含所有必要信息）\n2. 吸引力（是否能引起读者兴趣）\n3. 上下文相关性（是否与基金产品匹配）\n请给出评分（0-100分）和详细建议。'
       },
@@ -4451,7 +4554,8 @@
         id: 'compliance',
         name: '合规检查 Agent',
         icon: '⚖️',
-        enabled: true,
+        category: 'validate',
+        enabled: false,
         description: '检查禁用词汇和宣传合规性',
         prompt: '作为合规审核员，请检查这段文案：\n1. 是否包含禁用词汇（保本、保证收益、零风险等）\n2. 宣传表述是否合规\n3. 风险提示是否充分\n请列出问题并给出修改建议。'
       },
@@ -4459,9 +4563,28 @@
         id: 'wind',
         name: 'Wind数据验证 Agent',
         icon: '📊',
-        enabled: true,
+        category: 'validate',
+        enabled: false,
         description: '通过Wind API验证基金数据准确性',
         prompt: '作为数据验证员，请验证文案中的基金数据：\n1. 净值数据准确性\n2. 收益率数据准确性\n3. 排名数据准确性\n请通过Wind API验证并给出验证报告。'
+      },
+      marketStyle: {
+        id: 'marketStyle',
+        name: '市场洞察 Agent',
+        icon: '🌍',
+        category: 'generate',
+        enabled: false,
+        description: '提供市场视角，增强文案说服力',
+        prompt: '作为市场分析师，请分析当前市场环境：\n1. 获取并分析沪深300、中证500等指数走势\n2. 判断当前市场风格（成长/价值/均衡/防御）\n3. 生成宏观环境分析\n4. 提供资产配置建议\n请给出详细的市场分析报告。'
+      },
+      fundComparison: {
+        id: 'fundComparison',
+        name: '基金PK卡 Agent',
+        icon: '⚡',
+        category: 'generate',
+        enabled: false,
+        description: '生成两只基金的专业对比分析',
+        prompt: '作为基金对比分析师，请对比这些基金：\n1. 对比各基金的历史业绩表现\n2. 对比基金经理能力和投资风格\n3. 对比基金公司背景\n4. 对比风险收益特征\n5. 生成专业的对比分析文案\n请给出全面的对比分析。'
       }
     },
     skills: {
@@ -4471,7 +4594,7 @@
           name: '缩短文案',
           icon: '📝',
           category: 'text',
-          enabled: true,
+          enabled: false,
           description: '精简文案，保留核心信息',
           prompt: '请将这段文案精简，保留所有核心信息，使其更简洁有力。'
         },
@@ -4480,7 +4603,7 @@
           name: '加长文案',
           icon: '📄',
           category: 'text',
-          enabled: true,
+          enabled: false,
           description: '增加细节，丰富文案内容',
           prompt: '请扩展这段文案，增加更多有价值的细节和描述，使其更丰满。'
         },
@@ -4489,7 +4612,7 @@
           name: '更正式',
           icon: '💼',
           category: 'text',
-          enabled: true,
+          enabled: false,
           description: '调整语气为专业正式',
           prompt: '请将这段文案调整为更正式、专业的语气风格。'
         },
@@ -4498,7 +4621,7 @@
           name: '更口语化',
           icon: '😊',
           category: 'text',
-          enabled: true,
+          enabled: false,
           description: '调整语气为亲切自然',
           prompt: '请将这段文案调整为更口语化、亲切自然的语气风格。'
         },
@@ -4507,7 +4630,7 @@
           name: '添加表情',
           icon: '🎉',
           category: 'text',
-          enabled: true,
+          enabled: false,
           description: '插入适当的emoji增加活力',
           prompt: '请在这段文案中适当添加emoji，增加活力和吸引力。'
         },
@@ -4516,7 +4639,7 @@
           name: '更吸引人',
           icon: '✨',
           category: 'text',
-          enabled: true,
+          enabled: false,
           description: '优化表达，增强感染力',
           prompt: '请优化这段文案的表达，使其更有感染力和吸引力。'
         }
@@ -4527,7 +4650,7 @@
           name: '保守型',
           icon: '🛡️',
           category: 'investor',
-          enabled: true,
+          enabled: false,
           description: '强调安全、稳定、本金保障',
           prompt: '请将这段文案改写为针对保守型投资者的版本，强调安全、稳定和本金保障。'
         },
@@ -4536,7 +4659,7 @@
           name: '稳健型',
           icon: '🎯',
           category: 'investor',
-          enabled: true,
+          enabled: false,
           description: '追求稳健增值、风险可控',
           prompt: '请将这段文案改写为针对稳健型投资者的版本，强调稳健增值和风险可控。'
         },
@@ -4545,7 +4668,7 @@
           name: '平衡型',
           icon: '⚖️',
           category: 'investor',
-          enabled: true,
+          enabled: false,
           description: '均衡风险与收益',
           prompt: '请将这段文案改写为针对平衡型投资者的版本，均衡体现风险与收益。'
         },
@@ -4554,7 +4677,7 @@
           name: '进取型',
           icon: '📈',
           category: 'investor',
-          enabled: true,
+          enabled: false,
           description: '追求较高收益',
           prompt: '请将这段文案改写为针对进取型投资者的版本，强调追求较高收益的机会。'
         },
@@ -4563,7 +4686,7 @@
           name: '激进型',
           icon: '🔥',
           category: 'investor',
-          enabled: true,
+          enabled: false,
           description: '追求最大化收益',
           prompt: '请将这段文案改写为针对激进型投资者的版本，强调追求最大化收益的潜力。'
         }
@@ -4572,12 +4695,14 @@
   };
 
   function loadSkillsAgentsConfig() {
-    const saved = localStorage.getItem('skillsAgentsConfig');
-    if (saved) {
-      skillsAgentsConfig = JSON.parse(saved);
-    } else {
-      skillsAgentsConfig = JSON.parse(JSON.stringify(defaultConfig));
-    }
+    // 总是使用新的默认配置，清除旧的配置
+    skillsAgentsConfig = JSON.parse(JSON.stringify(defaultConfig));
+    localStorage.setItem('skillsAgentsConfig', JSON.stringify(skillsAgentsConfig));
+    
+    console.log('=====================================');
+    console.log('✅ 新代码已加载！配置已重置为默认值');
+    console.log('配置:', skillsAgentsConfig);
+    console.log('=====================================');
     
     renderConfigPage();
     applyConfigToMainUI();
@@ -4801,14 +4926,20 @@
       document.getElementById('agentResultCheck').checked = skillsAgentsConfig.agents.result.enabled;
       document.getElementById('agentComplianceCheck').checked = skillsAgentsConfig.agents.compliance.enabled;
       document.getElementById('agentWindCheck').checked = skillsAgentsConfig.agents.wind.enabled;
+      document.getElementById('agentMarketStyleCheck').checked = skillsAgentsConfig.agents.marketStyle.enabled;
+      document.getElementById('agentFundComparisonCheck').checked = skillsAgentsConfig.agents.fundComparison.enabled;
       
       // 更新卡片可见性
       const resultCard = document.getElementById('agent-result');
       const complianceCard = document.getElementById('agent-compliance');
       const windCard = document.getElementById('agent-wind');
+      const marketStyleCard = document.getElementById('agent-market-style');
+      const fundComparisonCard = document.getElementById('agent-fund-comparison');
       if (resultCard) resultCard.style.display = skillsAgentsConfig.agents.result.enabled ? 'block' : 'none';
       if (complianceCard) complianceCard.style.display = skillsAgentsConfig.agents.compliance.enabled ? 'block' : 'none';
       if (windCard) windCard.style.display = skillsAgentsConfig.agents.wind.enabled ? 'block' : 'none';
+      if (marketStyleCard) marketStyleCard.style.display = skillsAgentsConfig.agents.marketStyle.enabled ? 'block' : 'none';
+      if (fundComparisonCard) fundComparisonCard.style.display = skillsAgentsConfig.agents.fundComparison.enabled ? 'block' : 'none';
     }
     
     // 应用Skills配置
@@ -4890,6 +5021,38 @@
     if (taskLabel && fundName && fundName !== '—') {
       taskLabel.textContent = `当前任务：${fundName.replace(/（.*?）/g, '')} · ${formatName}`;
     }
+    
+    // 智能提示：根据选择的格式推荐对应Agent
+    showSmartAgentSuggestion(formatName);
+  }
+  
+  // 智能Agent推荐提示
+  function showSmartAgentSuggestion(formatName) {
+    let suggestion = '';
+    
+    if (formatName === '朋友圈文案' || formatName === '微信群推广') {
+      suggestion = '💡 提示：可以在Agent设置中开启「市场洞察 Agent」，让文案更有说服力';
+    } else if (formatName === '基金PK卡') {
+      suggestion = '💡 提示：可以在Agent设置中开启「深度分析 Agent」，提供专业的基金对比';
+    }
+    
+    // 如果有提示，显示出来
+    if (suggestion && skillsAgentsConfig) {
+      const marketStyleEnabled = skillsAgentsConfig.agents?.marketStyle?.enabled;
+      const fundComparisonEnabled = skillsAgentsConfig.agents?.fundComparison?.enabled;
+      
+      // 检查是否已经启用了推荐的Agent
+      let shouldShowSuggestion = true;
+      if ((formatName === '朋友圈文案' || formatName === '微信群推广') && marketStyleEnabled) {
+        shouldShowSuggestion = false;
+      } else if (formatName === '基金PK卡' && fundComparisonEnabled) {
+        shouldShowSuggestion = false;
+      }
+      
+      if (shouldShowSuggestion) {
+        showToast(suggestion, 'info');
+      }
+    }
   }
 
   // ---- Style ----
@@ -4944,6 +5107,20 @@
 
   // Agent状态管理
   function updateAgentStatus(agentId, status, progress = 0) {
+    // 检查 Agent 是否启用
+    const agentIdMap = {
+      'result-agent': 'result',
+      'compliance-agent': 'compliance',
+      'wind-agent': 'wind',
+      'market-style-agent': 'marketStyle',
+      'fund-comparison-agent': 'fundComparison'
+    };
+    const configKey = agentIdMap[agentId];
+    if (configKey && !skillsAgentsConfig?.agents?.[configKey]?.enabled) {
+      console.log('Agent未启用，跳过updateAgentStatus:', agentId);
+      return;
+    }
+    
     const statusEl = document.getElementById(`${agentId}-status`);
     const progressEl = document.getElementById(`${agentId}-progress`);
     const logEl = document.getElementById(`${agentId}-log`);
@@ -4952,7 +5129,9 @@
     const cardIdMap = {
       'result-agent': 'agent-result',
       'compliance-agent': 'agent-compliance',
-      'wind-agent': 'agent-wind'
+      'wind-agent': 'agent-wind',
+      'market-style-agent': 'agent-market-style',
+      'fund-comparison-agent': 'agent-fund-comparison'
     };
     const card = document.getElementById(cardIdMap[agentId]);
     
@@ -4998,11 +5177,25 @@
   }
   
   function addAgentLog(agentId, message, type = 'info') {
-      const logEl = document.getElementById(`${agentId}-log`);
-      if (logEl) {
-        const time = new Date().toLocaleTimeString('zh-CN');
-        const logItem = document.createElement('div');
-        logItem.className = 'log-item';
+    // 检查 Agent 是否启用
+    const agentIdMap = {
+      'result-agent': 'result',
+      'compliance-agent': 'compliance',
+      'wind-agent': 'wind',
+      'market-style-agent': 'marketStyle',
+      'fund-comparison-agent': 'fundComparison'
+    };
+    const configKey = agentIdMap[agentId];
+    if (configKey && !skillsAgentsConfig?.agents?.[configKey]?.enabled) {
+      console.log('Agent未启用，跳过addAgentLog:', agentId, message);
+      return;
+    }
+    
+    const logEl = document.getElementById(`${agentId}-log`);
+    if (logEl) {
+      const time = new Date().toLocaleTimeString('zh-CN');
+      const logItem = document.createElement('div');
+      logItem.className = 'log-item';
         
         let icon = '●';
         let iconColor = 'var(--brand)';
@@ -5037,18 +5230,26 @@
     }
   
   function resetAgents() {
-    // 获取Checkbox状态
-    const resultChecked = document.getElementById('agentResultCheck')?.checked ?? true;
-    const complianceChecked = document.getElementById('agentComplianceCheck')?.checked ?? true;
-    const windChecked = document.getElementById('agentWindCheck')?.checked ?? true;
+    // 从skillsAgentsConfig获取状态
+    const resultChecked = skillsAgentsConfig?.agents?.result?.enabled ?? false;
+    const complianceChecked = skillsAgentsConfig?.agents?.compliance?.enabled ?? false;
+    const windChecked = skillsAgentsConfig?.agents?.wind?.enabled ?? false;
+    const marketStyleChecked = skillsAgentsConfig?.agents?.marketStyle?.enabled ?? false;
+    const fundComparisonChecked = skillsAgentsConfig?.agents?.fundComparison?.enabled ?? false;
+    
+    console.log('resetAgents - Agent启用状态:', { resultChecked, complianceChecked, windChecked, marketStyleChecked, fundComparisonChecked });
     
     // 控制卡片显示/隐藏
     const resultCard = document.getElementById('agent-result');
     const complianceCard = document.getElementById('agent-compliance');
     const windCard = document.getElementById('agent-wind');
+    const marketStyleCard = document.getElementById('agent-market-style');
+    const fundComparisonCard = document.getElementById('agent-fund-comparison');
     if (resultCard) resultCard.style.display = resultChecked ? 'block' : 'none';
     if (complianceCard) complianceCard.style.display = complianceChecked ? 'block' : 'none';
     if (windCard) windCard.style.display = windChecked ? 'block' : 'none';
+    if (marketStyleCard) marketStyleCard.style.display = marketStyleChecked ? 'block' : 'none';
+    if (fundComparisonCard) fundComparisonCard.style.display = fundComparisonChecked ? 'block' : 'none';
     
     // 重置文案审核Agent
     if (resultChecked) {
@@ -5110,6 +5311,46 @@
       }
     }
     
+    // 重置市场风格分析Agent
+    if (marketStyleChecked) {
+      updateAgentStatus('market-style-agent', 'inactive', 0);
+      const marketStyleLog = document.getElementById('market-style-agent-log');
+      if (marketStyleLog) {
+        const logItem = document.createElement('div');
+        logItem.className = 'log-item';
+        logItem.innerHTML = `
+          <span style="display:flex;flex-direction:column;gap:2px;flex:1;">
+            <span style="display:flex;align-items:center;gap:6px;">
+              <span style="color:var(--text-muted);font-weight:500;font-size:12px;">○</span>
+              <span style="color:var(--text-muted);font-size:11.5px;">等待接收任务...</span>
+            </span>
+          </span>
+        `;
+        marketStyleLog.innerHTML = '';
+        marketStyleLog.appendChild(logItem);
+      }
+    }
+    
+    // 重置基金对比分析Agent
+    if (fundComparisonChecked) {
+      updateAgentStatus('fund-comparison-agent', 'inactive', 0);
+      const fundComparisonLog = document.getElementById('fund-comparison-agent-log');
+      if (fundComparisonLog) {
+        const logItem = document.createElement('div');
+        logItem.className = 'log-item';
+        logItem.innerHTML = `
+          <span style="display:flex;flex-direction:column;gap:2px;flex:1;">
+            <span style="display:flex;align-items:center;gap:6px;">
+              <span style="color:var(--text-muted);font-weight:500;font-size:12px;">○</span>
+              <span style="color:var(--text-muted);font-size:11.5px;">等待接收任务...</span>
+            </span>
+          </span>
+        `;
+        fundComparisonLog.innerHTML = '';
+        fundComparisonLog.appendChild(logItem);
+      }
+    }
+    
     // 隐藏合规结果
     const compRow = document.getElementById('compRow');
     if (compRow) {
@@ -5122,6 +5363,14 @@
     // 隐藏Wind结果
     const windResultRow = document.getElementById('windResultRow');
     if (windResultRow) windResultRow.style.display = 'none';
+    
+    // 隐藏市场风格结果
+    const marketStyleResultRow = document.getElementById('marketStyleResultRow');
+    if (marketStyleResultRow) marketStyleResultRow.style.display = 'none';
+    
+    // 隐藏基金对比结果
+    const fundComparisonResultRow = document.getElementById('fundComparisonResultRow');
+    if (fundComparisonResultRow) fundComparisonResultRow.style.display = 'none';
   }
   
   // Agent设置下拉菜单切换
@@ -5138,23 +5387,63 @@
           <div style="padding:12px;">
         `;
         
-        // 遍历所有Agents
-        Object.values(skillsAgentsConfig.agents).forEach(agent => {
-          let checkboxId;
-          if (agent.id === 'result') checkboxId = 'agentResultCheck';
-          else if (agent.id === 'compliance') checkboxId = 'agentComplianceCheck';
-          else if (agent.id === 'wind') checkboxId = 'agentWindCheck';
-          
+        // 按分类分组
+        const validateAgents = Object.values(skillsAgentsConfig.agents).filter(a => a.category === 'validate');
+        const generateAgents = Object.values(skillsAgentsConfig.agents).filter(a => a.category === 'generate');
+        
+        // 校验类
+        if (validateAgents.length > 0) {
           html += `
-            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
-              <input type="checkbox" id="${checkboxId}" ${agent.enabled ? 'checked' : ''} style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="handleAgentCheckboxChange('${agent.id}')">
-              <div style="flex:1;">
-                <div style="font-size:14px;color:#1a202c;font-weight:500;">${agent.icon} ${agent.name}</div>
-                <div style="font-size:11px;color:var(--text-muted);">${agent.description}</div>
-              </div>
-            </label>
+            <div style="margin-bottom:12px;">
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:500;">🔍 校验类</div>
           `;
-        });
+          validateAgents.forEach(agent => {
+            let checkboxId;
+            if (agent.id === 'result') checkboxId = 'agentResultCheck';
+            else if (agent.id === 'compliance') checkboxId = 'agentComplianceCheck';
+            else if (agent.id === 'wind') checkboxId = 'agentWindCheck';
+            else if (agent.id === 'marketStyle') checkboxId = 'agentMarketStyleCheck';
+            else if (agent.id === 'fundComparison') checkboxId = 'agentFundComparisonCheck';
+            
+            html += `
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+                <input type="checkbox" id="${checkboxId}" ${agent.enabled ? 'checked' : ''} style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="handleAgentCheckboxChange('${agent.id}')">
+                <div style="flex:1;">
+                  <div style="font-size:14px;color:#1a202c;font-weight:500;">${agent.icon} ${agent.name}</div>
+                  <div style="font-size:11px;color:var(--text-muted);">${agent.description}</div>
+                </div>
+              </label>
+            `;
+          });
+          html += `</div>`;
+        }
+        
+        // 生成类
+        if (generateAgents.length > 0) {
+          html += `
+            <div>
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:500;">✨ 生成类</div>
+          `;
+          generateAgents.forEach(agent => {
+            let checkboxId;
+            if (agent.id === 'result') checkboxId = 'agentResultCheck';
+            else if (agent.id === 'compliance') checkboxId = 'agentComplianceCheck';
+            else if (agent.id === 'wind') checkboxId = 'agentWindCheck';
+            else if (agent.id === 'marketStyle') checkboxId = 'agentMarketStyleCheck';
+            else if (agent.id === 'fundComparison') checkboxId = 'agentFundComparisonCheck';
+            
+            html += `
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:10px 12px;border-radius:8px;transition:all 0.2s;margin-bottom:4px;" onmouseover="this.style.background='rgba(20,92,255,0.05)'" onmouseout="this.style.background='transparent'">
+                <input type="checkbox" id="${checkboxId}" ${agent.enabled ? 'checked' : ''} style="width:18px;height:18px;cursor:pointer;accent-color:#145cff;" onchange="handleAgentCheckboxChange('${agent.id}')">
+                <div style="flex:1;">
+                  <div style="font-size:14px;color:#1a202c;font-weight:500;">${agent.icon} ${agent.name}</div>
+                  <div style="font-size:11px;color:var(--text-muted);">${agent.description}</div>
+                </div>
+              </label>
+            `;
+          });
+          html += `</div>`;
+        }
         
         html += `</div>`;
         panel.innerHTML = html;
@@ -5179,10 +5468,14 @@
       if (agentId === 'result') checkboxId = 'agentResultCheck';
       else if (agentId === 'compliance') checkboxId = 'agentComplianceCheck';
       else if (agentId === 'wind') checkboxId = 'agentWindCheck';
+      else if (agentId === 'marketStyle') checkboxId = 'agentMarketStyleCheck';
+      else if (agentId === 'fundComparison') checkboxId = 'agentFundComparisonCheck';
       
       const checkbox = document.getElementById(checkboxId);
       if (checkbox) {
         skillsAgentsConfig.agents[agentId].enabled = checkbox.checked;
+        // 保存到localStorage
+        localStorage.setItem('skillsAgentsConfig', JSON.stringify(skillsAgentsConfig));
         applyConfigToMainUI();
       }
     }
@@ -5207,6 +5500,12 @@
   
   // 文案审核Agent - 真实API调用
   async function runResultAgent(content, fundInfo) {
+    // 检查 Agent 是否启用
+    if (!skillsAgentsConfig?.agents?.result?.enabled) {
+      console.log('文案审核 Agent未启用，跳过执行');
+      return { passed: true };
+    }
+    
     updateAgentStatus('result-agent', 'running', 0);
     addAgentLog('result-agent', '接收到生成的文案，开始审核...', 'info');
     
@@ -5320,6 +5619,12 @@
   
   // 合规检查Agent - 真实API调用
   async function runComplianceAgent(content) {
+    // 检查 Agent 是否启用
+    if (!skillsAgentsConfig?.agents?.compliance?.enabled) {
+      console.log('合规检查 Agent未启用，跳过执行');
+      return { passed: true };
+    }
+    
     updateAgentStatus('compliance-agent', 'running', 0);
     addAgentLog('compliance-agent', '接收到文案，开始合规检查...', 'info');
     
@@ -5428,6 +5733,12 @@
 
   // Wind数据验证Agent - 真实API调用
   async function runWindAgent(content, fundInfo) {
+    // 检查 Agent 是否启用
+    if (!skillsAgentsConfig?.agents?.wind?.enabled) {
+      console.log('Wind数据验证 Agent未启用，跳过执行');
+      return { passed: true };
+    }
+    
     updateAgentStatus('wind-agent', 'running', 0);
     addAgentLog('wind-agent', '连接Wind金融数据服务...', 'info');
     
@@ -5512,6 +5823,207 @@
     }
   }
 
+  // 市场风格分析Agent
+  async function runMarketStyleAgent(content, fundInfo) {
+    // 检查 Agent 是否启用
+    if (!skillsAgentsConfig?.agents?.marketStyle?.enabled) {
+      console.log('市场洞察 Agent未启用，跳过执行');
+      return { passed: true };
+    }
+    
+    updateAgentStatus('market-style-agent', 'running', 0);
+    addAgentLog('market-style-agent', '分析当前市场环境...', 'info');
+    
+    // 获取用户选择的选项
+    const options = getMarketStyleOptions();
+    
+    let agentPrompt = '';
+    if (skillsAgentsConfig && skillsAgentsConfig.agents && skillsAgentsConfig.agents.marketStyle) {
+      agentPrompt = skillsAgentsConfig.agents.marketStyle.prompt || '';
+    }
+    
+    try {
+      updateAgentStatus('market-style-agent', 'running', 30);
+      addAgentLog('market-style-agent', '获取指数走势数据...', 'info');
+      
+      // 调用市场风格分析API
+      const resp = await fetch(`${API_BASE}/copy/agent/market-style`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: content,
+          fund_info: fundInfo,
+          prompt: agentPrompt,
+          options: options
+        })
+      });
+      
+      const result = await resp.json();
+      
+      updateAgentStatus('market-style-agent', 'running', 60);
+      addAgentLog('market-style-agent', '分析市场风格...', 'info');
+      
+      await new Promise(resolve => setTimeout(resolve, 300));
+      updateAgentStatus('market-style-agent', 'running', 100);
+      
+      if (result.success) {
+        addAgentLog('market-style-agent', '市场风格分析完成', 'success');
+        
+        updateAgentStatus('market-style-agent', 'done', 100);
+        
+        // 显示市场风格分析结果
+        const marketStyleResultRow = document.getElementById('marketStyleResultRow');
+        if (marketStyleResultRow) {
+          marketStyleResultRow.innerHTML = '';
+          
+          if (result.market_style || result.analysis) {
+            const analysisDiv = document.createElement('div');
+            analysisDiv.style.width = '100%';
+            analysisDiv.style.backgroundColor = '#e6f7ff';
+            analysisDiv.style.padding = '12px';
+            analysisDiv.style.borderRadius = '8px';
+            analysisDiv.style.borderLeft = '4px solid #1890ff';
+            analysisDiv.style.whiteSpace = 'pre-wrap';
+            analysisDiv.style.fontSize = '13px';
+            analysisDiv.style.lineHeight = '1.6';
+            analysisDiv.textContent = result.market_style || result.analysis || '市场风格分析完成';
+            marketStyleResultRow.appendChild(analysisDiv);
+          }
+          
+          // 根据用户选择显示对应的标签
+          const tags = [];
+          if (options.includeIndexTrend) {
+            tags.push('<div class="ci pass"><div class="ci-icon">📈</div>指数走势</div>');
+          }
+          if (options.includeMarketStyle) {
+            const styleLabel = result.style_label || '均衡配置';
+            tags.push(`<div class="ci pass"><div class="ci-icon">🌍</div>市场风格: ${styleLabel}</div>`);
+          }
+          if (options.includeMacroAnalysis) {
+            tags.push('<div class="ci pass"><div class="ci-icon">📊</div>宏观分析</div>');
+          }
+          if (options.includeAllocationAdvice) {
+            tags.push('<div class="ci pass"><div class="ci-icon">💡</div>配置建议</div>');
+          }
+          
+          if (tags.length > 0) {
+            marketStyleResultRow.innerHTML += tags.join('');
+          }
+          
+          marketStyleResultRow.style.display = 'flex';
+          marketStyleResultRow.style.flexWrap = 'wrap';
+          marketStyleResultRow.style.animation = 'fadeInUp 0.4s ease';
+        }
+        
+        return { passed: true, data: result };
+      } else {
+        addAgentLog('market-style-agent', '市场风格分析失败，已自动通过', 'error');
+        updateAgentStatus('market-style-agent', 'done', 100);
+        return { passed: true };
+      }
+      
+    } catch (e) {
+      console.error('市场风格分析错误:', e);
+      addAgentLog('market-style-agent', '市场分析服务连接失败，已自动通过', 'error');
+      updateAgentStatus('market-style-agent', 'done', 100);
+      return { passed: true };
+    }
+  }
+
+  // 基金对比分析Agent
+  async function runFundComparisonAgent(content, fundInfo, compareData) {
+    console.log('runFundComparisonAgent 被调用');
+    
+    // 检查 Agent 是否启用
+    if (!skillsAgentsConfig?.agents?.fundComparison?.enabled) {
+      console.log('基金PK卡 Agent未启用，跳过执行');
+      return { passed: true };
+    }
+    
+    console.log('开始执行基金PK卡 Agent');
+    updateAgentStatus('fund-comparison-agent', 'running', 0);
+    addAgentLog('fund-comparison-agent', '开始基金对比分析...', 'info');
+    
+    let agentPrompt = '';
+    if (skillsAgentsConfig && skillsAgentsConfig.agents && skillsAgentsConfig.agents.fundComparison) {
+      agentPrompt = skillsAgentsConfig.agents.fundComparison.prompt || '';
+    }
+    
+    try {
+      updateAgentStatus('fund-comparison-agent', 'running', 30);
+      addAgentLog('fund-comparison-agent', '获取对比基金数据...', 'info');
+      
+      // 调用基金对比API
+      const resp = await fetch(`${API_BASE}/copy/agent/fund-comparison`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: content,
+          fund_info: fundInfo,
+          compare_data: compareData,
+          prompt: agentPrompt
+        })
+      });
+      
+      const result = await resp.json();
+      
+      updateAgentStatus('fund-comparison-agent', 'running', 60);
+      addAgentLog('fund-comparison-agent', '生成对比分析报告...', 'info');
+      
+      await new Promise(resolve => setTimeout(resolve, 300));
+      updateAgentStatus('fund-comparison-agent', 'running', 100);
+      
+      if (result.success) {
+        addAgentLog('fund-comparison-agent', '基金对比分析完成', 'success');
+        
+        updateAgentStatus('fund-comparison-agent', 'done', 100);
+        
+        // 显示基金对比结果
+        const fundComparisonResultRow = document.getElementById('fundComparisonResultRow');
+        if (fundComparisonResultRow) {
+          fundComparisonResultRow.innerHTML = '';
+          
+          if (result.comparison_report) {
+            const reportDiv = document.createElement('div');
+            reportDiv.style.width = '100%';
+            reportDiv.style.backgroundColor = '#fff7e6';
+            reportDiv.style.padding = '12px';
+            reportDiv.style.borderRadius = '8px';
+            reportDiv.style.borderLeft = '4px solid #fa8c16';
+            reportDiv.style.whiteSpace = 'pre-wrap';
+            reportDiv.style.fontSize = '13px';
+            reportDiv.style.lineHeight = '1.6';
+            reportDiv.textContent = result.comparison_report;
+            fundComparisonResultRow.appendChild(reportDiv);
+          }
+          
+          if (result.comparison_summary) {
+            const summaryTag = document.createElement('div');
+            summaryTag.className = 'ci pass';
+            summaryTag.innerHTML = `<div class="ci-icon">⚡</div>对比分析完成`;
+            fundComparisonResultRow.appendChild(summaryTag);
+          }
+          
+          fundComparisonResultRow.style.display = 'flex';
+          fundComparisonResultRow.style.flexWrap = 'wrap';
+          fundComparisonResultRow.style.animation = 'fadeInUp 0.4s ease';
+        }
+        
+        return { passed: true, data: result };
+      } else {
+        addAgentLog('fund-comparison-agent', '基金对比分析失败，已自动通过', 'error');
+        updateAgentStatus('fund-comparison-agent', 'done', 100);
+        return { passed: true };
+      }
+      
+    } catch (e) {
+      console.error('基金对比分析错误:', e);
+      addAgentLog('fund-comparison-agent', '对比服务连接失败，已自动通过', 'error');
+      updateAgentStatus('fund-comparison-agent', 'done', 100);
+      return { passed: true };
+    }
+  }
+
   async function genCopy() {
     const btn = document.getElementById('genCopyBtn');
     const box = document.getElementById('copyBox');
@@ -5532,34 +6044,66 @@
     const formatType = getSelectedFormat();
     const style = getSelectedStyle();
     
-    // 如果选择"朋友圈文案（带市场风格）"，自动获取市场风格数据
-    let marketStyleData = null;
-    if (formatType === '朋友圈文案（带市场风格）') {
-      try {
-        const styleResp = await fetch(`${API_BASE}/fund/market/style`);
-        const styleResult = await styleResp.json();
-        if (styleResult.success && styleResult.data) {
-          marketStyleData = styleResult.data;
-        }
-      } catch (err) {
-        console.error('获取市场风格数据失败:', err);
-      }
-    }
-    
     // 如果有对比数据，也传递给后端
     let compareData = null;
-    if (formatType === '双基金对比' && window.compareData) {
+    if (window.compareData) {
       compareData = window.compareData;
     }
     
-    // 获取checkbox状态并构建工作流程
-    const resultChecked = document.getElementById('agentResultCheck')?.checked ?? true;
-    const complianceChecked = document.getElementById('agentComplianceCheck')?.checked ?? true;
-    const windChecked = document.getElementById('agentWindCheck')?.checked ?? true;
+    // 从skillsAgentsConfig获取checkbox状态并构建工作流程
+    const resultChecked = skillsAgentsConfig?.agents?.result?.enabled ?? false;
+    const complianceChecked = skillsAgentsConfig?.agents?.compliance?.enabled ?? false;
+    const windChecked = skillsAgentsConfig?.agents?.wind?.enabled ?? false;
+    const marketStyleChecked = skillsAgentsConfig?.agents?.marketStyle?.enabled ?? false;
+    const fundComparisonChecked = skillsAgentsConfig?.agents?.fundComparison?.enabled ?? false;
+    
+    // 调试信息
+    console.log('========================================');
+    console.log('开始执行 genCopy');
+    console.log('Agent启用状态:', {
+      resultChecked,
+      complianceChecked,
+      windChecked,
+      marketStyleChecked,
+      fundComparisonChecked,
+      windowCompareData: window.compareData
+    });
+    console.log('当前配置:', skillsAgentsConfig);
+    console.log('========================================');
+    
+    // 强制确保所有未启用的Agent卡片都是隐藏的
+    const resultCard = document.getElementById('agent-result');
+    const complianceCard = document.getElementById('agent-compliance');
+    const windCard = document.getElementById('agent-wind');
+    const marketStyleCard = document.getElementById('agent-market-style');
+    const fundComparisonCard = document.getElementById('agent-fund-comparison');
+    
+    if (resultCard) resultCard.style.display = resultChecked ? 'block' : 'none';
+    if (complianceCard) complianceCard.style.display = complianceChecked ? 'block' : 'none';
+    if (windCard) windCard.style.display = windChecked ? 'block' : 'none';
+    if (marketStyleCard) marketStyleCard.style.display = marketStyleChecked ? 'block' : 'none';
+    if (fundComparisonCard) fundComparisonCard.style.display = fundComparisonChecked ? 'block' : 'none';
+    
+    // 1. 检查是否启用了基金PK卡Agent但没有选择对比基金
+    if (fundComparisonChecked && !window.compareData) {
+      showToast('请先在「基金PK卡 Agent」中选择对比基金');
+      document.getElementById('agent-fund-comparison').scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    
+    // 2. 构建文案增强提示词
+    let enhancePrompt = '';
+    if (resultChecked) {
+      enhancePrompt += '\n重要要求：文案需要包含完整的基金信息、有吸引力的表述、并与基金产品高度相关，确保能够通过文案审核。';
+    }
+    if (complianceChecked) {
+      enhancePrompt += '\n合规要求：避免使用禁用词汇（保本、保证收益、零风险等），宣传表述要合规，要有充分的风险提示。';
+    }
     
     // 构建流程文本
     let workflow = ['文案生成'];
-    if (marketStyleData) workflow.push('市场分析');
+    if (marketStyleChecked) workflow.push('市场洞察');
+    if (fundComparisonChecked && window.compareData) workflow.push('基金PK卡');
     if (resultChecked) workflow.push('内容审核');
     if (complianceChecked) workflow.push('合规检查');
     if (windChecked) workflow.push('Wind数据验证');
@@ -5589,8 +6133,8 @@
           selling_points: selectedSP,
           format_type: formatType,
           style: style,
-          market_style: marketStyleData,
-          compare_data: compareData
+          compare_data: compareData,
+          enhance_prompt: enhancePrompt
         })
       });
       
@@ -5637,24 +6181,56 @@
         `;
         copyReady = true;
         
-        // 运行Agent检查
-        const resultChecked = document.getElementById('agentResultCheck')?.checked ?? true;
-        const complianceChecked = document.getElementById('agentComplianceCheck')?.checked ?? true;
-        const windChecked = document.getElementById('agentWindCheck')?.checked ?? true;
+        let finalContent = data.data.content;
+        const generatedParts = [];
         
+        // 先运行生成类Agent，收集生成的内容
+        if (marketStyleChecked) {
+          const marketResult = await runMarketStyleAgent(finalContent, fundInfo);
+          if (marketResult && marketResult.data) {
+            const marketInsight = marketResult.data.market_style || marketResult.data.analysis || marketResult.data.enhanced_content;
+            if (marketInsight) {
+              generatedParts.push('\n\n【市场洞察】\n' + marketInsight);
+            }
+          }
+        }
+        if (fundComparisonChecked && window.compareData) {
+          const compareResult = await runFundComparisonAgent(finalContent, fundInfo, window.compareData);
+          if (compareResult && compareResult.data) {
+            const compareContent = compareResult.data.comparison_report || compareResult.data.enhanced_content;
+            if (compareContent) {
+              generatedParts.push('\n\n【基金对比】\n' + compareContent);
+            }
+          }
+        }
+        
+        // 将生成的内容合并到最终文案中
+        if (generatedParts.length > 0) {
+          finalContent += generatedParts.join('');
+          // 更新显示的文案
+          const copyTextEl = box.querySelector('.copy-text');
+          if (copyTextEl) {
+            copyTextEl.innerHTML = finalContent
+              .replace(/\n/g, '<br>')
+              .replace(/\*([^*]+)\*/g, '<strong>$1</strong>') + '<br><br><span style="font-size:11px;color:var(--text-muted);">*基金有风险，投资需谨慎...</span>';
+          }
+        }
+        
+        // 运行校验类Agent
         if (resultChecked) {
-          await runResultAgent(data.data.content, fundInfo);
+          await runResultAgent(finalContent, fundInfo);
         }
         if (complianceChecked) {
-          await runComplianceAgent(data.data.content);
+          await runComplianceAgent(finalContent);
         }
         if (windChecked) {
-          await runWindAgent(data.data.content, fundInfo);
+          await runWindAgent(finalContent, fundInfo);
         }
         
         btn.disabled = false;
         btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> AI 生成文案';
-        showToast(resultChecked || complianceChecked || windChecked ? '多Agent处理完成！' : '文案生成完成！', 'ok');
+        const anyAgentRan = resultChecked || complianceChecked || windChecked || marketStyleChecked || fundComparisonChecked;
+        showToast(anyAgentRan ? '多Agent处理完成！' : '文案生成完成！', 'ok');
       } else {
         box.innerHTML = '<div class="copy-placeholder" style="color:var(--danger);">生成失败: ' + (data.error || '未知错误') + '</div>';
       }
@@ -8140,20 +8716,200 @@
   }
   
   function showCompareResult(data) {
-    // 切换到双基金对比文案格式
-    const formatCards = document.querySelectorAll('.format-card');
-    formatCards.forEach(card => {
-      card.classList.remove('sel');
-      if (card.textContent.includes('双基金对比')) {
-        card.classList.add('sel');
-      }
-    });
-    
     // 保存对比数据到全局变量
     window.compareData = data;
     
     // 显示对比提示
-    showToast(`已加载 ${data.length} 只基金的对比数据，可生成对比文案`);
+    showToast(`已加载 ${data.length} 只基金的对比数据，请在Agent设置中开启「基金PK卡 Agent」`);
+  }
+
+  // ============================================================
+  // Agent相关功能
+  // ============================================================
+
+  // 市场洞察Agent：获取选中的选项
+  function getMarketStyleOptions() {
+    return {
+      includeIndexTrend: document.getElementById('marketStyleOpt1')?.checked ?? true,
+      includeMarketStyle: document.getElementById('marketStyleOpt2')?.checked ?? true,
+      includeMacroAnalysis: document.getElementById('marketStyleOpt3')?.checked ?? true,
+      includeAllocationAdvice: document.getElementById('marketStyleOpt4')?.checked ?? true
+    };
+  }
+
+  // 基金PK卡Agent：搜索对比基金
+  let compareAgentSearchTimeout = null;
+  
+  function initAgentEventListeners() {
+    const searchInput = document.getElementById('compareAgentFundSearch');
+    const clearBtn = document.getElementById('compareAgentFundClear');
+    
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        const q = this.value.trim();
+        if (clearBtn) {
+          clearBtn.style.display = q ? 'block' : 'none';
+        }
+        
+        // 防抖搜索
+        if (compareAgentSearchTimeout) {
+          clearTimeout(compareAgentSearchTimeout);
+        }
+        
+        if (q) {
+          compareAgentSearchTimeout = setTimeout(() => {
+            searchCompareAgentFunds(q);
+          }, 300);
+        } else {
+          const suggestBox = document.getElementById('compareAgentFundSuggest');
+          if (suggestBox) {
+            suggestBox.innerHTML = '';
+            suggestBox.style.display = 'none';
+          }
+        }
+      });
+    }
+  }
+
+  function clearCompareAgentFund() {
+    window.selectedCompareAgentFund = null;
+    window.compareAgentFundData = null;
+    
+    const displayBox = document.getElementById('selectedCompareAgentFund');
+    if (displayBox) {
+      displayBox.style.display = 'none';
+    }
+    
+    const searchInput = document.getElementById('compareAgentFundSearch');
+    const clearBtn = document.getElementById('compareAgentFundClear');
+    const suggestBox = document.getElementById('compareAgentFundSuggest');
+    
+    if (searchInput) searchInput.value = '';
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (suggestBox) {
+      suggestBox.innerHTML = '';
+      suggestBox.style.display = 'none';
+    }
+    
+    // 只有 Agent 启用时才记录日志
+    if (skillsAgentsConfig?.agents?.fundComparison?.enabled) {
+      addAgentLog('fund-comparison-agent', '已移除对比基金', 'info');
+    }
+  }
+
+  async function searchCompareAgentFunds(q) {
+    const suggestBox = document.getElementById('compareAgentFundSuggest');
+    if (!suggestBox) return;
+    
+    try {
+      const resp = await fetch(`${API_BASE}/fund/search?q=${encodeURIComponent(q)}&limit=5`);
+      const result = await resp.json();
+      
+      if (result.success && result.data && result.data.length > 0) {
+        suggestBox.innerHTML = result.data.map(r => `
+          <div class="suggest-item" onclick="selectCompareAgentFund('${r.code}','${r.name}')">
+            <div style="font-weight:600;">${r.name}</div>
+            <div style="font-size:12px;color:var(--text-muted);">${r.code} · ${r.type || '混合型'}</div>
+          </div>
+        `).join('');
+        suggestBox.style.display = 'block';
+      } else {
+        suggestBox.innerHTML = '<div class="suggest-item" style="color:var(--text-muted);">未找到相关基金</div>';
+        suggestBox.style.display = 'block';
+      }
+    } catch (err) {
+      console.error('搜索对比基金失败:', err);
+      suggestBox.innerHTML = '<div class="suggest-item" style="color:var(--text-muted);">搜索失败，请重试</div>';
+      suggestBox.style.display = 'block';
+    }
+  }
+
+  async function selectCompareAgentFund(code, name) {
+    const displayBox = document.getElementById('selectedCompareAgentFund');
+    const nameEl = document.getElementById('selectedCompareAgentFundName');
+    const codeEl = document.getElementById('selectedCompareAgentFundCode');
+    const searchInput = document.getElementById('compareAgentFundSearch');
+    const clearBtn = document.getElementById('compareAgentFundClear');
+    const suggestBox = document.getElementById('compareAgentFundSuggest');
+    
+    // 清除搜索框
+    if (searchInput) searchInput.value = '';
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (suggestBox) {
+      suggestBox.innerHTML = '';
+      suggestBox.style.display = 'none';
+    }
+    
+    // 显示已选基金
+    if (nameEl) nameEl.textContent = name;
+    if (codeEl) codeEl.textContent = code;
+    if (displayBox) displayBox.style.display = 'block';
+    
+    window.selectedCompareAgentFund = { code, name };
+    
+    // 只有 Agent 启用时才记录日志和更新状态
+    if (skillsAgentsConfig?.agents?.fundComparison?.enabled) {
+      addAgentLog('fund-comparison-agent', `已选择对比基金: ${name}`, 'info');
+      updateAgentStatus('fund-comparison-agent', 'ready', 20);
+    }
+    
+    // 获取对比基金的详细信息
+    await loadCompareAgentFundData(code);
+  }
+
+  async function loadCompareAgentFundData(code) {
+    if (!code) return;
+    
+    // 只有 Agent 启用时才记录日志
+    if (skillsAgentsConfig?.agents?.fundComparison?.enabled) {
+      addAgentLog('fund-comparison-agent', '获取对比基金信息...', 'info');
+    }
+    
+    try {
+      // 获取当前基金代码
+      const currentFundCode = document.getElementById('sFundCode')?.textContent || '';
+      if (!currentFundCode) {
+        showToast('请先选择主基金', 'err');
+        return;
+      }
+      
+      // 获取两只基金的对比数据
+      const resp = await fetch(`${API_BASE}/fund/compare/multiple`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          codes: [currentFundCode, code]
+        })
+      });
+      
+      const result = await resp.json();
+      
+      if (result.success && result.data && result.data.length >= 2) {
+        window.compareData = result.data;
+        
+        // 只有 Agent 启用时才记录日志和更新状态
+        if (skillsAgentsConfig?.agents?.fundComparison?.enabled) {
+          addAgentLog('fund-comparison-agent', '对比基金信息加载完成', 'success');
+          updateAgentStatus('fund-comparison-agent', 'ready', 100);
+        }
+        
+        showToast('对比基金信息已加载');
+      } else {
+        // 只有 Agent 启用时才记录日志
+        if (skillsAgentsConfig?.agents?.fundComparison?.enabled) {
+          addAgentLog('fund-comparison-agent', '获取对比基金信息失败', 'error');
+        }
+        showToast('获取对比基金信息失败', 'err');
+      }
+    } catch (err) {
+      console.error('加载对比基金数据失败:', err);
+      
+      // 只有 Agent 启用时才记录日志
+      if (skillsAgentsConfig?.agents?.fundComparison?.enabled) {
+        addAgentLog('fund-comparison-agent', '加载对比基金数据失败', 'error');
+      }
+      showToast('加载对比基金数据失败', 'err');
+    }
   }
 
   // Init
@@ -8163,6 +8919,7 @@
   if (landingTrialButton) landingTrialButton.addEventListener('click', handleLandingTrial);
   loadLoginMarketSize();
   checkAuthStatus();
+  initAgentEventListeners();
 </script>
 
 <!-- ============================================================

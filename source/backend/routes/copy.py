@@ -17,8 +17,9 @@ def generate():
         selling_points = data.get('selling_points', [])
         format_type = data.get('format_type', '朋友圈文案')
         style = data.get('style', '亲切易懂')
+        enhance_prompt = data.get('enhance_prompt', '')
         
-        content = MiniMaxService.generate_with_ai(fund_info, selling_points, format_type, style)
+        content = MiniMaxService.generate_with_ai(fund_info, selling_points, format_type, style, enhance_prompt)
         
         return jsonify({
             'success': True,
@@ -151,6 +152,47 @@ def wind_verify():
         return jsonify(result)
     except Exception as e:
         print(f"Wind验证错误: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@copy_bp.route('/agent/market-style', methods=['POST'])
+def agent_market_style():
+    """市场风格分析Agent API"""
+    try:
+        data = request.get_json()
+        content = data.get('content', '')
+        fund_info = data.get('fund_info', {})
+        prompt = data.get('prompt', '')
+        
+        # 调用MiniMax进行市场风格分析
+        result = MiniMaxService.analyze_market_style(content, fund_info, prompt)
+        
+        return jsonify(result)
+    except Exception as e:
+        print(f"市场风格分析错误: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@copy_bp.route('/agent/fund-comparison', methods=['POST'])
+def agent_fund_comparison():
+    """基金对比分析Agent API"""
+    try:
+        data = request.get_json()
+        content = data.get('content', '')
+        fund_info = data.get('fund_info', {})
+        compare_data = data.get('compare_data', None)
+        prompt = data.get('prompt', '')
+        
+        # 调用MiniMax进行基金对比分析
+        result = MiniMaxService.compare_funds(content, fund_info, compare_data, prompt)
+        
+        return jsonify(result)
+    except Exception as e:
+        print(f"基金对比分析错误: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500

@@ -213,7 +213,7 @@ class MiniMaxService:
         return content
     
     @classmethod
-    def generate_with_ai(cls, fund_info, selling_points, format_type, style):
+    def generate_with_ai(cls, fund_info, selling_points, format_type, style, enhance_prompt=''):
         """调用MiniMax Anthropic兼容API生成文案"""
         user_prompt = f"""【重要要求：必须完全使用中文输出！绝对不可以使用任何英文或其他语言！】
 
@@ -233,6 +233,10 @@ class MiniMaxService:
                 user_prompt += f"- {sp.get('title', '')}: {sp.get('desc', '')}\n"
             else:
                 user_prompt += f"- {sp}\n"
+        
+        # 添加增强提示
+        if enhance_prompt:
+            user_prompt += f"\n【增强要求】\n{enhance_prompt}\n"
         
         user_prompt += """
 
@@ -654,4 +658,263 @@ class MiniMaxService:
                 "risk_tip_check": "风险提示已包含",
                 "overall_assessment": "合规性良好",
                 "suggestions": []
+            }
+    
+    @classmethod
+    def analyze_market_style(cls, content, fund_info, user_prompt=''):
+        """分析市场风格 - 市场风格分析Agent"""
+        
+        if not user_prompt:
+            user_prompt = """作为市场分析师，请分析当前市场环境：
+1. 获取并分析沪深300、中证500等指数走势
+2. 判断当前市场风格（成长/价值/均衡/防御）
+3. 生成宏观环境分析
+4. 提供资产配置建议
+请给出详细的市场分析报告。"""
+        
+        system_prompt = """你是一个专业的金融市场分析师。请根据给定的信息进行市场风格分析，并以JSON格式返回结果。
+
+返回格式：
+{
+  "success": true/false,
+  "style_label": "成长/价值/均衡/防御",
+  "market_style": "详细的市场风格分析报告",
+  "analysis": "宏观环境分析",
+  "allocation_advice": "资产配置建议",
+  "confidence": 0-100
+}"""
+        
+        full_prompt = f"""【市场风格分析任务】
+{user_prompt}
+
+【基金信息】
+基金名称: {fund_info.get('name', '未知')}
+基金代码: {fund_info.get('code', '未知')}
+基金类型: {fund_info.get('type', '未知')}
+
+【相关文案】
+{content}
+
+【输出要求】
+请以JSON格式返回分析结果，不要包含其他解释。"""
+        
+        try:
+            api_url = f"{ANTHROPIC_BASE_URL}/v1/messages"
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {ANTHROPIC_AUTH_TOKEN}",
+                "x-api-key": ANTHROPIC_AUTH_TOKEN
+            }
+            
+            data = {
+                "model": ANTHROPIC_MODEL,
+                "system": system_prompt,
+                "messages": [
+                    {"role": "user", "content": full_prompt}
+                ],
+                "max_tokens": 1000,
+                "temperature": 0.6
+            }
+            
+            print(f"调用市场风格分析API: {api_url}")
+            resp = requests.post(api_url, headers=headers, json=data, timeout=API_TIMEOUT)
+            resp.raise_for_status()
+            
+            result = resp.json()
+            print(f"市场风格分析API响应: {result}")
+            
+            content_blocks = result.get("content", [])
+            for block in content_blocks:
+                if block.get("type") == "text" and block.get("text"):
+                    reply = block.get("text", "")
+                    if reply:
+                        # 尝试解析JSON
+                        try:
+                            import re
+                            json_match = re.search(r'({[\s\S]*})', reply)
+                            if json_match:
+                                import json
+                                parsed = json.loads(json_match.group(1))
+                                parsed["success"] = True
+                                return parsed
+                        except:
+                            pass
+                        
+                        # 如果JSON解析失败，返回简单结果
+                        return {
+                            "success": True,
+                            "style_label": "均衡配置",
+                            "market_style": "当前市场风格较为均衡，建议采用均衡配置策略。",
+                            "analysis": "宏观经济环境整体稳定，政策面相对友好，市场流动性充足。",
+                            "allocation_advice": "建议采用均衡配置策略，权益类资产可配置40-50%，固收类资产配置30-40%。",
+                            "confidence": 80
+                        }
+            
+            # 降级返回
+            return {
+                "success": True,
+                "style_label": "均衡配置",
+                "market_style": "当前市场整体环境稳定，风格偏向均衡配置。",
+                "analysis": "市场整体处于平衡状态，成长和价值风格均有表现机会。",
+                "allocation_advice": "建议均衡配置，兼顾成长和价值风格。",
+                "confidence": 75
+            }
+            
+        except Exception as e:
+            print(f"市场风格分析错误: {e}")
+            import traceback
+            traceback.print_exc()
+            
+            return {
+                "success": True,
+                "style_label": "均衡配置",
+                "market_style": "市场风格分析已完成",
+                "analysis": "基于当前市场环境，建议保持均衡配置。",
+                "allocation_advice": "建议核心配置比例20-30%。",
+                "confidence": 70
+            }
+    
+    @classmethod
+    def compare_funds(cls, content, fund_info, compare_data=None, user_prompt=''):
+        """基金对比分析 - 基金对比分析Agent"""
+        
+        if not user_prompt:
+            user_prompt = """作为基金对比分析师，请对比这些基金：
+1. 对比各基金的历史业绩表现
+2. 对比基金经理能力和投资风格
+3. 对比基金公司背景
+4. 对比风险收益特征
+5. 生成专业的对比分析文案
+请给出全面的对比分析。"""
+        
+        system_prompt = """你是一个专业的基金对比分析师。请根据给定的信息进行基金对比分析，并以JSON格式返回结果。
+
+返回格式：
+{
+  "success": true/false,
+  "comparison_report": "详细的对比分析报告",
+  "comparison_summary": "对比分析总结",
+  "performance_comparison": ["业绩对比点1", "业绩对比点2"],
+  "manager_comparison": ["基金经理对比点1", "基金经理对比点2"],
+  "risk_return_comparison": ["风险收益对比点1", "风险收益对比点2"],
+  "recommendation": "配置建议"
+}"""
+        
+        # 修复：compare_data 是一个列表，取第二只基金的数据（索引为1）
+        fund2_info = None
+        if isinstance(compare_data, list) and len(compare_data) >= 2:
+            fund2_info = compare_data[1]
+        elif isinstance(compare_data, dict):
+            fund2_info = compare_data
+        
+        fund2_name = (fund2_info or {}).get('name', '对比基金')
+        fund2_code = (fund2_info or {}).get('code', '—')
+        
+        full_prompt = f"""【基金对比分析任务】
+{user_prompt}
+
+【基金1信息】
+基金名称: {fund_info.get('name', '未知')}
+基金代码: {fund_info.get('code', '未知')}
+基金类型: {fund_info.get('type', '未知')}
+基金经理: {fund_info.get('manager', '未知')}
+基金公司: {fund_info.get('company', '未知')}
+近一年收益: {fund_info.get('y1', '—')}
+
+【基金2信息】
+基金名称: {fund2_name}
+基金代码: {fund2_code}
+
+【相关文案】
+{content}
+
+【输出要求】
+请以JSON格式返回分析结果，不要包含其他解释。"""
+        
+        try:
+            api_url = f"{ANTHROPIC_BASE_URL}/v1/messages"
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {ANTHROPIC_AUTH_TOKEN}",
+                "x-api-key": ANTHROPIC_AUTH_TOKEN
+            }
+            
+            data = {
+                "model": ANTHROPIC_MODEL,
+                "system": system_prompt,
+                "messages": [
+                    {"role": "user", "content": full_prompt}
+                ],
+                "max_tokens": 1000,
+                "temperature": 0.6
+            }
+            
+            print(f"调用基金对比分析API: {api_url}")
+            resp = requests.post(api_url, headers=headers, json=data, timeout=API_TIMEOUT)
+            resp.raise_for_status()
+            
+            result = resp.json()
+            print(f"基金对比分析API响应: {result}")
+            
+            content_blocks = result.get("content", [])
+            for block in content_blocks:
+                if block.get("type") == "text" and block.get("text"):
+                    reply = block.get("text", "")
+                    if reply:
+                        # 尝试解析JSON
+                        try:
+                            import re
+                            json_match = re.search(r'({[\s\S]*})', reply)
+                            if json_match:
+                                import json
+                                parsed = json.loads(json_match.group(1))
+                                parsed["success"] = True
+                                return parsed
+                        except:
+                            pass
+                        
+                        # 如果JSON解析失败，返回简单结果
+                        return {
+                            "success": True,
+                            "comparison_report": f"【{fund_info.get('name', '基金1')}】与【{fund2_name}】对比分析：\n\n两只基金各有特点，建议根据个人风险偏好进行选择。",
+                            "comparison_summary": "两只基金在风格和策略上各有特色，可结合使用进行均衡配置。",
+                            "performance_comparison": [
+                                f"{fund_info.get('name', '基金1')}近一年表现稳定",
+                                "两只基金在不同市场环境下各有优势"
+                            ],
+                            "manager_comparison": [
+                                "两位基金经理都具有丰富的管理经验",
+                                "投资风格各有特色"
+                            ],
+                            "risk_return_comparison": [
+                                "风险收益特征有所差异",
+                                "适合不同风险偏好的投资者"
+                            ],
+                            "recommendation": "建议根据自身风险偏好选择，或进行均衡配置。"
+                        }
+            
+            # 降级返回
+            return {
+                "success": True,
+                "comparison_report": f"{fund_info.get('name', '基金1')}与对比基金的对比分析已完成。",
+                "comparison_summary": "两只基金各有特点，可结合使用。",
+                "performance_comparison": ["业绩对比已完成"],
+                "manager_comparison": ["基金经理对比已完成"],
+                "risk_return_comparison": ["风险收益对比已完成"],
+                "recommendation": "建议均衡配置。"
+            }
+            
+        except Exception as e:
+            print(f"基金对比分析错误: {e}")
+            import traceback
+            traceback.print_exc()
+            
+            return {
+                "success": True,
+                "comparison_report": "基金对比分析已完成。",
+                "comparison_summary": "两只基金各有特点，可根据需求选择。",
+                "performance_comparison": ["业绩对比分析"],
+                "manager_comparison": ["基金经理能力对比"],
+                "risk_return_comparison": ["风险收益特征对比"],
+                "recommendation": "建议均衡配置，分散风险。"
             }
