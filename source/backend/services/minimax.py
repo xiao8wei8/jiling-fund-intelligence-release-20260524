@@ -945,6 +945,14 @@ class MiniMaxService:
                 if block.get("type") == "text" and block.get("text"):
                     reply = block.get("text", "")
                     if reply:
+                        # 清理掉 markdown 格式的 json 标签
+                        import re
+                        # 移除 ```json 和 ``` 标签
+                        reply = re.sub(r'```json\s*', '', reply)
+                        reply = re.sub(r'```\s*', '', reply)
+                        # 也可能是其他格式的标签，一起清理
+                        reply = reply.strip()
+                        
                         # 尝试解析JSON
                         try:
                             import re
@@ -953,6 +961,12 @@ class MiniMaxService:
                                 import json
                                 parsed = json.loads(json_match.group(1))
                                 parsed["success"] = True
+                                # 清理 comparison_report 字段中的 json 标签
+                                import re
+                                if "comparison_report" in parsed:
+                                    parsed["comparison_report"] = re.sub(r'```json\s*', '', parsed["comparison_report"])
+                                    parsed["comparison_report"] = re.sub(r'```\s*', '', parsed["comparison_report"])
+                                    parsed["comparison_report"] = parsed["comparison_report"].strip()
                                 return parsed
                         except:
                             pass
