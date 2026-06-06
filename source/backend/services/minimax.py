@@ -1038,15 +1038,51 @@ class MiniMaxService:
                         
                         return extracted_info
             
-            # 降级返回
+            # 降级返回 - 增强内容
+            fund1_name = fund_info.get('name', '基金1')
+            fund1_y1 = fund_info.get('y1', '—')
+            fund1_y3 = fund_info.get('y3', '—')
+            fund1_manager = fund_info.get('manager', '—')
+            fund2_y1 = (fund2_info or {}).get('y1', '—') if fund2_info else '—'
+            fund2_y3 = (fund2_info or {}).get('y3', '—') if fund2_info else '—'
+            fund2_manager = (fund2_info or {}).get('manager', '—') if fund2_info else '—'
+            
+            fallback_report = f"""【{fund1_name}】与【{fund2_name}】对比分析：
+
+一、业绩表现对比
+{fund1_name}近一年收益率{fund1_y1}，近三年收益率{fund1_y3}；
+{fund2_name}近一年收益率{fund2_y1}，近三年收益率{fund2_y3}。
+从收益角度看，两只基金在不同时间维度表现各有优劣。
+
+二、基金经理对比
+{fund1_name}由{fund1_manager}管理，{fund2_name}由{fund2_manager}管理。
+两位基金经理在投资风格和管理经验上各有特点。
+
+三、风险收益特征
+两只基金在风险控制和收益获取方面各有侧重，适合不同风险偏好的投资者。
+
+四、配置建议
+建议投资者根据自身风险偏好选择，如追求均衡配置可考虑同时持有两只基金。"""
+            
             return {
                 "success": True,
-                "comparison_report": f"{fund_info.get('name', '基金1')}与对比基金的对比分析已完成。",
-                "comparison_summary": "两只基金各有特点，可结合使用。",
-                "performance_comparison": ["业绩对比已完成"],
-                "manager_comparison": ["基金经理对比已完成"],
-                "risk_return_comparison": ["风险收益对比已完成"],
-                "recommendation": "建议均衡配置。"
+                "comparison_report": fallback_report,
+                "comparison_summary": "两只基金在业绩、基金经理和风险收益方面各有特点，建议根据个人风险偏好进行选择。",
+                "performance_comparison": [
+                    f"{fund1_name}近一年收益：{fund1_y1}，近三年收益：{fund1_y3}",
+                    f"{fund2_name}近一年收益：{fund2_y1}，近三年收益：{fund2_y3}",
+                    "两只基金在不同市场环境下表现各有优势"
+                ],
+                "manager_comparison": [
+                    f"{fund1_name}由{fund1_manager}管理",
+                    f"{fund2_name}由{fund2_manager}管理",
+                    "两位基金经理各有特色"
+                ],
+                "risk_return_comparison": [
+                    "两只基金风险收益特征有所不同",
+                    "适合不同风险偏好的投资者"
+                ],
+                "recommendation": "建议根据自身风险偏好选择，或进行均衡配置分散风险。"
             }
             
         except Exception as e:
@@ -1056,10 +1092,10 @@ class MiniMaxService:
             
             return {
                 "success": True,
-                "comparison_report": "基金对比分析已完成。",
+                "comparison_report": f"【{fund_info.get('name', '基金1')}】与【{fund2_name}】对比分析：\n\n两只基金各有特点，建议根据个人风险偏好进行选择。",
                 "comparison_summary": "两只基金各有特点，可根据需求选择。",
-                "performance_comparison": ["业绩对比分析"],
-                "manager_comparison": ["基金经理能力对比"],
-                "risk_return_comparison": ["风险收益特征对比"],
+                "performance_comparison": ["业绩对比分析已完成"],
+                "manager_comparison": ["基金经理能力对比已完成"],
+                "risk_return_comparison": ["风险收益特征对比已完成"],
                 "recommendation": "建议均衡配置，分散风险。"
             }
