@@ -5709,8 +5709,34 @@
             });
             
             compRow.appendChild(issuesDiv);
-          }
-          
+
+            // 显示 suggestions
+            if (data.suggestions && data.suggestions.length > 0) {
+              var suggestionsDiv = document.createElement('div');
+              suggestionsDiv.style.width = '100%';
+              suggestionsDiv.style.marginTop = '8px';
+              suggestionsDiv.style.padding = '8px';
+              suggestionsDiv.style.background = '#f5f5f5';
+              suggestionsDiv.style.borderRadius = '4px';
+
+              var suggestionsTitle = document.createElement('div');
+              suggestionsTitle.style.fontWeight = 'bold';
+              suggestionsTitle.style.marginBottom = '4px';
+              suggestionsTitle.textContent = '修改建议：';
+              suggestionsDiv.appendChild(suggestionsTitle);
+
+              data.suggestions.forEach(function(suggestion, idx) {
+                var sugItem = document.createElement('div');
+                sugItem.style.fontSize = '12px';
+                sugItem.style.color = '#666';
+                sugItem.style.marginLeft = '16px';
+                sugItem.textContent = (idx + 1) + '. ' + suggestion;
+                suggestionsDiv.appendChild(sugItem);
+              });
+
+              compRow.appendChild(suggestionsDiv);
+            }
+
           compRow.style.display = 'flex';
           compRow.style.flexWrap = 'wrap';
           compRow.style.animation = 'fadeInUp 0.4s ease';

@@ -302,6 +302,17 @@ class MiniMaxService:
                     # 查找text类型的块（跳过thinking块）
                     if block.get("type") == "text" and block.get("text"):
                         reply = block.get("text", "")
+                        # 过滤掉thinking标签内容
+                        import re
+                        # 移除【thinking】...【/thinking】格式的内容
+                        reply = re.sub(r'【thinking】[\s\S]*?【/thinking】', '', reply)
+                        # 移除&lt;thinking&gt;...&lt;/thinking&gt;格式的内容  
+                        reply = re.sub(r'<thinking>[\s\S]*?</thinking>', '', reply)
+                        # 移除任何以"让我分析"、"我来分析"、"首先分析"等开头的思考段落
+                        reply = re.sub(r'^[\s]*?(让我|我来|首先|下面|现在|接下来)[，,].*?(：|:|\n)', '', reply, flags=re.MULTILINE)
+                        # 移除"好的，"、"明白了，"等开头的引导语
+                        reply = re.sub(r'^[\s]*?(好的|好的，|明白|明白，|了解|了解，).*?[\n：:]', '', reply, flags=re.MULTILINE)
+                        reply = reply.strip()
                         if reply:
                             return reply.strip()
             
@@ -588,7 +599,16 @@ class MiniMaxService:
 {content}
 
 【输出要求】
-请以JSON格式返回审核结果，不要包含其他解释。"""
+请以JSON格式返回审核结果，不要包含其他解释。
+
+【检查步骤说明】
+请按照以下步骤详细检查并输出：
+1. 首先逐句阅读文案，标记每个潜在问题点
+2. 检查是否包含禁用词汇（保本、保证收益、零风险、稳赚不赔、高收益无风险、只赚不赔、收益保底等）
+3. 检查宣传表述是否存在夸大、虚假或误导性内容
+4. 检查风险提示是否充分、明确、易于理解
+5. 对每个发现的问题给出具体的修改建议
+6. 给出整体修改方案和优化建议"""
         
         try:
             api_url = f"{ANTHROPIC_BASE_URL}/v1/messages"
@@ -604,7 +624,7 @@ class MiniMaxService:
                 "messages": [
                     {"role": "user", "content": full_prompt}
                 ],
-                "max_tokens": 800,
+                "max_tokens": 1200,
                 "temperature": 0.5
             }
             
@@ -630,13 +650,56 @@ class MiniMaxService:
                                 return parsed
                         except:
                             pass
-                        
+
+                        # JSON解析失败，尝试用正则提取有用信息
+                        import re
+                        issues_found = []
+                        risk_tip_check = "风险提示检查通过"
+                        overall_assessment = "合规性检查完成"
+                        suggestions = []
+
+                        # 提取 issues_found
+                        issues_match = re.search(r'"issues_found"\s*:\s*\[([\s\S]*?)\]', reply)
+                        if issues_match:
+                            issues_str = issues_match.group(1)
+                            issue_items = re.findall(r'{"type"\s*:\s*"([^"]*)"[^}]*"text"\s*:\s*"([^"]*)"[^}]*"suggestion"\s*:\s*"([^"]*)"', issues_str)
+                            for item in issue_items:
+                                issues_found.append({"type": item[0], "text": item[1], "suggestion": item[2]})
+
+                        # 提取 risk_tip_check
+                        risk_match = re.search(r'"risk_tip_check"\s*:\s*"([^"]*)"', reply)
+                        if risk_match:
+                            risk_tip_check = risk_match.group(1)
+
+                        # 提取 overall_assessment
+                        assessment_match = re.search(r'"overall_assessment"\s*:\s*"([^"]*)"', reply)
+                        if assessment_match:
+                            overall_assessment = assessment_match.group(1)
+
+                        # 提取 suggestions
+                        suggestions_match = re.search(r'"suggestions"\s*:\s*\[([\s\S]*?)\]', reply)
+                        if suggestions_match:
+                            suggestions_str = suggestions_match.group(1)
+                            suggestions = re.findall(r'"([^"]*)"', suggestions_str)
+                            suggestions = [s for s in suggestions if s.strip()]
+
+                        # 如果提取到任何有用信息，返回提取结果
+                        if issues_found or suggestions or "合规性良好" not in overall_assessment:
+                            return {
+                                "passed": len(issues_found) == 0,
+                                "issues_found": issues_found,
+                                "risk_tip_check": risk_tip_check,
+                                "overall_assessment": overall_assessment,
+                                "suggestions": suggestions
+                            }
+
+                        # 提取失败，使用原始回复的前1000字符作为详细报告
                         return {
                             "passed": True,
                             "issues_found": [],
                             "risk_tip_check": "风险提示已包含",
                             "overall_assessment": "合规性良好",
-                            "suggestions": []
+                            "suggestions": [reply[:1000]] if len(reply) > 0 else []
                         }
             
             return {
@@ -644,7 +707,7 @@ class MiniMaxService:
                 "issues_found": [],
                 "risk_tip_check": "风险提示检查通过",
                 "overall_assessment": "合规性良好",
-                "suggestions": []
+                "suggestions": ["请人工复核文案合规性"]
             }
             
         except Exception as e:
@@ -712,7 +775,7 @@ class MiniMaxService:
                 "messages": [
                     {"role": "user", "content": full_prompt}
                 ],
-                "max_tokens": 1000,
+                "max_tokens": 2000,
                 "temperature": 0.6
             }
             
@@ -813,23 +876,44 @@ class MiniMaxService:
         full_prompt = f"""【基金对比分析任务】
 {user_prompt}
 
-【基金1信息】
+【基金1详细信息】
 基金名称: {fund_info.get('name', '未知')}
 基金代码: {fund_info.get('code', '未知')}
 基金类型: {fund_info.get('type', '未知')}
 基金经理: {fund_info.get('manager', '未知')}
 基金公司: {fund_info.get('company', '未知')}
+基金规模: {fund_info.get('scale', '未知')}
+成立日期: {fund_info.get('found_date', '未知')}
 近一年收益: {fund_info.get('y1', '—')}
+近三年收益: {fund_info.get('y3', '—')}
+近六月收益: {fund_info.get('y6', '—')}
+今年以来收益: {fund_info.get('ytd', '—')}
 
-【基金2信息】
+【基金2详细信息】
 基金名称: {fund2_name}
 基金代码: {fund2_code}
+基金类型: {fund2_info.get('type', '未知') if fund2_info else '未知'}
+基金经理: {fund2_info.get('manager', '未知') if fund2_info else '未知'}
+基金公司: {fund2_info.get('company', '未知') if fund2_info else '未知'}
+基金规模: {fund2_info.get('scale', '未知') if fund2_info else '未知'}
+成立日期: {fund2_info.get('found_date', '未知') if fund2_info else '未知'}
+近一年收益: {fund2_info.get('y1', '—') if fund2_info else '—'}
+近三年收益: {fund2_info.get('y3', '—') if fund2_info else '—'}
+近六月收益: {fund2_info.get('y6', '—') if fund2_info else '—'}
+今年以来收益: {fund2_info.get('ytd', '—') if fund2_info else '—'}
 
 【相关文案】
 {content}
 
 【输出要求】
-请以JSON格式返回分析结果，不要包含其他解释。"""
+请以JSON格式返回分析结果，不要包含其他解释。要求返回内容包含：
+1. 详细的业绩对比分析（包含近一年、近三年、近六月、今年以来收益的全面对比）
+2. 基金经理投资风格和能力的深度对比
+3. 基金公司背景和投研实力的对比
+4. 风险收益特征的全面评估
+5. 基于多维度的综合配置建议
+6. 明确指出每只基金的优势和劣势
+7. 适合的投资者类型建议"""
         
         try:
             api_url = f"{ANTHROPIC_BASE_URL}/v1/messages"
@@ -845,7 +929,7 @@ class MiniMaxService:
                 "messages": [
                     {"role": "user", "content": full_prompt}
                 ],
-                "max_tokens": 1000,
+                "max_tokens": 2000,
                 "temperature": 0.6
             }
             
@@ -873,25 +957,86 @@ class MiniMaxService:
                         except:
                             pass
                         
-                        # 如果JSON解析失败，返回简单结果
-                        return {
+                        # 如果JSON解析失败，尝试从原始回复中提取有用信息
+                        extracted_info = {
                             "success": True,
-                            "comparison_report": f"【{fund_info.get('name', '基金1')}】与【{fund2_name}】对比分析：\n\n两只基金各有特点，建议根据个人风险偏好进行选择。",
-                            "comparison_summary": "两只基金在风格和策略上各有特色，可结合使用进行均衡配置。",
-                            "performance_comparison": [
-                                f"{fund_info.get('name', '基金1')}近一年表现稳定",
+                            "comparison_report": "",
+                            "comparison_summary": "",
+                            "performance_comparison": [],
+                            "manager_comparison": [],
+                            "risk_return_comparison": [],
+                            "recommendation": ""
+                        }
+                        
+                        # 尝试提取各种关键信息
+                        import re
+                        
+                        # 提取对比分析报告相关内容
+                        report_match = re.search(r'对比[分析]?报告[：:]?\s*([\s\S]{10,500}?)(?=【|\n\n|$)', reply)
+                        if report_match:
+                            extracted_info["comparison_report"] = report_match.group(1).strip()
+                        
+                        # 提取业绩对比相关信息
+                        perf_matches = re.findall(r'(?:业绩|收益)[对比:：]\s*([^【\n]{10,200}?)(?=\n|【|$)', reply)
+                        if perf_matches:
+                            extracted_info["performance_comparison"] = [p.strip() for p in perf_matches[:3]]
+                        elif "业绩" in reply or "收益" in reply:
+                            extracted_info["performance_comparison"] = ["两只基金在业绩表现上各有特点", "建议结合收益和风险综合评估"]
+                        
+                        # 提取基金经理相关信息
+                        manager_matches = re.findall(r'(?:基金经理|经理)[对比:：]\s*([^【\n]{10,200}?)(?=\n|【|$)', reply)
+                        if manager_matches:
+                            extracted_info["manager_comparison"] = [m.strip() for m in manager_matches[:2]]
+                        elif "经理" in reply:
+                            extracted_info["manager_comparison"] = ["两位基金经理各有特色", "投资风格有所不同"]
+                        
+                        # 提取风险收益相关信息
+                        risk_matches = re.findall(r'(?:风险|收益特征)[对比:：]\s*([^【\n]{10,200}?)(?=\n|【|$)', reply)
+                        if risk_matches:
+                            extracted_info["risk_return_comparison"] = [r.strip() for r in risk_matches[:2]]
+                        elif "风险" in reply:
+                            extracted_info["risk_return_comparison"] = ["风险收益特征有所差异", "适合不同风险偏好投资者"]
+                        
+                        # 提取配置建议
+                        rec_match = re.search(r'(?:建议|配置建议|推荐)[：:]?\s*([^【\n]{10,200}?)(?=\n|【|$)', reply)
+                        if rec_match:
+                            extracted_info["recommendation"] = rec_match.group(1).strip()
+                        
+                        # 提取总结
+                        summary_match = re.search(r'(?:总结|总结)[：:]?\s*([^【\n]{10,200}?)(?=\n|【|$)', reply)
+                        if summary_match:
+                            extracted_info["comparison_summary"] = summary_match.group(1).strip()
+                        
+                        # 如果所有字段都是空的，使用默认内容
+                        if not extracted_info["comparison_report"]:
+                            extracted_info["comparison_report"] = f"【{fund_info.get('name', '基金1')}】与【{fund2_name}】对比分析：\n\n{reply[:500]}..." if len(reply) > 500 else f"【{fund_info.get('name', '基金1')}】与【{fund2_name}】对比分析：\n\n{reply}"
+                        
+                        if not extracted_info["comparison_summary"]:
+                            extracted_info["comparison_summary"] = "两只基金在风格和策略上各有特色，建议根据个人风险偏好进行选择。"
+                        
+                        if not extracted_info["recommendation"]:
+                            extracted_info["recommendation"] = "建议根据自身风险偏好选择，或进行均衡配置。"
+                        
+                        if not extracted_info["performance_comparison"]:
+                            extracted_info["performance_comparison"] = [
+                                f"{fund_info.get('name', '基金1')}近一年收益：{fund_info.get('y1', '—')}",
+                                f"{fund2_name}近一年收益：{fund2_info.get('y1', '—') if fund2_info else '—'}",
                                 "两只基金在不同市场环境下各有优势"
-                            ],
-                            "manager_comparison": [
-                                "两位基金经理都具有丰富的管理经验",
-                                "投资风格各有特色"
-                            ],
-                            "risk_return_comparison": [
+                            ]
+                        
+                        if not extracted_info["manager_comparison"]:
+                            extracted_info["manager_comparison"] = [
+                                f"{fund_info.get('manager', '基金经理')}管理{fund_info.get('name', '基金1')}",
+                                f"{fund2_info.get('manager', '基金经理') if fund2_info else '基金经理'}管理{fund2_name}"
+                            ]
+                        
+                        if not extracted_info["risk_return_comparison"]:
+                            extracted_info["risk_return_comparison"] = [
                                 "风险收益特征有所差异",
                                 "适合不同风险偏好的投资者"
-                            ],
-                            "recommendation": "建议根据自身风险偏好选择，或进行均衡配置。"
-                        }
+                            ]
+                        
+                        return extracted_info
             
             # 降级返回
             return {
